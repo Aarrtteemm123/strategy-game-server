@@ -83,7 +83,7 @@ class ArmyUnit(EmbeddedDocument):
     need_peoples = IntField(default=1)
     maintenance_price = IntField(default=10)
     modifiers = EmbeddedDocumentListField('Modifier', default=[Modifier()])
-    unit_characteristic = EmbeddedDocumentListField('ArmyUnitCharacteristic',default=[ArmyUnitCharacteristic(),ArmyUnitCharacteristic(),ArmyUnitCharacteristic(),ArmyUnitCharacteristic()])
+    unit_characteristic = DictField(EmbeddedDocumentField('ArmyUnitCharacteristic'),default={'Infantry':ArmyUnitCharacteristic(),'Artillery':ArmyUnitCharacteristic()})
 
 class Army(EmbeddedDocument):
     reserve_military_manpower = IntField(default=100000)
@@ -110,6 +110,7 @@ class PersonalData(EmbeddedDocument):
     date_registration = DateTimeField(default=timezone.now)
 
 class User(Document):
+    _id = ObjectIdField()
     personal_data = EmbeddedDocumentField('PersonalData')
     settings = DictField(default={'set1':False,'set2':True,'set3':False})
     country = EmbeddedDocumentField('Country')

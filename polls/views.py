@@ -19,7 +19,6 @@ def index(request):
     return HttpResponse('Hello')
 
 
-
 @api_view(['GET', 'POST', 'DELETE'])
 def tutorial_list(request):
     if request.method == 'GET':
