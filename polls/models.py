@@ -5,6 +5,11 @@ from mongoengine import *
 
 connect('TestDb')
 
+class News(Document):
+    title = StringField(default='title news')
+    date = DateTimeField(default=timezone.now)
+    text = StringField(default='text news')
+
 class Budget(EmbeddedDocument):
     money = IntField(default=10000)
     population_taxes = IntField(default=0)
@@ -87,6 +92,8 @@ class ArmyUnit(EmbeddedDocument):
 
 class Army(EmbeddedDocument):
     reserve_military_manpower = IntField(default=100000)
+    victories = IntField(default=0)
+    losses = IntField(default=0)
     units = DictField(EmbeddedDocumentField('ArmyUnit'),default={'Infantry':ArmyUnit(),'Artillery':ArmyUnit()})
 
 class Country(EmbeddedDocument):
@@ -114,6 +121,7 @@ class User(Document):
     personal_data = EmbeddedDocumentField('PersonalData')
     settings = DictField(default={'set1':False,'set2':True,'set3':False})
     country = EmbeddedDocumentField('Country')
+    date_last_send_feedback = DateTimeField()
 
 budget = Budget()
 pop = Population()
@@ -121,6 +129,8 @@ army = Army()
 persData = PersonalData(username='David',password='45fg',email='dav34@gmail.com')
 country = Country(link_img='link/on/img',name='Ukraine',budget=budget,population=pop,army=army)
 user = User(personal_data=persData,country=country).save()
+
+news = News().save()
 
 
 

@@ -1,5 +1,3 @@
-from abc import ABC
-
 from bson import ObjectId
 from bson.errors import InvalidId
 from django.utils.encoding import smart_text
@@ -102,6 +100,8 @@ class ArmyUnitSerializer(serializers.Serializer):
 
 class ArmySerializer(serializers.Serializer):
     reserve_military_manpower = serializers.IntegerField()
+    victories = serializers.IntegerField()
+    losses = serializers.IntegerField()
     units = serializers.DictField(child=ArmyUnitSerializer())
 
 class CountrySerializer(serializers.Serializer):
@@ -129,3 +129,9 @@ class UserSerializer(serializers.Serializer):
     personalData = PersonalDataSerializer(required=False)
     settings = serializers.DictField()
     country = CountrySerializer(required=False)
+    date_last_send_feedback = serializers.DateTimeField()
+
+class NewsSerializer(serializers.Serializer):
+    title = serializers.CharField()
+    date = serializers.DateTimeField()
+    text = serializers.CharField()
