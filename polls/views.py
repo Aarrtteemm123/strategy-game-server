@@ -13,6 +13,8 @@ from mongoengine import *
 
 import pymongo,json
 
+from polls.view_models.basic_statistic import BasicStatisticView
+
 connect('TestDb')
 
 def index(request):
@@ -25,6 +27,7 @@ def tutorial_list(request):
         users = User.objects
         serializer = UserSerializer(users,many=True)
         print(serializer.data)
+        bs = BasicStatisticView()
 
         return JsonResponse(serializer.data,safe=False)
 
