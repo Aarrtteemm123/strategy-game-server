@@ -6,8 +6,8 @@ from rest_framework.parsers import JSONParser
 from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 
-from polls.models import User
-from polls.serializers import UserSerializer
+from polls.models import User, Trade, Country, News
+from polls.serializers import UserSerializer, TradeSerializer, CountrySerializer, NewsSerializer
 from rest_framework.decorators import api_view
 from mongoengine import *
 
@@ -24,8 +24,8 @@ def index(request):
 @api_view(['GET', 'POST', 'DELETE'])
 def tutorial_list(request):
     if request.method == 'GET':
-        users = User.objects
-        serializer = UserSerializer(users,many=True)
+        users = News.objects.exclude('title','_id')
+        serializer = NewsSerializer(users,many=True)
         print(serializer.data)
         bs = BasicStatisticView()
 

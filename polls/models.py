@@ -1,136 +1,146 @@
 from datetime import date, datetime
 
+import mongoengine
 from django.utils import timezone
 from mongoengine import *
 
 connect('TestDb')
 
 class News(Document):
-    title = StringField(default='title news')
+    _id = ObjectIdField()
+    title = StringField(default='',max_length=200)
     date = DateTimeField(default=timezone.now)
-    text = StringField(default='text news')
+    text = StringField(default='',max_length=1000)
 
 class Budget(EmbeddedDocument):
-    money = IntField(default=10000)
-    population_taxes = IntField(default=0)
-    farms_taxes = IntField(default=0)
-    mines_taxes = IntField(default=0)
-    factories_taxes = IntField(default=0)
-    military_taxes = IntField(default=0)
-    military_expenses = IntField(default=0)
+    money = IntField(default=0,min_value=-10000)
+    population_taxes = IntField(default=0,min_value=0,max_value=100)
+    farms_taxes = IntField(default=0,min_value=0,max_value=100)
+    mines_taxes = IntField(default=0,min_value=0,max_value=100)
+    factories_taxes = IntField(default=0,min_value=0,max_value=100)
+    military_taxes = IntField(default=0,min_value=0,max_value=100)
+    military_expenses = IntField(default=0,min_value=0)
 
 class Modifier(EmbeddedDocument):
-    value = FloatField(default=0)
-    address = StringField(default='From...')
-    to = StringField(default='to...')
+    value = FloatField(default=0.0)
+    address_from = StringField(default='',max_length=100)
+    address_to = StringField(default='',max_length=100)
 
 class Technology(EmbeddedDocument):
-    name = StringField(default='name technology')
-    price_upgrade = IntField(default=5000)
-    level = IntField(default=1)
-    max_level = IntField(default=100)
+    name = StringField(default='',max_length=100)
+    price_upgrade = IntField(default=0,min_value=0)
+    level = IntField(default=0,min_value=0,max_value=100)
+    max_level = IntField(default=0)
     total_result = FloatField(default=0)
-    increasePrice = FloatField(default=1.5)
-    modifiers = EmbeddedDocumentListField('Modifier',default=[Modifier(),Modifier()])
+    increasePrice = FloatField(default=0,min_value=0)
+    modifiers = EmbeddedDocumentListField('Modifier',default=[])
 
 class Goods(EmbeddedDocument):
-    name = StringField(default='Name goods...')
-    value = IntField(default=0)
-    link_img = StringField(default='Image link...')
+    name = StringField(default='',max_length=100)
+    value = IntField(default=0,min_value=0)
+    link_img = StringField(default='',max_length=100)
 
 class IndustrialBuildings(EmbeddedDocument):
-    name = StringField(default='name...')
-    link_img = StringField(default='None image')
-    production_speed = FloatField(default=1)
-    price_build = IntField(default=10000)
-    workers = IntField(default=500)
-    number = IntField(default=0)
-    needGoods =  EmbeddedDocumentListField('Goods',default=[Goods()])
+    name = StringField(default='',max_length=100)
+    link_img = StringField(default='',max_length=100)
+    production_speed = FloatField(default=0,min_value=0)
+    price_build = IntField(default=0,min_value=0)
+    workers = IntField(default=0,min_value=0)
+    number = IntField(default=0,min_value=0)
+    needGoods =  EmbeddedDocumentListField('Goods',default=[])
 
 class Warehouse(EmbeddedDocument):
-    name = StringField(default='name...')
-    link_img = StringField(default='None image')
-    value = FloatField(default=0)
-    capacity = IntField(default=1000)
-    filling_speed = FloatField(default=1)
-    level = IntField(default=1)
-    max_level = IntField(default=100)
-    price_upgrade = IntField(default=10000)
-    added_capacity = IntField(default=1000)
-    increasePrice = FloatField(default=1.5)
+    name = StringField(default='',max_length=100)
+    link_img = StringField(default='',max_length=100)
+    value = FloatField(default=0.0,min_value=0)
+    capacity = IntField(default=0)
+    filling_speed = FloatField(default=0.0)
+    level = IntField(default=0,min_value=0,max_value=100)
+    max_level = IntField(default=0,min_value=0)
+    price_upgrade = IntField(default=0,min_value=0)
+    added_capacity = IntField(default=0,min_value=0)
+    increasePrice = FloatField(default=0,min_value=0)
 
 class PoliticalLaw(EmbeddedDocument):
-    name = StringField(default='name...')
-    description = StringField(default='description law ...')
-    price = IntField(default=1000)
-    modifiers = EmbeddedDocumentListField('Modifier', default=[Modifier(), Modifier()])
+    name = StringField(default='',max_length=100)
+    description = StringField(default='',max_length=200)
+    price = IntField(default=0,min_value=0)
+    modifiers = EmbeddedDocumentListField('Modifier', default=[])
 
 class Population(EmbeddedDocument):
-    total_population = IntField(default=100000)
-    factory_workers = IntField(default=20000)
-    miners = IntField(default=10000)
-    farmers = IntField(default=30000)
-    solders = IntField(default=15000)
-    others = IntField(default=25000)
-    min_percent_others = IntField(default=20)
-    basic_percent_growth_rate = IntField(default=5)
-    modifiers = EmbeddedDocumentListField('Modifier', default=[Modifier()])
+    total_population = IntField(default=0,min_value=0)
+    factory_workers = IntField(default=0,min_value=0)
+    miners = IntField(default=0,min_value=0)
+    farmers = IntField(default=0,min_value=0)
+    solders = IntField(default=0,min_value=0)
+    others = IntField(default=0,min_value=0)
+    min_percent_others = IntField(default=0,min_value=0)
+    basic_percent_growth_rate = IntField(default=0,min_value=0)
+    modifiers = EmbeddedDocumentListField('Modifier', default=[])
 
 class ArmyUnitCharacteristic(EmbeddedDocument):
-    unit_name = StringField(default='unit name ...')
-    attack_value = FloatField(default=10)
-    defence_value = FloatField(default=10)
+    unit_name = StringField(default='',max_length=100)
+    attack_value = FloatField(default=0,min_value=0)
+    defence_value = FloatField(default=0,min_value=0)
 
 class ArmyUnit(EmbeddedDocument):
-    name = StringField(default='type unit...')
-    link_img = StringField(default='link on image...')
-    number = IntField(default=1)
-    need_peoples = IntField(default=1)
-    maintenance_price = IntField(default=10)
-    modifiers = EmbeddedDocumentListField('Modifier', default=[Modifier()])
-    unit_characteristic = DictField(EmbeddedDocumentField('ArmyUnitCharacteristic'),default={'Infantry':ArmyUnitCharacteristic(),'Artillery':ArmyUnitCharacteristic()})
+    name = StringField(default='',max_length=100)
+    link_img = StringField(default='',max_length=200)
+    number = IntField(default=0,min_value=0)
+    need_peoples = IntField(default=0,min_value=1)
+    maintenance_price = IntField(default=0,min_value=1)
+    modifiers = EmbeddedDocumentListField('Modifier', default=[])
+    unit_characteristic = DictField(EmbeddedDocumentField('ArmyUnitCharacteristic'),default={})
 
 class Army(EmbeddedDocument):
-    reserve_military_manpower = IntField(default=100000)
-    victories = IntField(default=0)
-    losses = IntField(default=0)
-    units = DictField(EmbeddedDocumentField('ArmyUnit'),default={'Infantry':ArmyUnit(),'Artillery':ArmyUnit()})
+    reserve_military_manpower = IntField(default=0,min_value=0)
+    victories = IntField(default=0,min_value=0)
+    losses = IntField(default=0,min_value=0)
+    units = DictField(EmbeddedDocumentField('ArmyUnit'),default={})
 
-class Country(EmbeddedDocument):
-    link_img = StringField(default='None image')
-    name = StringField(default='name country')
+class Country(Document):
+    link_img = StringField(default='',max_length=100)
+    name = StringField(default='',max_length=200)# unique=True
     budget = EmbeddedDocumentField('Budget')
-    technologies = EmbeddedDocumentListField('Technology',default=[Technology(),Technology()])
-    farms = EmbeddedDocumentListField('IndustrialBuildings',default=[IndustrialBuildings(),IndustrialBuildings()])
-    mines = EmbeddedDocumentListField('IndustrialBuildings',default=[IndustrialBuildings(),IndustrialBuildings()])
-    factories = EmbeddedDocumentListField('IndustrialBuildings',default=[IndustrialBuildings(),IndustrialBuildings()])
-    military_factories = EmbeddedDocumentListField('IndustrialBuildings',default=[IndustrialBuildings(),IndustrialBuildings()])
-    warehouses = EmbeddedDocumentListField('Warehouse',default=[Warehouse(),Warehouse(),Warehouse(),Warehouse(),Warehouse()])
-    adopted_laws = EmbeddedDocumentListField('PoliticalLaw', default=[PoliticalLaw(),PoliticalLaw()])
+    technologies = EmbeddedDocumentListField('Technology',default=[])
+    farms = EmbeddedDocumentListField('IndustrialBuildings',default=[])
+    mines = EmbeddedDocumentListField('IndustrialBuildings',default=[])
+    factories = EmbeddedDocumentListField('IndustrialBuildings',default=[])
+    military_factories = EmbeddedDocumentListField('IndustrialBuildings',default=[])
+    warehouses = EmbeddedDocumentListField('Warehouse',default=[])
+    adopted_laws = EmbeddedDocumentListField('PoliticalLaw', default=[])
     population = EmbeddedDocumentField('Population')
     army = EmbeddedDocumentField('Army')
 
 class PersonalData(EmbeddedDocument):
-    username = StringField(default='your name')
-    password = StringField(default='your password')
-    email = EmailField(default='test12@gmail.com')
+    username = StringField(default='',max_length=200)# unique=True
+    password = StringField(default='',max_length=200)# unique=True
+    email = EmailField(default='user_email@gmail.com')
     date_registration = DateTimeField(default=timezone.now)
 
 class User(Document):
-    _id = ObjectIdField()
+    _id = ObjectIdField() # unique=True
     personal_data = EmbeddedDocumentField('PersonalData')
-    settings = DictField(default={'set1':False,'set2':True,'set3':False})
-    country = EmbeddedDocumentField('Country')
+    settings = DictField(default={})
+    country = ReferenceField('Country',reverse_delete_rule=mongoengine.DENY)
     date_last_send_feedback = DateTimeField()
 
-budget = Budget()
-pop = Population()
-army = Army()
-persData = PersonalData(username='David',password='45fg',email='dav34@gmail.com')
-country = Country(link_img='link/on/img',name='Ukraine',budget=budget,population=pop,army=army)
-user = User(personal_data=persData,country=country).save()
+class HistoryPrice(EmbeddedDocument):
+    value = FloatField(default=1.0,min_value=0)
+    time = DateTimeField(default=timezone.now)
+
+class Trade(Document):
+    _id = ObjectIdField()
+    name = StringField(default='',max_length=100)
+    price_now = FloatField(default=0.0,min_value=0)
+    history_price = EmbeddedDocumentListField('HistoryPrice',default=[])
+
+
+country = Country().save()
+user = User(country=country).save()
 
 news = News().save()
+print((news.validate()))
 
 
 

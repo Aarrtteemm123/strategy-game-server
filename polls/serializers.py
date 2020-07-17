@@ -20,8 +20,8 @@ class ObjectIdField(serializers.Field):
 
 class ModifierSerializer(serializers.Serializer):
     value = serializers.FloatField()
-    address = serializers.CharField()
-    to = serializers.CharField()
+    address_from = serializers.CharField()
+    address_to = serializers.CharField()
 
 class BudgetSerializer(serializers.Serializer):
     money = serializers.IntegerField()
@@ -33,22 +33,22 @@ class BudgetSerializer(serializers.Serializer):
     military_expenses = serializers.IntegerField()
 
 class TechnologiesSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=200)
+    name = serializers.CharField(read_only=True)
     price_upgrade = serializers.IntegerField()
     level = serializers.IntegerField()
-    max_level = serializers.IntegerField()
+    max_level = serializers.IntegerField(read_only=True)
     total_result = serializers.FloatField()
-    increasePrice = serializers.FloatField()
+    increasePrice = serializers.FloatField(read_only=True)
     modifiers = ModifierSerializer(required=False,many=True)
 
 class GoodsSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=200)
+    name = serializers.CharField(read_only=True)
     value = serializers.IntegerField()
-    link_img = serializers.CharField()
+    link_img = serializers.CharField(read_only=True)
 
 class IndustrialBuildingsSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=200)
-    link_img = serializers.CharField(max_length=200)
+    name = serializers.CharField(read_only=True)
+    link_img = serializers.CharField(read_only=True)
     production_speed = serializers.FloatField()
     price_build =  serializers.IntegerField()
     workers =  serializers.IntegerField()
@@ -56,20 +56,20 @@ class IndustrialBuildingsSerializer(serializers.Serializer):
     needGoods = GoodsSerializer(required=False,many=True)
 
 class WarehouseSerializer(serializers.Serializer):
-    name = serializers.CharField()
-    link_img = serializers.CharField()
+    name = serializers.CharField(read_only=True)
+    link_img = serializers.CharField(read_only=True)
     value = serializers.FloatField()
     capacity = serializers.IntegerField()
     filling_speed =serializers.FloatField()
     level = serializers.IntegerField()
-    max_level = serializers.IntegerField()
+    max_level = serializers.IntegerField(read_only=True)
     price_upgrade = serializers.IntegerField()
     added_capacity = serializers.IntegerField()
-    increasePrice = serializers.FloatField()
+    increasePrice = serializers.FloatField(read_only=True)
 
 class PoliticalLawSerializer(serializers.Serializer):
-    name = serializers.CharField()
-    description = serializers.CharField()
+    name = serializers.CharField(read_only=True)
+    description = serializers.CharField(read_only=True)
     price = serializers.IntegerField()
     modifiers = ModifierSerializer(required=False,many=True)
 
@@ -85,15 +85,15 @@ class PopulationSerializer(serializers.Serializer):
     modifiers = ModifierSerializer(required=False,many=True)
 
 class ArmyUnitCharacteristicSerializer(serializers.Serializer):
-    unit_name = serializers.CharField()
+    unit_name = serializers.CharField(read_only=True)
     attack_value = serializers.FloatField()
     defence_value = serializers.FloatField()
 
 class ArmyUnitSerializer(serializers.Serializer):
-    name = serializers.CharField()
-    link_img = serializers.CharField()
+    name = serializers.CharField(read_only=True)
+    link_img = serializers.CharField(read_only=True)
     number = serializers.IntegerField()
-    need_peoples = serializers.IntegerField()
+    need_peoples = serializers.IntegerField(read_only=True)
     maintenance_price = serializers.IntegerField()
     modifiers = ModifierSerializer(required=False,many=True)
     unit_characteristic = serializers.DictField(child=ArmyUnitCharacteristicSerializer())
@@ -105,8 +105,8 @@ class ArmySerializer(serializers.Serializer):
     units = serializers.DictField(child=ArmyUnitSerializer())
 
 class CountrySerializer(serializers.Serializer):
-    link_img = serializers.URLField()
-    name = serializers.CharField(max_length=100)
+    link_img = serializers.CharField()
+    name = serializers.CharField()
     budget = BudgetSerializer(required=False)
     technologies = TechnologiesSerializer(required=False,many=True)
     farms = IndustrialBuildingsSerializer(required=False,many=True)
@@ -119,10 +119,10 @@ class CountrySerializer(serializers.Serializer):
     army = ArmySerializer(required=False)
 
 class PersonalDataSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=100)
-    password = serializers.CharField(max_length=100)
+    username = serializers.CharField()
+    password = serializers.CharField()
     email = serializers.EmailField()
-    dateRegistration = serializers.DateTimeField()
+    dateRegistration = serializers.DateTimeField(read_only=True)
 
 class UserSerializer(serializers.Serializer):
     _id = ObjectIdField(read_only=True)
@@ -132,6 +132,17 @@ class UserSerializer(serializers.Serializer):
     date_last_send_feedback = serializers.DateTimeField()
 
 class NewsSerializer(serializers.Serializer):
+    _id = ObjectIdField(read_only=True)
     title = serializers.CharField()
     date = serializers.DateTimeField()
     text = serializers.CharField()
+
+class HistoryPriceSerializer(serializers.Serializer):
+    value = serializers.FloatField()
+    time = serializers.DateTimeField()
+
+class TradeSerializer(serializers.Serializer):
+    _id = ObjectIdField(read_only=True)
+    name = serializers.CharField(read_only=True)
+    price_now = serializers.FloatField()
+    history_price = HistoryPriceSerializer(required=False,many=True)
