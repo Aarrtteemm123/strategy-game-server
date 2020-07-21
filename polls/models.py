@@ -120,6 +120,7 @@ class PersonalData(EmbeddedDocument):
 
 class User(Document):
     _id = ObjectIdField() # unique=True
+    isAuth = BooleanField(default=False)
     personal_data = EmbeddedDocumentField('PersonalData')
     settings = DictField(default={})
     country = ReferenceField('Country',reverse_delete_rule=mongoengine.DENY)

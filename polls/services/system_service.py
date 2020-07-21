@@ -5,5 +5,5 @@ class SystemService:
     def send_email(self,from_email,to_email,msg):
         pass
 
-    def get_feedback(self,from_user,msg):
+    def get_feedback(self,from_user,rating,msg):
         pass

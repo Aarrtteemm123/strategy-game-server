@@ -126,6 +126,7 @@ class PersonalDataSerializer(serializers.Serializer):
 
 class UserSerializer(serializers.Serializer):
     _id = ObjectIdField(read_only=True)
+    isAuth = serializers.BooleanField()
     personalData = PersonalDataSerializer(required=False)
     settings = serializers.DictField()
     country = CountrySerializer(required=False)
