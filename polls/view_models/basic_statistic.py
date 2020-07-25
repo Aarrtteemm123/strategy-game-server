@@ -95,4 +95,4 @@ class BasicStatisticView:
         self.military_goods_table = military_goods_table
 
 bs = BasicStatisticView()
-print(json.dumps(bs.__dict__,default=lambda x: x.__dict__))
+#print(json.dumps(bs.__dict__,default=lambda x: x.__dict__))

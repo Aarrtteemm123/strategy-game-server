@@ -1,5 +1,6 @@
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from django.http import HttpResponse
-
 
 from django.http.response import JsonResponse
 from django.shortcuts import redirect
@@ -13,6 +14,7 @@ from mongoengine import *
 
 import pymongo,json
 
+from polls.services.user_service import UserService
 from polls.view_models.basic_statistic import BasicStatisticView
 
 connect('TestDb')
@@ -184,9 +186,9 @@ def calculate_war(request,user_id,defending_player_id):
 @api_view(['GET', 'POST', 'DELETE'])
 def tutorial_list(request):
     if request.method == 'GET':
-        users = News.objects
-        serializer = NewsSerializer(users,many=True)
-        print(serializer.data)
+        print(UserService().register_new_user('ar3', '123', 'test@gmail.com', 'c4', 'img'))
+        news = User.objects(username='ar3').only('country','username')
+        serializer = UserSerializer(news,many=True)
         bs = BasicStatisticView()
 
         return JsonResponse(serializer.data,safe=False)
@@ -200,28 +202,3 @@ def tutorial_list(request):
         return JsonResponse(tutorial_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# GET list of tutorials, POST a new tutorial, DELETE all tutorials
-
-
-@api_view(['GET', 'PUT', 'DELETE'])
-def tutorial_detail(request, pk):
-    # find tutorial by pk (id)
-    try:
-        tutorial = User.objects.get(pk=pk)
-        if request.method == 'GET':
-            tutorial_serializer = TutorialSerializer(tutorial)
-            return JsonResponse(tutorial_serializer.data)
-        elif request.method == 'PUT':
-            tutorial_data = JSONParser().parse(request)
-            tutorial_serializer = TutorialSerializer(tutorial, data=tutorial_data)
-            if tutorial_serializer.is_valid():
-                tutorial_serializer.save()
-                return JsonResponse(tutorial_serializer.data)
-            return JsonResponse(tutorial_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        elif request.method == 'DELETE':
-            tutorial.delete()
-            return JsonResponse({'message': 'Tutorial was deleted successfully!'}, status=status.HTTP_204_NO_CONTENT)
-    except User.DoesNotExist:
-        return JsonResponse({'message': 'The tutorial does not exist'}, status=status.HTTP_404_NOT_FOUND)
-
-        # GET / PUT / DELETE tutorial

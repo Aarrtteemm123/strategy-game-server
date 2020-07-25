@@ -1,5 +1,3 @@
-from datetime import date, datetime
-
 import mongoengine
 from django.utils import timezone
 from mongoengine import *
@@ -100,7 +98,7 @@ class Army(EmbeddedDocument):
 
 class Country(Document):
     link_img = StringField(default='',max_length=100)
-    name = StringField(default='',max_length=200)# unique=True
+    name = StringField(default='',max_length=100,unique=True)# unique=True
     budget = EmbeddedDocumentField('Budget')
     technologies = EmbeddedDocumentListField('Technology',default=[])
     farms = EmbeddedDocumentListField('IndustrialBuildings',default=[])
@@ -112,19 +110,16 @@ class Country(Document):
     population = EmbeddedDocumentField('Population')
     army = EmbeddedDocumentField('Army')
 
-class PersonalData(EmbeddedDocument):
-    username = StringField(default='',max_length=200)# unique=True
-    password = StringField(default='',max_length=200)# unique=True
-    email = EmailField(default='user_email@gmail.com')
-    date_registration = DateTimeField(default=timezone.now)
-
 class User(Document):
     _id = ObjectIdField() # unique=True
     isAuth = BooleanField(default=False)
-    personal_data = EmbeddedDocumentField('PersonalData')
+    username = StringField(default='', max_length=100,unique=True)  # unique=True
+    password = StringField(default='', max_length=100)
+    email = EmailField(default='user_email@gmail.com')
+    date_registration = DateTimeField(default=timezone.now)
     settings = DictField(default={})
-    country = ReferenceField('Country',reverse_delete_rule=mongoengine.DENY)
-    date_last_send_feedback = DateTimeField()
+    country = ReferenceField('Country',reverse_delete_rule=mongoengine.CASCADE)
+    date_last_send_feedback = DateTimeField(default=timezone.now)
 
 class HistoryPrice(EmbeddedDocument):
     value = FloatField(default=1.0,min_value=0)
@@ -136,12 +131,6 @@ class Trade(Document):
     price_now = FloatField(default=0.0,min_value=0)
     history_price = EmbeddedDocumentListField('HistoryPrice',default=[])
 
-
-country = Country().save()
-user = User(country=country).save()
-
-news = News().save()
-print((news.validate()))
 
 
 

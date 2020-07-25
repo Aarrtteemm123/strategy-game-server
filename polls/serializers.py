@@ -118,16 +118,13 @@ class CountrySerializer(serializers.Serializer):
     population = PopulationSerializer(required=False)
     army = ArmySerializer(required=False)
 
-class PersonalDataSerializer(serializers.Serializer):
+class UserSerializer(serializers.Serializer):
+    _id = ObjectIdField(read_only=True)
+    isAuth = serializers.BooleanField()
     username = serializers.CharField()
     password = serializers.CharField()
     email = serializers.EmailField()
     dateRegistration = serializers.DateTimeField(read_only=True)
-
-class UserSerializer(serializers.Serializer):
-    _id = ObjectIdField(read_only=True)
-    isAuth = serializers.BooleanField()
-    personalData = PersonalDataSerializer(required=False)
     settings = serializers.DictField()
     country = CountrySerializer(required=False)
     date_last_send_feedback = serializers.DateTimeField()
