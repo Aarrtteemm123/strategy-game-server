@@ -7,7 +7,7 @@ from django.shortcuts import redirect
 from rest_framework.parsers import JSONParser
 from rest_framework import status
 
-from polls.models import User, Trade, Country, News
+from polls.models import User, Trade, Country, News, Army
 from polls.serializers import UserSerializer, TradeSerializer, CountrySerializer, NewsSerializer
 from rest_framework.decorators import api_view
 from mongoengine import *
@@ -186,9 +186,10 @@ def calculate_war(request,user_id,defending_player_id):
 @api_view(['GET', 'POST', 'DELETE'])
 def tutorial_list(request):
     if request.method == 'GET':
-        print(UserService().register_new_user('ar3', '123', 'test@gmail.com', 'c4', 'img'))
-        news = User.objects(username='ar3').only('country','username')
-        serializer = UserSerializer(news,many=True)
+        #print(UserService().register_new_user('ar3', '123', 'test@gmail.com', 'c4', 'img'))
+
+        news = Country.objects(id='5f1dc17211fc3660885d8d24').only('name')
+        serializer = CountrySerializer(news,many=True)
         bs = BasicStatisticView()
 
         return JsonResponse(serializer.data,safe=False)
