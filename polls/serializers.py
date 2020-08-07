@@ -23,6 +23,11 @@ class ModifierSerializer(serializers.Serializer):
     address_from = serializers.CharField()
     address_to = serializers.CharField()
 
+class HistorySerializer(serializers.Serializer):
+    name = serializers.CharField()
+    value = serializers.FloatField()
+    time = serializers.DateTimeField()
+
 class BudgetSerializer(serializers.Serializer):
     money = serializers.IntegerField()
     population_taxes = serializers.IntegerField()
@@ -31,6 +36,8 @@ class BudgetSerializer(serializers.Serializer):
     factories_taxes = serializers.IntegerField()
     military_taxes = serializers.IntegerField()
     military_expenses = serializers.IntegerField()
+    profit_history = HistorySerializer(required=False,many=True)
+    expenses_history = HistorySerializer(required=False,many=True)
 
 class TechnologiesSerializer(serializers.Serializer):
     name = serializers.CharField(read_only=True)
@@ -54,6 +61,7 @@ class IndustrialBuildingsSerializer(serializers.Serializer):
     workers =  serializers.IntegerField()
     number =  serializers.IntegerField()
     needGoods = GoodsSerializer(required=False,many=True)
+    isWorking = serializers.BooleanField()
 
 class WarehouseSerializer(serializers.Serializer):
     name = serializers.CharField(read_only=True)
@@ -67,7 +75,7 @@ class WarehouseSerializer(serializers.Serializer):
     added_capacity = serializers.IntegerField()
     increasePrice = serializers.FloatField(read_only=True)
 
-class PoliticalLawSerializer(serializers.Serializer):
+class LawSerializer(serializers.Serializer):
     name = serializers.CharField(read_only=True)
     description = serializers.CharField(read_only=True)
     price = serializers.IntegerField()
@@ -79,10 +87,12 @@ class PopulationSerializer(serializers.Serializer):
     miners = serializers.IntegerField()
     farmers = serializers.IntegerField()
     solders = serializers.IntegerField()
+    free_people = serializers.IntegerField()
     others = serializers.IntegerField()
     min_percent_others = serializers.IntegerField()
     basic_percent_growth_rate = serializers.IntegerField()
     modifiers = ModifierSerializer(required=False,many=True)
+    population_history = HistorySerializer(required=False,many=True)
 
 class ArmyUnitCharacteristicSerializer(serializers.Serializer):
     unit_name = serializers.CharField(read_only=True)
@@ -92,17 +102,18 @@ class ArmyUnitCharacteristicSerializer(serializers.Serializer):
 class ArmyUnitSerializer(serializers.Serializer):
     name = serializers.CharField(read_only=True)
     link_img = serializers.CharField(read_only=True)
-    number = serializers.IntegerField()
     need_peoples = serializers.IntegerField(read_only=True)
     maintenance_price = serializers.IntegerField()
-    modifiers = ModifierSerializer(required=False,many=True)
     unit_characteristic = serializers.DictField(child=ArmyUnitCharacteristicSerializer())
 
 class ArmySerializer(serializers.Serializer):
+    conscript_law_value = serializers.FloatField()
     reserve_military_manpower = serializers.IntegerField()
     victories = serializers.IntegerField()
     losses = serializers.IntegerField()
-    units = serializers.DictField(child=ArmyUnitSerializer())
+    attack_modifiers = ModifierSerializer(required=False,many=True)
+    defence_modifiers = ModifierSerializer(required=False,many=True)
+    units = serializers.DictField(default={})
 
 class CountrySerializer(serializers.Serializer):
     link_img = serializers.CharField()
@@ -113,8 +124,9 @@ class CountrySerializer(serializers.Serializer):
     mines = IndustrialBuildingsSerializer(required=False,many=True)
     factories = IndustrialBuildingsSerializer(required=False,many=True)
     military_factories = IndustrialBuildingsSerializer(required=False,many=True)
+    industry_modifiers = ModifierSerializer(required=False,many=True)
     warehouses = WarehouseSerializer(required=False,many=True)
-    adopted_laws = PoliticalLawSerializer(required=False,many=True)
+    adopted_laws = LawSerializer(required=False,many=True)
     population = PopulationSerializer(required=False)
     army = ArmySerializer(required=False)
 
@@ -135,12 +147,8 @@ class NewsSerializer(serializers.Serializer):
     date = serializers.DateTimeField()
     text = serializers.CharField()
 
-class HistoryPriceSerializer(serializers.Serializer):
-    value = serializers.FloatField()
-    time = serializers.DateTimeField()
-
 class TradeSerializer(serializers.Serializer):
     _id = ObjectIdField(read_only=True)
     name = serializers.CharField(read_only=True)
     price_now = serializers.FloatField()
-    history_price = HistoryPriceSerializer(required=False,many=True)
+    history_price = HistorySerializer(required=False,many=True)

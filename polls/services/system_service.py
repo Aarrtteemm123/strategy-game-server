@@ -2,8 +2,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
 
-from polls.models import Trade, HistoryPrice, PoliticalLaw, Modifier, ArmyUnitCharacteristic, ArmyUnit, Population, \
-    Army, Goods, Warehouse, IndustrialBuildings, Technology, Budget, Country
+from polls.models import Trade, History, Modifier, ArmyUnitCharacteristic, ArmyUnit, Population, \
+    Army, Goods, Warehouse, IndustrialBuildings, Technology, Budget, Country, Law
 from serverDjango.settings import ADMIN_EMAIL, ADMIN_EMAIL_PASSWORD
 
 
@@ -30,8 +30,10 @@ class SystemService:
         return Country(
             link_img=link_img,
             name=name,
-            budget=Budget(money=10000, population_taxes=50, farms_taxes=50, mines_taxes=50,
-                          factories_taxes=50, military_taxes=50, military_expenses=1000
+            budget=Budget(money=100000, population_taxes=50, farms_taxes=50, mines_taxes=50,
+                          factories_taxes=50, military_taxes=50, military_expenses=1000,
+                          profit_history = [History(value=5), History(value=-2), History(value=8)],
+                          expenses_history = [History(value=5), History(value=-2), History(value=8)],
                           ),
             technologies=[
                 Technology(name='Medicine technology', price_upgrade=5000, level=0, max_level=100, total_result=0.0,
@@ -344,19 +346,21 @@ class SystemService:
                           capacity=1000, filling_speed=0, level=0, max_level=100,
                           price_upgrade=10000, added_capacity=1000, increasePrice=1.3),
             ],
-            adopted_laws=['Volunteer'],
+            adopted_laws=['Conscript law: Volunteer'],
             population=Population(total_population=50000, factory_workers=0, miners=0,
-                                  farmers=0, solders=0, others=50000, min_percent_others=20,
-                                  basic_percent_growth_rate=5, modifiers=[]),
-            army=Army(reserve_military_manpower=650, victories=0, losses=0,
+                                  farmers=0, solders=0, free_people=40000, others=10000, min_percent_others=20,
+                                  basic_percent_growth_rate=5,
+                                  population_history=[History(value=5),History(value=-2),History(value=8)],
+                                  modifiers=[]),
+            army=Army(reserve_military_manpower=650, victories=0, losses=0,conscript_law_value = 1.5,
                       units={
                           'Infantry': 100, 'Artillery': 0, 'PTO': 0, 'PVO': 0, 'Tank': 0, 'Aviation': 0
                       })
         )
 
     def create_default_table_laws(self):
-        PoliticalLaw.objects().delete()
-        PoliticalLaw(
+        Law.objects().delete()
+        Law(
             name='Immigration', description='Open border for all', price=20000,
             modifiers=[
                 Modifier(value=2, address_from='Immigration', address_to='basic_percent_growth_rate'),
@@ -366,7 +370,7 @@ class SystemService:
             ]
         ).save()
 
-        PoliticalLaw(
+        Law(
             name='Isolation', description='Close border for all', price=20000,
             modifiers=[
                 Modifier(value=-5, address_from='Isolation', address_to='basic_percent_growth_rate'),
@@ -375,7 +379,7 @@ class SystemService:
             ]
         ).save()
 
-        PoliticalLaw(
+        Law(
             name='Free housing', description='Gift flat for every family', price=20000,
             modifiers=[
                 Modifier(value=5, address_from='Free housing', address_to='basic_percent_growth_rate'),
@@ -385,7 +389,7 @@ class SystemService:
             ]
         ).save()
 
-        PoliticalLaw(
+        Law(
             name='Free education', description='Education is free for everyone', price=20000,
             modifiers=[
                 Modifier(value=-2, address_from='Free education', address_to='basic_percent_growth_rate'),
@@ -394,7 +398,7 @@ class SystemService:
             ]
         ).save()
 
-        PoliticalLaw(
+        Law(
             name='Conscript law: Elite', description='Percent of the total population 0.5%', price=20000,
             modifiers=[
                 Modifier(value=-10, address_from='Conscript law: Elite', address_to='basic_percent_growth_rate'),
@@ -404,14 +408,14 @@ class SystemService:
             ]
         ).save()
 
-        PoliticalLaw(
+        Law(
             name='Conscript law: Volunteer', description='Percent of the total population 1.5%', price=20000,
             modifiers=[
 
             ]
         ).save()
 
-        PoliticalLaw(
+        Law(
             name='Conscript law: Limited Conscription', description='Percent of the total population 2.5%', price=20000,
             modifiers=[
                 Modifier(value=-5, address_from='Conscript law: Limited Conscription', address_to='production_speed'),
@@ -420,14 +424,14 @@ class SystemService:
             ]
         ).save()
 
-        PoliticalLaw(
+        Law(
             name='Conscript law: Extensive Conscription', description='Percent of the total population 5%', price=20000,
             modifiers=[
                 Modifier(value=-5, address_from='Conscript law: Extensive Conscription', address_to='production_speed'),
             ]
         ).save()
 
-        PoliticalLaw(
+        Law(
             name='Conscript law: Service by Requirement', description='Percent of the total population 10%',
             price=20000,
             modifiers=[
@@ -439,7 +443,7 @@ class SystemService:
             ]
         ).save()
 
-        PoliticalLaw(
+        Law(
             name='Conscript law: All Adults Serve', description='Percent of the total population 20%', price=20000,
             modifiers=[
                 Modifier(value=-10, address_from='Conscript law: All Adults Serve',
@@ -450,7 +454,7 @@ class SystemService:
             ]
         ).save()
 
-        PoliticalLaw(
+        Law(
             name='Conscript law: All with weapons', description='Percent of the total population 30%', price=20000,
             modifiers=[
                 Modifier(value=-15, address_from='Conscript law: All with weapons',
@@ -464,236 +468,236 @@ class SystemService:
     def create_default_table_goods(self):
         Trade.objects().delete()
         Trade(name='Seed', price_now=10, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Meat', price_now=15, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Milk', price_now=20, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Fish', price_now=10, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Fruits', price_now=15, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Vegetables', price_now=20, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Iron', price_now=10, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Aluminum', price_now=15, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Coal', price_now=20, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Oil', price_now=10, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Silicon', price_now=15, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Salt', price_now=20, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Minerals', price_now=10, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Gold', price_now=15, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Diamond', price_now=20, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Bakery', price_now=10, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Canned food', price_now=15, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Cheese', price_now=20, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Salt fish', price_now=10, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Juice', price_now=15, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Fuel', price_now=20, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Electronics', price_now=10, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Chemicals', price_now=15, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Computers', price_now=20, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Steel', price_now=10, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Rubber', price_now=15, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Plastic', price_now=20, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Glass', price_now=10, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Fertilizer', price_now=15, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Medicine', price_now=20, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Solar panel', price_now=10, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Battery', price_now=15, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Jewelry', price_now=20, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Infantry equipment', price_now=10, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Artillery', price_now=15, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='PTO', price_now=20, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='PVO', price_now=10, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Tank', price_now=15, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 
         Trade(name='Aviation', price_now=20, history_price=[
-            HistoryPrice(value=10), HistoryPrice(value=20), HistoryPrice(value=30),
-            HistoryPrice(value=25), HistoryPrice(value=40), HistoryPrice(value=15),
+            History(value=10), History(value=20), History(value=30),
+            History(value=25), History(value=40), History(value=15),
         ]
               ).save()
 

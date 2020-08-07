@@ -10,6 +10,11 @@ class News(Document):
     date = DateTimeField(default=timezone.now)
     text = StringField(default='',max_length=1000)
 
+class History(EmbeddedDocument):
+    name = StringField(max_length=100,default='')
+    value = FloatField(default=0.0)
+    time = DateTimeField(default=timezone.now)
+
 class Budget(EmbeddedDocument):
     money = IntField(default=0,min_value=-10000)
     population_taxes = IntField(default=0,min_value=0,max_value=100)
@@ -18,6 +23,8 @@ class Budget(EmbeddedDocument):
     factories_taxes = IntField(default=0,min_value=0,max_value=100)
     military_taxes = IntField(default=0,min_value=0,max_value=100)
     military_expenses = IntField(default=0,min_value=0)
+    profit_history = EmbeddedDocumentListField('History',default=[])
+    expenses_history = EmbeddedDocumentListField('History',default=[])
 
 class Modifier(EmbeddedDocument):
     value = FloatField(default=0.0)
@@ -45,7 +52,8 @@ class IndustrialBuildings(EmbeddedDocument):
     price_build = IntField(default=0,min_value=0)
     workers = IntField(default=0,min_value=0)
     number = IntField(default=0,min_value=0)
-    needGoods =  EmbeddedDocumentListField('Goods',default=[])
+    needGoods = EmbeddedDocumentListField('Goods',default=[])
+    isWorking = BooleanField(default=True)
 
 class Warehouse(EmbeddedDocument):
     goods = EmbeddedDocumentField('Goods')
@@ -57,7 +65,7 @@ class Warehouse(EmbeddedDocument):
     added_capacity = IntField(default=0,min_value=0)
     increasePrice = FloatField(default=0,min_value=0)
 
-class PoliticalLaw(Document):
+class Law(Document):
     name = StringField(default='',max_length=100)
     description = StringField(default='',max_length=200)
     price = IntField(default=0,min_value=0)
@@ -69,10 +77,12 @@ class Population(EmbeddedDocument):
     miners = IntField(default=0,min_value=0)
     farmers = IntField(default=0,min_value=0)
     solders = IntField(default=0,min_value=0)
+    free_people = IntField(default=0,min_value=0)
     others = IntField(default=0,min_value=0)
     min_percent_others = IntField(default=0,min_value=0)
     basic_percent_growth_rate = IntField(default=0,min_value=0)
     modifiers = EmbeddedDocumentListField('Modifier', default=[])
+    population_history = EmbeddedDocumentListField('History',default=[])
 
 class ArmyUnitCharacteristic(EmbeddedDocument):
     unit_name = StringField(default='',max_length=100)
@@ -87,10 +97,12 @@ class ArmyUnit(Document):
     unit_characteristic = DictField(EmbeddedDocumentField('ArmyUnitCharacteristic'),default={})
 
 class Army(EmbeddedDocument):
+    conscript_law_value = FloatField(default=0, min_value=0)
     reserve_military_manpower = IntField(default=0,min_value=0)
     victories = IntField(default=0,min_value=0)
     losses = IntField(default=0,min_value=0)
-    modifiers = EmbeddedDocumentListField('Modifier', default=[])
+    attack_modifiers = EmbeddedDocumentListField('Modifier', default=[])
+    defence_modifiers = EmbeddedDocumentListField('Modifier', default=[])
     units = DictField(default={})
 
 class Country(Document):
@@ -102,6 +114,7 @@ class Country(Document):
     mines = EmbeddedDocumentListField('IndustrialBuildings',default=[])
     factories = EmbeddedDocumentListField('IndustrialBuildings',default=[])
     military_factories = EmbeddedDocumentListField('IndustrialBuildings',default=[])
+    industry_modifiers = EmbeddedDocumentListField('Modifier',default=[])
     warehouses = EmbeddedDocumentListField('Warehouse',default=[])
     adopted_laws = ListField(default=[])
     population = EmbeddedDocumentField('Population')
@@ -121,12 +134,8 @@ class User(Document):
     country = ReferenceField('Country',reverse_delete_rule=mongoengine.CASCADE)
     date_last_send_feedback = DateTimeField(default=timezone.now)
 
-class HistoryPrice(EmbeddedDocument):
-    value = FloatField(default=1.0,min_value=0)
-    time = DateTimeField(default=timezone.now)
-
 class Trade(Document):
     _id = ObjectIdField()
     name = StringField(default='',max_length=100)
     price_now = FloatField(default=0.0,min_value=0)
-    history_price = EmbeddedDocumentListField('HistoryPrice',default=[])
+    history_price = EmbeddedDocumentListField('History',default=[])
