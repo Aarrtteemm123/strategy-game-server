@@ -1,4 +1,4 @@
-from polls.models import Country, Modifier, Goods, Trade, Law, ArmyUnit
+from polls.models import Country, Modifier, Trade, Law, ArmyUnit, Warehouse
 import re
 
 class GameService:
@@ -20,7 +20,7 @@ class GameService:
             existing = obj.industry_modifiers.filter(address_from='farms taxes')
             if existing.count() == 0:
                 obj.update(
-                    push__industry_modifiers=Modifier(value=-0.6 * new_value + 30, address_from='farms taxes'))
+                    push__industry_modifiers=Modifier(value=-0.6 * new_value + 30, address_from='farms taxes',address_to='farms'))
             else:
                 existing.update(value=-0.6 * new_value + 30)
                 obj.save()
@@ -31,7 +31,7 @@ class GameService:
             existing = obj.industry_modifiers.filter(address_from='mines taxes')
             if existing.count() == 0:
                 obj.update(
-                    push__industry_modifiers=Modifier(value=-0.6 * new_value + 30, address_from='mines taxes'))
+                    push__industry_modifiers=Modifier(value=-0.6 * new_value + 30, address_from='mines taxes',address_to='mines'))
             else:
                 existing.update(value=-0.6 * new_value + 30)
                 obj.save()
@@ -42,7 +42,7 @@ class GameService:
             existing = obj.industry_modifiers.filter(address_from='factories taxes')
             if existing.count() == 0:
                 obj.update(
-                    push__industry_modifiers=Modifier(value=-0.6 * new_value + 30, address_from='factories taxes'))
+                    push__industry_modifiers=Modifier(value=-0.6 * new_value + 30, address_from='factories taxes',address_to='factories'))
             else:
                 existing.update(value=-0.6 * new_value + 30)
                 obj.save()
@@ -211,7 +211,7 @@ class GameService:
             obj.budget.money -=law.price
             obj.adopted_laws.append(name_law)
             obj.population.modifiers.append(Modifier(value=2,address_from=name_law))
-            obj.industry_modifiers.append(Modifier(value=5,address_from=name_law))
+            obj.industry_modifiers.append(Modifier(value=5,address_from=name_law,address_to='industry'))
             obj.army.attack_modifiers.append(Modifier(value=-8,address_from=name_law))
             obj.army.defence_modifiers.append(Modifier(value=-8,address_from=name_law))
         elif name_law == 'Isolation' and obj.budget.money >= law.price and \
@@ -219,14 +219,14 @@ class GameService:
             obj.budget.money -=law.price
             obj.adopted_laws.append(name_law)
             obj.population.modifiers.append(Modifier(value=-5,address_from=name_law))
-            obj.industry_modifiers.append(Modifier(value=-5,address_from=name_law))
+            obj.industry_modifiers.append(Modifier(value=-5,address_from=name_law,address_to='industry'))
             obj.army.defence_modifiers.append(Modifier(value=15,address_from=name_law))
         elif name_law == 'Free housing' and obj.budget.money >= law.price and \
                 not name_law in obj.adopted_laws:
             obj.budget.money -=law.price
             obj.adopted_laws.append(name_law)
             obj.population.modifiers.append(Modifier(value=5,address_from=name_law))
-            obj.industry_modifiers.append(Modifier(value=-10,address_from=name_law))
+            obj.industry_modifiers.append(Modifier(value=-10,address_from=name_law,address_to='industry'))
             obj.army.attack_modifiers.append(Modifier(value=-10,address_from=name_law))
             obj.army.defence_modifiers.append(Modifier(value=10,address_from=name_law))
         elif name_law == 'Free education' and obj.budget.money >= law.price and \
@@ -234,75 +234,64 @@ class GameService:
             obj.budget.money -=law.price
             obj.adopted_laws.append(name_law)
             obj.population.modifiers.append(Modifier(value=-2,address_from=name_law))
-            obj.industry_modifiers.append(Modifier(value=15,address_from=name_law))
+            obj.industry_modifiers.append(Modifier(value=15,address_from=name_law,address_to='industry'))
             obj.army.attack_modifiers.append(Modifier(value=-10,address_from=name_law))
         obj.save()
+
+    def __update_conscript_law(self, obj, name_law, law, conscript_law_value,
+                               pop_mod=None, indus_mod=None, attack_mod=None, def_mod=None):
+        self.cansel_conscript_law(obj)
+        obj.adopted_laws.append(name_law)
+        obj.budget.money -= law.price
+        obj.army.conscript_law_value = conscript_law_value
+        obj.army.reserve_military_manpower = obj.population.total_population \
+                                             * obj.army.conscript_law_value // 100
+        if pop_mod is not None:
+            obj.population.modifiers.append(pop_mod)
+        if indus_mod is not None:
+            obj.industry_modifiers.append(indus_mod)
+        if attack_mod is not None:
+            obj.army.attack_modifiers.append(attack_mod)
+        if def_mod is not None:
+            obj.army.defence_modifiers.append(def_mod)
 
     def set_conscript_law(self,country_name,name_law):
         obj = Country.objects(name=country_name).first()
         law = Law.objects(name=name_law).first()
         if name_law == 'Conscript law: Elite' and obj.budget.money >= law.price:
-            self.cansel_conscript_law(obj)
-            obj.adopted_laws.append(name_law)
-            obj.budget.money -= law.price
-            obj.army.conscript_law_value = 0.5
-            obj.army.reserve_military_manpower = obj.population.total_population * obj.army.conscript_law_value // 100
-            obj.population.modifiers.append(Modifier(value=-10, address_from=name_law))
-            obj.industry_modifiers.append(Modifier(value=10, address_from=name_law))
-            obj.army.attack_modifiers.append(Modifier(value=10, address_from=name_law))
-            obj.army.defence_modifiers.append(Modifier(value=10, address_from=name_law))
+            self.__update_conscript_law(obj, name_law, law, 0.5,
+                                        pop_mod=Modifier(value=-10, address_from=name_law),
+                                        indus_mod=Modifier(value=10, address_from=name_law,address_to='industry'),
+                                        attack_mod=Modifier(value=10, address_from=name_law),
+                                        def_mod=Modifier(value=10, address_from=name_law))
         elif name_law == 'Conscript law: Volunteer' and obj.budget.money >= law.price:
-            self.cansel_conscript_law(obj)
-            obj.adopted_laws.append(name_law)
-            obj.budget.money -= law.price
-            obj.army.conscript_law_value = 1.5
-            obj.army.reserve_military_manpower = obj.population.total_population * obj.army.conscript_law_value // 100
+            self.__update_conscript_law(obj, name_law, law, 1.5)
         elif name_law == 'Conscript law: Limited Conscription' and obj.budget.money >= law.price:
-            self.cansel_conscript_law(obj)
-            obj.adopted_laws.append(name_law)
-            obj.budget.money -= law.price
-            obj.army.conscript_law_value = 2.5
-            obj.army.reserve_military_manpower = obj.population.total_population * obj.army.conscript_law_value // 100
-            obj.industry_modifiers.append(Modifier(value=-5, address_from=name_law))
-            obj.army.attack_modifiers.append(Modifier(value=5, address_from=name_law))
-            obj.army.defence_modifiers.append(Modifier(value=5, address_from=name_law))
+            self.__update_conscript_law(obj, name_law, law, 2.5,
+                                        indus_mod=Modifier(value=-5, address_from=name_law,address_to='industry'),
+                                        attack_mod=Modifier(value=5, address_from=name_law),
+                                        def_mod=Modifier(value=5, address_from=name_law))
         elif name_law == 'Conscript law: Extensive Conscription' and obj.budget.money >= law.price:
-            self.cansel_conscript_law(obj)
-            obj.adopted_laws.append(name_law)
-            obj.budget.money -= law.price
-            obj.army.conscript_law_value = 5
-            obj.army.reserve_military_manpower = obj.population.total_population * obj.army.conscript_law_value // 100
-            obj.industry_modifiers.append(Modifier(value=-5, address_from=name_law))
+            self.__update_conscript_law(obj, name_law, law, 5,
+                                        indus_mod=Modifier(value=-5, address_from=name_law,address_to='industry'))
         elif name_law == 'Conscript law: Service by Requirement' and obj.budget.money >= law.price:
-            self.cansel_conscript_law(obj)
-            obj.adopted_laws.append(name_law)
-            obj.budget.money -= law.price
-            obj.army.conscript_law_value = 10
-            obj.army.reserve_military_manpower = obj.population.total_population * obj.army.conscript_law_value // 100
-            obj.population.modifiers.append(Modifier(value=-5, address_from=name_law))
-            obj.industry_modifiers.append(Modifier(value=-5, address_from=name_law))
-            obj.army.attack_modifiers.append(Modifier(value=-5, address_from=name_law))
-            obj.army.defence_modifiers.append(Modifier(value=-5, address_from=name_law))
+            self.__update_conscript_law(obj, name_law, law, 10,
+                                        pop_mod=Modifier(value=-5, address_from=name_law),
+                                        indus_mod=Modifier(value=5, address_from=name_law,address_to='industry'),
+                                        attack_mod=Modifier(value=-5, address_from=name_law),
+                                        def_mod=Modifier(value=-5, address_from=name_law))
         elif name_law == 'Conscript law: All Adults Serve' and obj.budget.money >= law.price:
-            self.cansel_conscript_law(obj)
-            obj.adopted_laws.append(name_law)
-            obj.budget.money -= law.price
-            obj.army.conscript_law_value = 20
-            obj.army.reserve_military_manpower = obj.population.total_population * obj.army.conscript_law_value // 100
-            obj.population.modifiers.append(Modifier(value=-10, address_from=name_law))
-            obj.industry_modifiers.append(Modifier(value=-15, address_from=name_law))
-            obj.army.attack_modifiers.append(Modifier(value=-5, address_from=name_law))
-            obj.army.defence_modifiers.append(Modifier(value=-5, address_from=name_law))
+            self.__update_conscript_law(obj, name_law, law, 20,
+                                        pop_mod=Modifier(value=-10, address_from=name_law),
+                                        indus_mod=Modifier(value=-15, address_from=name_law,address_to='industry'),
+                                        attack_mod=Modifier(value=-5, address_from=name_law),
+                                        def_mod=Modifier(value=-5, address_from=name_law))
         elif name_law == 'Conscript law: All with weapons' and obj.budget.money >= law.price:
-            self.cansel_conscript_law(obj)
-            obj.adopted_laws.append(name_law)
-            obj.budget.money -= law.price
-            obj.army.conscript_law_value = 30
-            obj.army.reserve_military_manpower = obj.population.total_population * obj.army.conscript_law_value // 100
-            obj.population.modifiers.append(Modifier(value=-15, address_from=name_law))
-            obj.industry_modifiers.append(Modifier(value=-35, address_from=name_law))
-            obj.army.attack_modifiers.append(Modifier(value=-15, address_from=name_law))
-            obj.army.defence_modifiers.append(Modifier(value=-10, address_from=name_law))
+            self.__update_conscript_law(obj, name_law, law, 30,
+                                        pop_mod=Modifier(value=-15, address_from=name_law),
+                                        indus_mod=Modifier(value=-35, address_from=name_law,address_to='industry'),
+                                        attack_mod=Modifier(value=-15, address_from=name_law),
+                                        def_mod=Modifier(value=-10, address_from=name_law))
         obj.save()
 
     def cansel_conscript_law(self,country):
@@ -326,7 +315,7 @@ class GameService:
             obj.budget.money -= law.price
             obj.adopted_laws.remove(name_law)
             obj.population.modifiers.remove(Modifier(value=2, address_from=name_law))
-            obj.industry_modifiers.remove(Modifier(value=5, address_from=name_law))
+            obj.industry_modifiers.remove(Modifier(value=5, address_from=name_law,address_to='industry'))
             obj.army.attack_modifiers.remove(Modifier(value=-8, address_from=name_law))
             obj.army.defence_modifiers.remove(Modifier(value=-8, address_from=name_law))
         elif name_law == 'Isolation' and obj.budget.money >= law.price and \
@@ -334,14 +323,14 @@ class GameService:
             obj.budget.money -=law.price
             obj.adopted_laws.remove(name_law)
             obj.population.modifiers.remove(Modifier(value=-5,address_from=name_law))
-            obj.industry_modifiers.remove(Modifier(value=-5,address_from=name_law))
+            obj.industry_modifiers.remove(Modifier(value=-5,address_from=name_law,address_to='industry'))
             obj.army.defence_modifiers.remove(Modifier(value=15,address_from=name_law))
         elif name_law == 'Free housing' and obj.budget.money >= law.price and \
                 name_law in obj.adopted_laws:
             obj.budget.money -=law.price
             obj.adopted_laws.remove(name_law)
             obj.population.modifiers.remove(Modifier(value=5,address_from=name_law))
-            obj.industry_modifiers.remove(Modifier(value=-10,address_from=name_law))
+            obj.industry_modifiers.remove(Modifier(value=-10,address_from=name_law,address_to='industry'))
             obj.army.attack_modifiers.remove(Modifier(value=-10,address_from=name_law))
             obj.army.defence_modifiers.remove(Modifier(value=10,address_from=name_law))
         elif name_law == 'Free education' and obj.budget.money >= law.price and \
@@ -349,7 +338,7 @@ class GameService:
             obj.budget.money -=law.price
             obj.adopted_laws.remove(name_law)
             obj.population.modifiers.remove(Modifier(value=-2,address_from=name_law))
-            obj.industry_modifiers.remove(Modifier(value=15,address_from=name_law))
+            obj.industry_modifiers.remove(Modifier(value=15,address_from=name_law,address_to='industry'))
             obj.army.attack_modifiers.remove(Modifier(value=-10,address_from=name_law))
         obj.save()
 
@@ -410,3 +399,296 @@ class GameService:
                         elif dif == 0:
                             attacking_country.army.units[unit.name] = 0
                             defending_country.army.units[item[1].unit_name] = 0
+        if next(filter(lambda x:x[1]!=0,defending_country.army.units.items()),None) is None:
+            defending_country.army.losses +=1
+            attacking_country.army.victories +=1
+            warehouses_victory_country = attacking_country.warehouses
+            for warehouse in defending_country.warehouses:
+                some_warehouse = next(filter(lambda x:x.goods.name==warehouse.goods.name,warehouses_victory_country),None)
+                some_warehouse.goods.value += warehouse.goods.value
+                warehouse.goods.value = 0
+                if some_warehouse.goods.value > warehouse.capacity:
+                    some_warehouse.goods.value = warehouse.capacity
+        else:
+            defending_country.army.victories += 1
+            attacking_country.army.losses += 1
+        attacking_country.save()
+        defending_country.save()
+
+    def get_farms_production_profit(self,country):
+        goods = Trade.objects()
+        industry_modifiers = 100  # -> 1(100%)
+        total_profit = 0
+        if country.industry_modifiers is not None:
+            for mod in country.industry_modifiers:
+                if mod.address_to == 'farms' or mod.address_to == 'industry':
+                    industry_modifiers += mod.value
+        for farm in country.farms:
+            production_power = farm.production_speed * farm.number * industry_modifiers / 100 * goods.filter(
+                name=re.split(r' ', farm.name)[0]).first().price_now
+            total_profit += production_power
+        return total_profit
+
+    def get_mines_production_profit(self,country):
+        goods = Trade.objects()
+        industry_modifiers = 100  # -> 1(100%)
+        total_profit = 0
+        if country.industry_modifiers is not None:
+            for mod in country.industry_modifiers:
+                if mod.address_to == 'mines' or mod.address_to == 'industry':
+                    industry_modifiers += mod.value
+        for mine in country.mines:
+            production_power = mine.production_speed * mine.number * industry_modifiers / 100 * goods.filter(
+                name=re.split(r' ', mine.name)[0]).first().price_now
+            total_profit += production_power
+        return total_profit
+
+    def get_civil_factories_production_profit(self,country):
+        goods = Trade.objects()
+        industry_modifiers = 100  # -> 1(100%)
+        total_profit = 0
+        if country.industry_modifiers is not None:
+            for mod in country.industry_modifiers:
+                if mod.address_to == 'factories' or mod.address_to == 'industry':
+                    industry_modifiers += mod.value
+        for factory in country.factories:
+            if factory.number > 0:
+                name_goods = self.get_name_goods_from_building(factory.name)
+                expenses = 0
+                if factory.needGoods:
+                    for item in factory.needGoods:
+                        expenses += item.value * goods.filter(name=item.name).first().price_now
+                production_power = factory.production_speed * factory.number * industry_modifiers / 100 * goods.filter(
+                    name=name_goods).first().price_now - expenses
+                total_profit += production_power
+        return total_profit
+
+    def get_military_factories_production_profit(self,country):
+        goods = Trade.objects()
+        industry_modifiers = 100  # -> 1(100%)
+        total_profit = 0
+        if country.industry_modifiers is not None:
+            for mod in country.industry_modifiers:
+                if mod.address_to == 'factories' or mod.address_to == 'industry':
+                    industry_modifiers += mod.value
+        for military_factory in country.military_factories:
+            if military_factory.number > 0:
+                name_goods = self.get_name_goods_from_building(military_factory.name)
+                expenses = 0
+                if military_factory.needGoods:
+                    for item in military_factory.needGoods:
+                        expenses += item.value * goods.filter(name=item.name).first().price_now
+                production_power = military_factory.production_speed * military_factory.number * industry_modifiers / 100 * goods.filter(
+                    name=name_goods).first().price_now - expenses
+                total_profit += production_power
+        return total_profit
+
+    def get_factories_profit(self,country):
+        goods = Trade.objects()
+        industry_modifiers = 100  # -> 1(100%)
+        total_profit = 0
+        if country.industry_modifiers is not None:
+            for mod in country.industry_modifiers:
+                if mod.address_to == 'factories' or mod.address_to == 'industry':
+                    industry_modifiers += mod.value
+        for factory in country.factories:
+            if factory.number > 0:
+                name_goods = self.get_name_goods_from_building(factory.name)
+                expenses = 0
+                if factory.needGoods:
+                    for item in factory.needGoods:
+                        expenses += item.value * goods.filter(name=item.name).first().price_now
+                production_power = factory.production_speed * factory.number * industry_modifiers / 100 * goods.filter(
+                    name=name_goods).first().price_now - expenses
+                total_profit += production_power + 0.25 * production_power * country.budget.factories_taxes / 100
+        for military_factory in country.military_factories:
+            if military_factory.number > 0:
+                name_goods = self.get_name_goods_from_building(military_factory.name)
+                expenses = 0
+                if military_factory.needGoods:
+                    for item in military_factory.needGoods:
+                        expenses += item.value * goods.filter(name=item.name).first().price_now
+                production_power = military_factory.production_speed * military_factory.number * industry_modifiers / 100 * goods.filter(name=name_goods).first().price_now - expenses
+                total_profit += production_power + 0.25 * production_power * country.budget.factories_taxes / 100
+        return total_profit
+
+    def get_mines_profit(self,country):
+        goods = Trade.objects()
+        industry_modifiers = 100  # -> 1(100%)
+        total_profit = 0
+        if country.industry_modifiers is not None:
+            for mod in country.industry_modifiers:
+                if mod.address_to == 'mines' or mod.address_to == 'industry':
+                    industry_modifiers += mod.value
+        for mine in country.mines:
+            production_power = mine.production_speed * mine.number * industry_modifiers / 100 * goods.filter(name=re.split(r' ', mine.name)[0]).first().price_now
+            total_profit += production_power + 0.25 * production_power * country.budget.mines_taxes / 100
+        return total_profit
+
+    def get_farms_profit(self,country):
+        goods = Trade.objects()
+        industry_modifiers = 100  # -> 1(100%)
+        total_profit = 0
+        if country.industry_modifiers is not None:
+            for mod in country.industry_modifiers:
+                if mod.address_to == 'farms' or mod.address_to == 'industry':
+                    industry_modifiers += mod.value
+        for farm in country.farms:
+            production_power = farm.production_speed * farm.number * industry_modifiers/100 * goods.filter(name=re.split(r' ',farm.name)[0]).first().price_now
+            total_profit += production_power + 0.25 * production_power * country.budget.farms_taxes/100
+        return total_profit
+
+    def get_army_taxes_profit(self,country):
+        return country.army.reserve_military_manpower * country.budget.military_taxes/100
+
+    def get_pop_taxes_profit(self,country):
+        return (country.population.total_population * country.budget.population_taxes / 100) + (country.army.reserve_military_manpower * country.budget.military_taxes/100)
+
+    def get_farms_taxes_profit(self,country):
+        goods = Trade.objects()
+        industry_modifiers = 100  # -> 1(100%)
+        total_profit = 0
+        if country.industry_modifiers is not None:
+            for mod in country.industry_modifiers:
+                if mod.address_to == 'farms' or mod.address_to == 'industry':
+                    industry_modifiers += mod.value
+        for farm in country.farms:
+            production_power = farm.production_speed * farm.number * industry_modifiers / 100 * goods.filter(
+                name=re.split(r' ', farm.name)[0]).first().price_now
+            total_profit += 0.25 * production_power * country.budget.farms_taxes / 100
+        return total_profit
+
+    def get_mines_taxes_profit(self,country):
+        goods = Trade.objects()
+        industry_modifiers = 100  # -> 1(100%)
+        total_profit = 0
+        if country.industry_modifiers is not None:
+            for mod in country.industry_modifiers:
+                if mod.address_to == 'mines' or mod.address_to == 'industry':
+                    industry_modifiers += mod.value
+        for mine in country.mines:
+            production_power = mine.production_speed * mine.number * industry_modifiers / 100 * goods.filter(
+                name=re.split(r' ', mine.name)[0]).first().price_now
+            total_profit += 0.25 * production_power * country.budget.mines_taxes / 100
+        return total_profit
+
+    def get_civil_factories_taxes_profit(self,country):
+        goods = Trade.objects()
+        industry_modifiers = 100  # -> 1(100%)
+        total_profit = 0
+        if country.industry_modifiers is not None:
+            for mod in country.industry_modifiers:
+                if mod.address_to == 'factories' or mod.address_to == 'industry':
+                    industry_modifiers += mod.value
+        for factory in country.factories:
+            if factory.number > 0:
+                name_goods = self.get_name_goods_from_building(factory.name)
+                expenses = 0
+                if factory.needGoods:
+                    for item in factory.needGoods:
+                        expenses += item.value * goods.filter(name=item.name).first().price_now
+                production_power = factory.production_speed * factory.number * industry_modifiers / 100 * goods.filter(
+                    name=name_goods).first().price_now - expenses
+                total_profit += 0.25 * production_power * country.budget.factories_taxes / 100
+        return total_profit
+
+    def get_military_factories_taxes_profit(self,country):
+        goods = Trade.objects()
+        industry_modifiers = 100  # -> 1(100%)
+        total_profit = 0
+        if country.industry_modifiers is not None:
+            for mod in country.industry_modifiers:
+                if mod.address_to == 'factories' or mod.address_to == 'industry':
+                    industry_modifiers += mod.value
+        for military_factory in country.military_factories:
+            if military_factory.number > 0:
+                name_goods = self.get_name_goods_from_building(military_factory.name)
+                expenses = 0
+                if military_factory.needGoods:
+                    for item in military_factory.needGoods:
+                        expenses += item.value * goods.filter(name=item.name).first().price_now
+                production_power = military_factory.production_speed * military_factory.number * industry_modifiers / 100 * goods.filter(
+                    name=name_goods).first().price_now - expenses
+                total_profit += 0.25 * production_power * country.budget.factories_taxes / 100
+        return total_profit
+
+    def get_total_profit(self,country):
+        total_profit = self.get_pop_taxes_profit(country) + self.get_farms_profit(country) + self.get_mines_profit(country) + self.get_factories_profit(country) - country.budget.military_expenses
+        return total_profit
+
+    def get_economic_place(self,country_name):
+        countries = Country.objects()
+        economic_profit_dict = {country.name:self.get_total_profit(country) for country in countries}
+        economic_rating = sorted(economic_profit_dict.items(), key=lambda x: x[1] ,reverse=True)
+        return economic_rating.index((country_name,self.get_total_profit(countries.filter(name=country_name).first()))) + 1
+
+    def get_army_place(self,country_name):
+        countries = Country.objects
+        army_expenses_dict = {country.name: country.budget.military_expenses for country in countries}
+        army_rating_dict = sorted(army_expenses_dict.items(), key=lambda x: x[1], reverse=True)
+        target_country = next(filter(lambda x:x[0]==country_name,army_rating_dict))
+        return army_rating_dict.index(target_country) + 1
+
+    def get_goods_data(self,country):
+        industry_modifiers = 100  # -> 1(100%)
+        if country.industry_modifiers is not None:
+            for mod in country.industry_modifiers:
+                industry_modifiers += mod.value
+        names_farms = [farm.name for farm in country.farms]
+        farms_production = [farm.number * farm.production_speed * industry_modifiers / 100 for farm in country.farms]
+        names_mines = [mine.name for mine in country.mines]
+        mines_production = [mine.number * mine.production_speed * industry_modifiers / 100 for mine in country.mines]
+        names_factories = [factory.name for factory in country.factories]
+        factories_production = [factory.number * factory.production_speed * industry_modifiers / 100 for factory in country.factories]
+        names_military_factories = [factory.name for factory in country.military_factories]
+        military_factories_production = [factory.number * factory.production_speed * industry_modifiers / 100 for factory in country.military_factories]
+        goods_data_dict = {
+            'farms':{'names':names_farms,'values':farms_production},
+            'mines':{'names':names_mines,'values':mines_production},
+            'factories':{'names':names_factories,'values':factories_production},
+            'military factories':{'names':names_military_factories,'values':military_factories_production}
+        }
+        return goods_data_dict
+
+    def get_table_world_place_production(self):
+        countries = Country.objects()
+        data = {}
+        is_first_iteration = True
+        for country in countries:
+            industry_modifiers = 100  # -> 1(100%)
+            if country.industry_modifiers is not None:
+                 for mod in country.industry_modifiers:
+                    industry_modifiers += mod.value
+            for farm in country.farms:
+                if is_first_iteration:
+                    data[self.get_name_goods_from_building(farm.name)] = []
+                data[self.get_name_goods_from_building(farm.name)].append((country.name,farm.number * farm.production_speed * industry_modifiers / 100))
+            for mine in country.mines:
+                if is_first_iteration:
+                    data[self.get_name_goods_from_building(mine.name)] = []
+                data[self.get_name_goods_from_building(mine.name)].append((country.name,mine.number * mine.production_speed * industry_modifiers / 100))
+            for factory in country.factories:
+                if is_first_iteration:
+                    data[self.get_name_goods_from_building(factory.name)] = []
+                data[self.get_name_goods_from_building(factory.name)].append((country.name,factory.number * factory.production_speed * industry_modifiers / 100))
+            for military_factory in country.military_factories:
+                if is_first_iteration:
+                    data[self.get_name_goods_from_building(military_factory.name)] = []
+                data[self.get_name_goods_from_building(military_factory.name)].append((country.name,military_factory.number * military_factory.production_speed * industry_modifiers / 100))
+            is_first_iteration = False
+
+        for key in data:
+            data[key] = sorted(data[key],key=lambda x:x[1],reverse=True)
+        return data
+
+    def get_name_goods_from_building(self,name_building):
+        words = re.split(r' ', name_building)
+        if 'factory' in words:
+            words.remove('factory')
+        elif 'farm' in words:
+            words.remove('farm')
+        elif 'mine' in words:
+            words.remove('mine')
+        return ' '.join(words)
+
+

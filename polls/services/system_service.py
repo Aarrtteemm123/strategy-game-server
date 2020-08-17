@@ -689,7 +689,7 @@ class SystemService:
         ]
               ).save()
 
-        Trade(name='Tank', price_now=15, history_price=[
+        Trade(name='Tanks', price_now=15, history_price=[
             History(value=10), History(value=20), History(value=30),
             History(value=25), History(value=40), History(value=15),
         ]

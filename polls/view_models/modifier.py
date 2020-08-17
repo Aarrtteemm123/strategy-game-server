@@ -1,5 +1,5 @@
 class ModifierView:
-    def __init__(self, value='', msg='', color=''):
-        self.value = value
+    def __init__(self, value=0, msg=''):
+        self.value = str(value) + ' %'
         self.msg = msg
-        self.color = color
+        self.color = 'green' if value > 0 else 'red'

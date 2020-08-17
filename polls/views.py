@@ -15,6 +15,7 @@ from mongoengine import *
 import pymongo,json
 
 from polls.services.user_service import UserService
+from polls.services.view_service import CountryViewService
 from polls.view_models.basic_statistic import BasicStatisticView
 
 connect('TestDb')
@@ -84,7 +85,11 @@ def redirect_feedback(request,user_id):
 def get_all(request,user_id):
     if request.method == 'GET':
         # code...
-        return JsonResponse({}, status=status.HTTP_200_OK, safe=False)
+        obj = {
+            'basic statistic':CountryViewService().get_basic_statistic(user_id),
+            'budget':CountryViewService().get_budget(user_id)
+        }
+        return HttpResponse(json.dumps(obj, default=lambda x: x.__dict__), status=status.HTTP_200_OK)
     else:
         return JsonResponse({}, status=status.HTTP_405_METHOD_NOT_ALLOWED, safe=False)
 

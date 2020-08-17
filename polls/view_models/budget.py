@@ -13,7 +13,7 @@ class TaxesCard:
 
 class BudgetView:
     def __init__(self, money=0, taxes_profit=0, farms_profit=0, mines_profit=0,
-                 factories_profit=0, army_profit=0, military_expenses=0,
+                 factories_profit=0, military_expenses=0,
                  total_profit=0, population_taxes=TaxesCard(), army_taxes=TaxesCard(),
                  farms_taxes=TaxesCard(), mines_taxes=TaxesCard(),
                  factories_taxes=TaxesCard()):
@@ -22,7 +22,6 @@ class BudgetView:
         self.farms_profit = farms_profit
         self.mines_profit = mines_profit
         self.factories_profit = factories_profit
-        self.army_profit = army_profit
         self.military_expenses = military_expenses
         self.total_profit = total_profit
         self.population_taxes = population_taxes
@@ -31,6 +30,4 @@ class BudgetView:
         self.mines_taxes = mines_taxes
         self.factories_taxes = factories_taxes
 
-
-bv = BudgetView()
-print(json.dumps(bv.__dict__, default=lambda x: x.__dict__))
+#print(json.dumps(bv.__dict__, default=lambda x: x.__dict__))

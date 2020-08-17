@@ -116,6 +116,7 @@ class ArmySerializer(serializers.Serializer):
     units = serializers.DictField(default={})
 
 class CountrySerializer(serializers.Serializer):
+    _id = ObjectIdField()
     link_img = serializers.CharField()
     name = serializers.CharField()
     budget = BudgetSerializer(required=False)

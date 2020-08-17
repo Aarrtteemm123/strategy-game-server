@@ -48,8 +48,7 @@ class ChartGoodsData:
         self.x_axis_label = x_axis_label
 
 class TableRowDataView:
-    def __init__(self,id=0,link_img='',name_goods='',number=0,world_place=0):
-        self.id = id
+    def __init__(self,link_img='',name_goods='',number=0,world_place=0):
         self.link_img = link_img
         self.name_goods = name_goods
         self.number = number
@@ -94,5 +93,4 @@ class BasicStatisticView:
         self.industrial_goods_table = industrial_goods_table
         self.military_goods_table = military_goods_table
 
-bs = BasicStatisticView()
 #print(json.dumps(bs.__dict__,default=lambda x: x.__dict__))

@@ -106,6 +106,7 @@ class Army(EmbeddedDocument):
     units = DictField(default={})
 
 class Country(Document):
+    _id = ObjectIdField()
     link_img = StringField(default='',max_length=1000)
     name = StringField(default='',max_length=100,unique=False)
     budget = EmbeddedDocumentField('Budget')

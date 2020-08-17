@@ -1,4 +1,7 @@
+import json
+
 from polls.models import Country, Budget, Population, Army, User
+from polls.services.game_service import GameService
 from polls.services.system_service import EmailTemplate, SystemService
 from serverDjango.settings import ADMIN_EMAIL, ADMIN_EMAIL_PASSWORD
 
@@ -11,20 +14,19 @@ class UserService:
         return User.objects(username=username).only('isAuth').update_one(isAuth=False) == 1
 
     def register_new_user(self, username, password, email, country_name, link_country_flag):
-        country = Country(link_img=link_country_flag, name=country_name, budget=Budget(), population=Population(),
-                          army=Army())
-        user = User(username=username, password=password, email=email, country=country)
+        country = SystemService().create_default_country(country_name,link_country_flag)
         try:
             country.save()
         except:
             return False
+        user = User(username=username, password=password, email=email, country=country.pk)
         try:
             user.save()
         except:
             country.delete()
             return False
-        html_msg = EmailTemplate().get_html_registration(username,password,country_name,str(user.pk),link_country_flag)
-        SystemService().send_email(ADMIN_EMAIL,email,ADMIN_EMAIL_PASSWORD,html_msg,EmailTemplate.REGISTRATION_TITLE)
+        #html_msg = EmailTemplate().get_html_registration(username, password, country_name, str(user.pk),link_country_flag)
+        #SystemService().send_email(ADMIN_EMAIL, email, ADMIN_EMAIL_PASSWORD, html_msg, EmailTemplate.REGISTRATION_TITLE)
         return True
 
     def delete_user_account(self, username):
