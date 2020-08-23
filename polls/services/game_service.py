@@ -689,6 +689,8 @@ class GameService:
             words.remove('farm')
         elif 'mine' in words:
             words.remove('mine')
+        elif 'well' in words:
+            words.remove('well')
         return ' '.join(words)
 
 

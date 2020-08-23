@@ -15,7 +15,7 @@ from mongoengine import *
 import pymongo,json
 
 from polls.services.user_service import UserService
-from polls.services.view_service import CountryViewService
+from polls.services.view_service import CountryViewService, NewsViewService
 from polls.view_models.basic_statistic import BasicStatisticView
 
 connect('TestDb')
@@ -87,7 +87,15 @@ def get_all(request,user_id):
         # code...
         obj = {
             'basic statistic':CountryViewService().get_basic_statistic(user_id),
-            'budget':CountryViewService().get_budget(user_id)
+            'budget':CountryViewService().get_budget(user_id),
+            'technologies':CountryViewService().get_technologies(user_id),
+            'industry':CountryViewService().get_industry(user_id),
+            'warehouses':CountryViewService().get_warehouses(user_id),
+            'adopted politics laws':CountryViewService().get_politics_laws(user_id),
+            'population':CountryViewService().get_population(user_id),
+            'trade':CountryViewService().get_trade(user_id),
+            'army':CountryViewService().get_army(user_id),
+            'news':NewsViewService().get_news()
         }
         return HttpResponse(json.dumps(obj, default=lambda x: x.__dict__), status=status.HTTP_200_OK)
     else:

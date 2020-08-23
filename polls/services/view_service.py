@@ -1,11 +1,19 @@
 import json, time
+import re
 
-from polls.models import User, Country, Trade
+from polls.models import User, Country, Trade, News, ArmyUnit
 from polls.services.game_service import GameService
+from polls.view_models.army import ArmyCardView, UnitCharacteristicView
 from polls.view_models.basic_statistic import BasicStatisticView, ChartBudgetData, ChartPopulationData, ChartProfitData, \
     ChartGoodsData, TableRowDataView
 from polls.view_models.budget import BudgetView, TaxesCard
+from polls.view_models.industry import IndustrialCardView, TableRowGoodsView
 from polls.view_models.modifier import ModifierView
+from polls.view_models.news import NewsView
+from polls.view_models.population import PopulationView
+from polls.view_models.technology import TechnologyView
+from polls.view_models.trade import TradeCardView, TableRowProducerView, ChartPriceGoods
+from polls.view_models.warehouse import WarehouseCardView
 
 
 class CountryViewService:
@@ -120,28 +128,212 @@ class CountryViewService:
         finish = time.time()
         return budget_view
 
-    def get_technology(self, user_id):
-        pass
+    def get_technologies(self, user_id):
+        start = time.time()
+        user = User.objects(_id=user_id).first()
+        country = Country.objects(_id=user.country._id).first()
+        technologies_view_list = []
+        for technology in country.technologies:
+            technology_view = TechnologyView(technology.name,technology.price_upgrade,
+                    technology.level,technology.max_level,technology.level * technology.modifiers[0].value,
+                    [ModifierView(mod.value,mod.address_to) for mod in technology.modifiers])
+            technologies_view_list.append(technology_view)
+        finish = time.time()
+        #print(finish -start)
+        return technologies_view_list
 
     def get_industry(self, user_id):
-        pass
+        start = time.time()
+        user = User.objects(_id=user_id).first()
+        country = Country.objects(_id=user.country._id).first()
+        industry_dict = {}
+        farms_list = []
+        mines_list = []
+        factories_list = []
+        industry_modifiers = 100  # -> 1(100%)
+        if country.industry_modifiers is not None:
+            for mod in country.industry_modifiers:
+                if mod.address_to == 'farms' or mod.address_to == 'industry':
+                    industry_modifiers += mod.value
+        for farm in country.farms:
+            industrial_card_view = IndustrialCardView(
+                farm.name,farm.link_img,farm.production_speed,
+                farm.number * farm.production_speed * industry_modifiers / 100,
+                farm.price_build,farm.workers,farm.number,farm.number * farm.workers,[]
+            )
+            farms_list.append(industrial_card_view)
+        industry_dict['farms'] = farms_list
+        industry_modifiers = 100  # -> 1(100%)
+        if country.industry_modifiers is not None:
+            for mod in country.industry_modifiers:
+                if mod.address_to == 'mines' or mod.address_to == 'industry':
+                    industry_modifiers += mod.value
+        for mine in country.mines:
+            industrial_card_view = IndustrialCardView(
+                mine.name,mine.link_img,mine.production_speed,
+                mine.number * mine.production_speed * industry_modifiers / 100,
+                mine.price_build,mine.workers,mine.number,mine.number * mine.workers,[]
+            )
+            mines_list.append(industrial_card_view)
+        industry_dict['mines'] = mines_list
+        industry_modifiers = 100  # -> 1(100%)
+        if country.industry_modifiers is not None:
+            for mod in country.industry_modifiers:
+                if mod.address_to == 'factories' or mod.address_to == 'industry':
+                    industry_modifiers += mod.value
+        for factory in country.factories:
+            industrial_card_view = IndustrialCardView(
+                factory.name,factory.link_img,factory.production_speed,
+                factory.number * factory.production_speed * industry_modifiers / 100,
+                factory.price_build,factory.workers,factory.number,factory.number * factory.workers,
+                [TableRowGoodsView(item.link_img,item.name,item.value) for item in factory.needGoods]
+            )
+            factories_list.append(industrial_card_view)
+        for factory in country.military_factories:
+            industrial_card_view = IndustrialCardView(
+                factory.name, factory.link_img, factory.production_speed,
+                factory.number * factory.production_speed * industry_modifiers / 100,
+                factory.price_build, factory.workers, factory.number, factory.number * factory.workers,
+                [TableRowGoodsView(item.link_img, item.name, item.value) for item in factory.needGoods]
+            )
+            factories_list.append(industrial_card_view)
+        industry_dict['factories'] = factories_list
+        finish = time.time()
+        #print(finish -start)
+        return industry_dict
 
-    def get_warehouse(self, user_id):
-        pass
+    def get_warehouses(self, user_id):
+        start = time.time()
+        user = User.objects(_id=user_id).first()
+        country = Country.objects(_id=user.country._id).first()
+        warehouses_list = []
+        for warehouse in country.warehouses:
+            warehouse_card_view = WarehouseCardView(
+                warehouse.goods.name,warehouse.goods.link_img,
+                warehouse.goods.value,warehouse.capacity,
+                warehouse.filling_speed,warehouse.level,warehouse.max_level,
+                warehouse.price_upgrade,warehouse.added_capacity,warehouse.increasePrice
+            )
+            warehouses_list.append(warehouse_card_view)
 
-    def get_politics(self, user_id):
-        pass
+        finish = time.time()
+        #print(finish -start)
+        return warehouses_list
+
+    def get_politics_laws(self, user_id):
+        start = time.time()
+        user = User.objects(_id=user_id).first()
+        country = Country.objects(_id=user.country._id).first()
+        adopted_laws_name_list = country.adopted_laws
+        finish = time.time()
+        # print(finish -start)
+        return adopted_laws_name_list
 
     def get_population(self, user_id):
-        pass
+        start = time.time()
+        user = User.objects(_id=user_id).first()
+        country = Country.objects(_id=user.country._id).first()
+        modifiers_view_list = []
+        population_modifiers = 100  # -> 1(100%)
+        for mod in country.population.modifiers:
+            modifiers_view_list.append(ModifierView(mod.value,mod.address_from))
+            population_modifiers+=mod.value
+        modifiers_view_list.append(ModifierView(country.population.basic_percent_growth_rate,'basic percent'))
+        percent_total_progress = (population_modifiers + country.population.basic_percent_growth_rate)/100
+
+        total_population = country.population.total_population
+        pie_chart_labels = ['Farmers','Miners','Workers','Solders','Free','Others']
+        pie_chart_data = [
+            country.population.farmers/total_population,country.population.miners/total_population,
+            country.population.factory_workers/total_population,country.population.solders/total_population,
+            country.population.free_people/total_population,total_population * country.population.min_percent_others/100
+        ]
+
+        population_view = PopulationView(
+            country.population.total_population,country.population.farmers,
+            country.population.miners,country.population.factory_workers,
+            country.population.solders,country.population.free_people,
+            country.population.others,percent_total_progress,modifiers_view_list,
+            pie_chart_data,pie_chart_labels
+        )
+        finish = time.time()
+        # print(finish -start)
+        return population_view
 
     def get_trade(self, user_id):
-        pass
+        start = time.time()
+        user = User.objects(_id=user_id).first()
+        goods = Trade.objects
+        target_country = Country.objects(_id=user.country._id).first()
+        countries = Country.objects
+
+        trade_cards_view_list = []
+        production_data = GameService().get_table_world_place_production()
+
+        for item in goods:
+            start_loop = time.time()
+            data_top_producer = []
+            if len(production_data[item.name]) > 4:
+                data_top_producer_buffer = production_data[item.name][:5]
+            else:
+                data_top_producer_buffer = production_data[item.name]
+
+            for producer in data_top_producer_buffer:
+                producer_view = TableRowProducerView(
+                    countries.filter(name=producer[0]).first().link_img,
+                    producer[0],producer[1]
+                )
+                data_top_producer.append(producer_view)
+
+            warehouse = next(filter(lambda x:x.goods.name==item.name,target_country.warehouses),None)
+
+            price_list = [history.value for history in item.history_price]
+            chart_price_goods = ChartPriceGoods(
+                price_list,[str(history.time) for history in item.history_price],
+                item.name,max(price_list) * 1.2, min(price_list) * 0.9
+            )
+            trade_card_view = TradeCardView(
+                item.name,warehouse.goods.link_img,
+                item.price_now,warehouse.goods.value,0,data_top_producer,chart_price_goods
+            )
+            trade_cards_view_list.append(trade_card_view)
+        finish = time.time()
+        #print(finish -start)
+        return trade_cards_view_list
 
     def get_army(self, user_id):
-        pass
+        start = time.time()
+        user = User.objects(_id=user_id).first()
+        country = Country.objects(_id=user.country._id).first()
+        army = country.army.units
+        army_units = ArmyUnit.objects()
+        army_view_list = []
+        sum_attack_modifiers = sum(mod.value for mod in country.army.attack_modifiers) / 100 + 1
+        sum_defence_modifiers = sum(mod.value for mod in country.army.defence_modifiers) / 100 + 1
+        for name_unit in army:
+            unit = army_units.filter(name=name_unit).first()
+            unit_characteristic_view_list = [UnitCharacteristicView(item.unit_name,
+                item.attack_value * sum_attack_modifiers,
+                item.defence_value * sum_defence_modifiers)
+                for item in unit.unit_characteristic.values()]
+
+            modifiers = [ModifierView(mod.value,mod.address_from) for mod in country.army.attack_modifiers]
+            modifiers.extend([ModifierView(mod.value,mod.address_from) for mod in country.army.defence_modifiers])
+            army_card_view = ArmyCardView(
+                name_unit,unit.link_img,army[name_unit],unit.need_peoples,
+                unit.maintenance_price,unit.maintenance_price*army[name_unit],
+                country.army.reserve_military_manpower,modifiers,unit_characteristic_view_list
+            )
+            army_view_list.append(army_card_view)
+        finish = time.time()
+        #print(finish -start)
+        return army_view_list
 
 
 class NewsViewService:
     def get_news(self):
-        pass
+        start = time.time()
+        news_view_list = [NewsView(news.title,str(news.date),re.split(';',news.text)) for news in News.objects]
+        finish = time.time()
+        #print(finish -start)
+        return news_view_list

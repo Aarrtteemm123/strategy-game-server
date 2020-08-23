@@ -1,9 +1,13 @@
+import json
+import time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
 
 from polls.models import Trade, History, Modifier, ArmyUnitCharacteristic, ArmyUnit, Population, \
-    Army, Goods, Warehouse, IndustrialBuildings, Technology, Budget, Country, Law
+    Army, Goods, Warehouse, IndustrialBuildings, Technology, Budget, Country, Law, User
+from polls.services.game_service import GameService
+from polls.view_models.player import PlayerView
 from serverDjango.settings import ADMIN_EMAIL, ADMIN_EMAIL_PASSWORD
 
 
@@ -25,6 +29,23 @@ class SystemService:
         msg_html = EmailTemplate().get_html_feedback(username, msg, user_email, rating)
         self.send_email(ADMIN_EMAIL, ADMIN_EMAIL, ADMIN_EMAIL_PASSWORD,
                         msg_html, EmailTemplate.FEEDBACK_TITLE)
+
+    def find_player(self,username):
+        start = time.time()
+        user = User.objects(username=username).first()
+        if user is not None:
+            print(user)
+            country = Country.objects(_id=user.country._id).first()
+            player_view = PlayerView(
+                country.link_img,country.name,user.username,GameService().get_economic_place(country.name),
+                GameService().get_army_place(country.name),country.budget.money,country.population.total_population,
+                sum([farm.number for farm in country.farms]),sum([mine.number for mine in country.mines]),
+                sum([sum([factory.number for factory in country.factories]),sum([factory.number for factory in country.military_factories])]),
+                country.population.solders,country.army.units)
+            finish = time.time()
+            #print(finish -start)
+            return player_view
+        else: return None
 
     def create_default_country(self,name,link_img):
         return Country(
@@ -343,6 +364,24 @@ class SystemService:
                           capacity=1000, filling_speed=0, level=0, max_level=100,
                           price_upgrade=10000, added_capacity=1000, increasePrice=1.3),
                 Warehouse(goods=Goods(name='Jewelry', value=0, link_img='industry_goods/jewelry.jpg'),
+                          capacity=1000, filling_speed=0, level=0, max_level=100,
+                          price_upgrade=10000, added_capacity=1000, increasePrice=1.3),
+                Warehouse(goods=Goods(name='Infantry equipment', value=0, link_img='army/infantry_equipment.jpg'),
+                          capacity=1000, filling_speed=0, level=0, max_level=100,
+                          price_upgrade=10000, added_capacity=1000, increasePrice=1.3),
+                Warehouse(goods=Goods(name='Artillery', value=0, link_img='army/artillery.jpg'),
+                          capacity=1000, filling_speed=0, level=0, max_level=100,
+                          price_upgrade=10000, added_capacity=1000, increasePrice=1.3),
+                Warehouse(goods=Goods(name='PTO', value=0, link_img='army/pto.jpg'),
+                          capacity=1000, filling_speed=0, level=0, max_level=100,
+                          price_upgrade=10000, added_capacity=1000, increasePrice=1.3),
+                Warehouse(goods=Goods(name='PVO', value=0, link_img='army/pvo.jpg'),
+                          capacity=1000, filling_speed=0, level=0, max_level=100,
+                          price_upgrade=10000, added_capacity=1000, increasePrice=1.3),
+                Warehouse(goods=Goods(name='Tanks', value=0, link_img='army/tank.jpg'),
+                          capacity=1000, filling_speed=0, level=0, max_level=100,
+                          price_upgrade=10000, added_capacity=1000, increasePrice=1.3),
+                Warehouse(goods=Goods(name='Aviation', value=0, link_img='army/aviation.jpg'),
                           capacity=1000, filling_speed=0, level=0, max_level=100,
                           price_upgrade=10000, added_capacity=1000, increasePrice=1.3),
             ],

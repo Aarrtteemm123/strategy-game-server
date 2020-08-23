@@ -15,5 +15,5 @@ class TechnologyView:
         self.percent_total_result = percent_total_result
         self.modifiers = modifiers
 
-tv = TechnologyView()
-print(json.dumps(tv.__dict__, default=lambda x: x.__dict__))
+
+#print(json.dumps(tv.__dict__, default=lambda x: x.__dict__))

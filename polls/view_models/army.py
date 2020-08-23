@@ -28,5 +28,5 @@ class ArmyCardView:
         self.modifiers = modifiers
         self.unit_characteristic = unit_characteristic
 
-tv = ArmyCardView()
-print(json.dumps(tv.__dict__, default=lambda x: x.__dict__))
+#tv = ArmyCardView()
+#print(json.dumps(tv.__dict__, default=lambda x: x.__dict__))
