@@ -387,7 +387,7 @@ class SystemService:
             ],
             adopted_laws=['Conscript law: Volunteer'],
             population=Population(total_population=50000, factory_workers=0, miners=0,
-                                  farmers=0, solders=0, free_people=40000, others=10000, min_percent_others=20,
+                                  farmers=0, solders=750, free_people=39250, others=10000, min_percent_others=20,
                                   basic_percent_growth_rate=5,
                                   population_history=[History(value=5),History(value=-2),History(value=8)],
                                   modifiers=[]),

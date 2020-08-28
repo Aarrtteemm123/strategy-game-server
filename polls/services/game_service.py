@@ -3,68 +3,63 @@ import re
 
 class GameService:
     def set_taxes(self,country_name,type_taxes,new_value):
-        if type_taxes == 'population_taxes':
-            obj = Country.objects(name=country_name).only('budget','population').first()
-            obj.update(budget__population_taxes=new_value)
+        if type_taxes == 'population_taxes' and 100 >= new_value >= 0:
+            obj = Country.objects(name=country_name).first()
+            obj.budget.population_taxes = new_value
             existing = obj.population.modifiers.filter(address_from='population taxes')
             if existing.count() == 0:
-                obj.update(push__population__modifiers=Modifier(value=-0.2*new_value+10, address_from='population taxes'))
+                obj.population.modifiers.append(Modifier(value=-0.2*new_value+10, address_from='population taxes'))
             else:
                 existing.update(value=-0.2*new_value+10)
-                obj.save()
+            obj.save()
 
 
-        elif type_taxes == 'farms_taxes':
-            obj = Country.objects(name=country_name).only('budget', 'industry_modifiers').first()
-            obj.update(budget__farms_taxes=new_value)
+        elif type_taxes == 'farms_taxes' and 100 >= new_value >= 0:
+            obj = Country.objects(name=country_name).first()
+            obj.budget.farms_taxes = new_value
             existing = obj.industry_modifiers.filter(address_from='farms taxes')
             if existing.count() == 0:
-                obj.update(
-                    push__industry_modifiers=Modifier(value=-0.6 * new_value + 30, address_from='farms taxes',address_to='farms'))
+                obj.industry_modifiers.append(Modifier(value=-0.6 * new_value + 30, address_from='farms taxes',address_to='farms'))
             else:
                 existing.update(value=-0.6 * new_value + 30)
-                obj.save()
+            obj.save()
 
-        elif type_taxes == 'mines_taxes':
-            obj = Country.objects(name=country_name).only('budget', 'industry_modifiers').first()
-            obj.update(budget__mines_taxes=new_value)
+        elif type_taxes == 'mines_taxes' and 100 >= new_value >= 0:
+            obj = Country.objects(name=country_name).first()
+            obj.budget.mines_taxes = new_value
             existing = obj.industry_modifiers.filter(address_from='mines taxes')
             if existing.count() == 0:
-                obj.update(
-                    push__industry_modifiers=Modifier(value=-0.6 * new_value + 30, address_from='mines taxes',address_to='mines'))
+                obj.industry_modifiers.append(Modifier(value=-0.6 * new_value + 30, address_from='mines taxes',address_to='mines'))
             else:
                 existing.update(value=-0.6 * new_value + 30)
-                obj.save()
+            obj.save()
 
-        elif type_taxes == 'factories_taxes':
-            obj = Country.objects(name=country_name).only('budget', 'industry_modifiers').first()
-            obj.update(budget__factories_taxes=new_value)
+        elif type_taxes == 'factories_taxes' and 100 >= new_value >= 0:
+            obj = Country.objects(name=country_name).first()
+            obj.budget.factories_taxes=new_value
             existing = obj.industry_modifiers.filter(address_from='factories taxes')
             if existing.count() == 0:
-                obj.update(
-                    push__industry_modifiers=Modifier(value=-0.6 * new_value + 30, address_from='factories taxes',address_to='factories'))
+                obj.industry_modifiers.append(Modifier(value=-0.6 * new_value + 30, address_from='factories taxes',address_to='factories'))
             else:
                 existing.update(value=-0.6 * new_value + 30)
-                obj.save()
+            obj.save()
 
-        elif type_taxes == 'military_taxes':
-            obj = Country.objects(name=country_name).only('budget', 'army').first()
-            obj.update(budget__military_taxes=new_value)
+        elif type_taxes == 'military_taxes' and 100 >= new_value >= 0:
+            obj = Country.objects(name=country_name).first()
+            obj.budget.military_taxes=new_value
             existing = obj.army.attack_modifiers.filter(address_from='army taxes')
             existing2 = obj.army.defence_modifiers.filter(address_from='army taxes')
             if existing.count() == 0:
-                obj.update(
-                    push__army__attack_modifiers=Modifier(value=-new_value + 50, address_from='army taxes'))
-                obj.update(
-                    push__army__defence_modifiers=Modifier(value=-new_value + 50, address_from='army taxes'))
+                obj.army.attack_modifiers.append(Modifier(value=-new_value + 50, address_from='army taxes'))
+                obj.army.defence_modifiers.append(Modifier(value=-new_value + 50, address_from='army taxes'))
             else:
                 existing.update(value=-new_value + 50)
                 existing2.update(value=-new_value + 50)
-                obj.save()
+            obj.save()
 
     def upgrade_technology(self,country_name,technology_name):
         if technology_name == 'Medicine technology':
-            obj = Country.objects(name=country_name).only('budget', 'population','technologies').first()
+            obj = Country.objects(name=country_name).first()
             technology = obj.technologies.filter(name='Medicine technology').first()
             if obj.budget.money >= technology.price_upgrade:
                 obj.budget.money -= technology.price_upgrade
@@ -72,14 +67,14 @@ class GameService:
                 technology.level +=1
                 existing = obj.population.modifiers.filter(address_from='Medicine technology')
                 if existing.count() == 0:
-                    obj.update(push__population__modifiers=Modifier(value=technology.modifiers[0].value,
+                    obj.population.modifiers.append(Modifier(value=technology.modifiers[0].value,
                                                                     address_from='Medicine technology'))
                 else:
                     existing.update(value=technology.modifiers[0].value * technology.level)
                 obj.save()
 
         elif technology_name == 'Computers technology':
-            obj = Country.objects(name=country_name).only('budget','technologies','industry_modifiers').first()
+            obj = Country.objects(name=country_name).first()
             technology = obj.technologies.filter(name='Computers technology').first()
             if obj.budget.money >= technology.price_upgrade:
                 obj.budget.money -= technology.price_upgrade
@@ -87,14 +82,14 @@ class GameService:
                 technology.level +=1
                 existing = obj.industry_modifiers.filter(address_from='Computers technology')
                 if existing.count() == 0:
-                    obj.update(push__industry_modifiers=Modifier(value=technology.modifiers[0].value,
+                    obj.industry_modifiers.append(Modifier(value=technology.modifiers[0].value,
                                                                     address_from='Computers technology'))
                 else:
                     existing.update(value=technology.modifiers[0].value * technology.level)
                 obj.save()
 
         elif technology_name == 'Upgrade weapons':
-            obj = Country.objects(name=country_name).only('budget','technologies','army').first()
+            obj = Country.objects(name=country_name).first()
             technology = obj.technologies.filter(name='Upgrade weapons').first()
             if obj.budget.money >= technology.price_upgrade:
                 obj.budget.money -= technology.price_upgrade
@@ -102,14 +97,14 @@ class GameService:
                 technology.level +=1
                 existing = obj.army.attack_modifiers.filter(address_from='Upgrade weapons')
                 if existing.count() == 0:
-                    obj.update(push__army__attack_modifiers=Modifier(value=technology.modifiers[0].value,
+                    obj.army.attack_modifiers.append(Modifier(value=technology.modifiers[0].value,
                                                                     address_from='Upgrade weapons'))
                 else:
                     existing.update(value=technology.modifiers[0].value * technology.level)
                 obj.save()
 
         if technology_name == 'Upgrade defence system':
-            obj = Country.objects(name=country_name).only('budget','technologies','army').first()
+            obj = Country.objects(name=country_name).first()
             technology = obj.technologies.filter(name='Upgrade defence system').first()
             if obj.budget.money >= technology.price_upgrade:
                 obj.budget.money -= technology.price_upgrade
@@ -117,15 +112,14 @@ class GameService:
                 technology.level += 1
                 existing = obj.army.defence_modifiers.filter(address_from='Upgrade defence system')
                 if existing.count() == 0:
-                    obj.update(push__army__defence_modifiers=Modifier(value=technology.modifiers[0].value,
+                    obj.army.defence_modifiers.append(Modifier(value=technology.modifiers[0].value,
                                                               address_from='Upgrade defence system'))
                 else:
                     existing.update(value=technology.modifiers[0].value * technology.level)
                 obj.save()
 
     def build_industry(self,country_name,name_building):
-        obj = Country.objects(name=country_name).only('budget', 'population',
-            'farms','mines','factories','military_factories').first()
+        obj = Country.objects(name=country_name).first()
         type_building = re.split(r' ',name_building)[-1]
         if type_building == 'farm':
             farm = obj.farms.filter(name=name_building).first()
@@ -135,6 +129,10 @@ class GameService:
                 obj.population.free_people -= farm.workers
                 obj.population.farmers +=farm.workers
                 farm.number +=1
+                obj.army.reserve_military_manpower = obj.population.free_people \
+                                                     * obj.army.conscript_law_value // 100
+                obj.population.free_people *= (1 - obj.army.conscript_law_value // 100)
+                obj.population.solders = obj.army.reserve_military_manpower + self.get_number_soldiers_from_units(obj)
         elif type_building == 'mines':
             mine = obj.mines.filter(name=name_building).first()
             if obj.budget.money >= mine.price_build and \
@@ -143,6 +141,10 @@ class GameService:
                 obj.population.free_people -= mine.workers
                 obj.population.miners += mine.workers
                 mine.number += 1
+                obj.army.reserve_military_manpower = obj.population.free_people \
+                                                     * obj.army.conscript_law_value // 100
+                obj.population.free_people *= (1 - obj.army.conscript_law_value // 100)
+                obj.population.solders = obj.army.reserve_military_manpower + self.get_number_soldiers_from_units(obj)
         elif type_building == 'factory':
             factory = obj.factories.filter(name=name_building).first()
             if factory is not None and obj.budget.money >= factory.price_build and \
@@ -151,6 +153,10 @@ class GameService:
                 obj.population.free_people -= factory.workers
                 obj.population.factory_workers += factory.workers
                 factory.number += 1
+                obj.army.reserve_military_manpower = obj.population.free_people \
+                                                     * obj.army.conscript_law_value // 100
+                obj.population.free_people *= (1 - obj.army.conscript_law_value // 100)
+                obj.population.solders = obj.army.reserve_military_manpower + self.get_number_soldiers_from_units(obj)
             else:
                 factory = obj.military_factories.filter(name=name_building).first()
                 if obj.budget.money >= factory.price_build and \
@@ -159,11 +165,15 @@ class GameService:
                     obj.population.free_people -= factory.workers
                     obj.population.factory_workers += factory.workers
                     factory.number += 1
+                    obj.army.reserve_military_manpower = obj.population.free_people \
+                                                         * obj.army.conscript_law_value // 100
+                    obj.population.free_people *= (1 - obj.army.conscript_law_value // 100)
+                    obj.population.solders = obj.army.reserve_military_manpower + self.get_number_soldiers_from_units(
+                        obj)
         obj.save()
 
     def remove_industry(self,country_name,name_building):
-        obj = Country.objects(name=country_name).only('population',
-                'farms', 'mines', 'factories', 'military_factories').first()
+        obj = Country.objects(name=country_name).first()
         type_building = re.split(r' ', name_building)[-1]
         if type_building == 'farm':
             farm = obj.farms.filter(name=name_building).first()
@@ -171,6 +181,10 @@ class GameService:
                 obj.population.free_people += farm.workers
                 obj.population.farmers -= farm.workers
                 farm.number -= 1
+                obj.army.reserve_military_manpower = obj.population.free_people \
+                                                     * obj.army.conscript_law_value // 100
+                obj.population.free_people *= (1 - obj.army.conscript_law_value // 100)
+                obj.population.solders = obj.army.reserve_military_manpower + self.get_number_soldiers_from_units(obj)
 
         elif type_building == 'mines':
             mine = obj.mines.filter(name=name_building).first()
@@ -178,6 +192,10 @@ class GameService:
                 obj.population.free_people += mine.workers
                 obj.population.miners -= mine.workers
                 mine.number -= 1
+                obj.army.reserve_military_manpower = obj.population.free_people \
+                                                     * obj.army.conscript_law_value // 100
+                obj.population.free_people *= (1 - obj.army.conscript_law_value // 100)
+                obj.population.solders = obj.army.reserve_military_manpower + self.get_number_soldiers_from_units(obj)
 
         elif type_building == 'factory':
             factory = obj.factories.filter(name=name_building).first()
@@ -185,13 +203,29 @@ class GameService:
                 obj.population.free_people += factory.workers
                 obj.population.factory_workers -= factory.workers
                 factory.number -= 1
+                obj.army.reserve_military_manpower = obj.population.free_people \
+                                                     * obj.army.conscript_law_value // 100
+                obj.population.free_people *= (1 - obj.army.conscript_law_value // 100)
+                obj.population.solders = obj.army.reserve_military_manpower + self.get_number_soldiers_from_units(obj)
             else:
                 factory = obj.military_factories.filter(name=name_building).first()
                 if factory.number > 0:
                     obj.population.free_people += factory.workers
                     obj.population.factory_workers -= factory.workers
                     factory.number -= 1
+                    obj.army.reserve_military_manpower = obj.population.free_people \
+                                                         * obj.army.conscript_law_value // 100
+                    obj.population.free_people *= (1 - obj.army.conscript_law_value // 100)
+                    obj.population.solders =  obj.army.reserve_military_manpower + self.get_number_soldiers_from_units(obj)
         obj.save()
+
+    def get_number_soldiers_from_units(self,country):
+        number = 0
+        army_units = ArmyUnit.objects
+        army = country.army.units
+        for unit in army:
+            number+=army[unit]*army_units.filter(name=unit).first().need_peoples
+        return number
 
     def upgrade_warehouse(self, country_name, name_goods):
         obj = Country.objects(name=country_name).only('budget', 'warehouses').first()
@@ -240,12 +274,13 @@ class GameService:
 
     def __update_conscript_law(self, obj, name_law, law, conscript_law_value,
                                pop_mod=None, indus_mod=None, attack_mod=None, def_mod=None):
-        self.cansel_conscript_law(obj)
+        self.__cansel_conscript_law(obj)
         obj.adopted_laws.append(name_law)
         obj.budget.money -= law.price
         obj.army.conscript_law_value = conscript_law_value
-        obj.army.reserve_military_manpower = obj.population.total_population \
+        obj.army.reserve_military_manpower = obj.population.free_people \
                                              * obj.army.conscript_law_value // 100
+        obj.population.free_people *= (1 - obj.army.conscript_law_value // 100)
         if pop_mod is not None:
             obj.population.modifiers.append(pop_mod)
         if indus_mod is not None:
@@ -294,7 +329,7 @@ class GameService:
                                         def_mod=Modifier(value=-10, address_from=name_law))
         obj.save()
 
-    def cansel_conscript_law(self,country):
+    def __cansel_conscript_law(self, country):
         conscript_laws = ['Conscript law: Elite', 'Conscript law: Volunteer',
                           'Conscript law: Limited Conscription', 'Conscript law: Extensive Conscription',
                           'Conscript law: Service by Requirement', 'Conscript law: All Adults Serve',
@@ -374,12 +409,14 @@ class GameService:
                 warehouse = [item for item in obj.warehouses if item.goods.name == name_unit][0]
             if warehouse.goods.value + dif >= 0:
                 warehouse.goods.value += dif
+        obj.population.solders = obj.army.reserve_military_manpower + self.get_number_soldiers_from_units(obj)
         obj.save()
 
     def calculate_war(self,attacking_country_name,defending_country_name):
         attacking_country = Country.objects(name=attacking_country_name).first()
         defending_country = Country.objects(name=defending_country_name).first()
         army_units = ArmyUnit.objects()
+        victory_flag = True
         for unit in army_units:
             sorted_units_by_attack = sorted(unit.unit_characteristic.items(), key=lambda x: x[1].attack_value, reverse=True)
             if attacking_country.army.units[unit.name] !=0:
@@ -412,8 +449,13 @@ class GameService:
         else:
             defending_country.army.victories += 1
             attacking_country.army.losses += 1
+            victory_flag = False
+        attacking_country.population.solders = attacking_country.army.reserve_military_manpower + self.get_number_soldiers_from_units(attacking_country)
+        defending_country.population.solders = defending_country.army.reserve_military_manpower + self.get_number_soldiers_from_units(defending_country)
+        # change military expenses
         attacking_country.save()
         defending_country.save()
+        return victory_flag
 
     def get_farms_production_profit(self,country):
         goods = Trade.objects()
@@ -539,10 +581,10 @@ class GameService:
         return total_profit
 
     def get_army_taxes_profit(self,country):
-        return country.army.reserve_military_manpower * country.budget.military_taxes/100
+        return country.population.solders * country.budget.military_taxes/100
 
     def get_pop_taxes_profit(self,country):
-        return (country.population.total_population * country.budget.population_taxes / 100) + (country.army.reserve_military_manpower * country.budget.military_taxes/100)
+        return (country.population.total_population * country.budget.population_taxes / 100) + self.get_army_taxes_profit(country)
 
     def get_farms_taxes_profit(self,country):
         goods = Trade.objects()
@@ -692,5 +734,3 @@ class GameService:
         elif 'well' in words:
             words.remove('well')
         return ' '.join(words)
-
-
