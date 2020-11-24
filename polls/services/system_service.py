@@ -209,7 +209,7 @@ class SystemService:
                                     production_speed=10,
                                     price_build=10000, workers=5000, number=0,
                                     needGoods=[
-                                        Goods(name='Silicon', value=5, link_img='industry_goods/silicon.jpg'),
+                                        Goods(name='Silicon', value=5, link_img='mine_goods/silicon.jpg'),
                                         Goods(name='Glass', value=5, link_img='industry_goods/glass.jpg'),
                                     ]),
                 IndustrialBuildings(name='Battery factory', link_img='industry_goods/battery.jpg', production_speed=10,
@@ -399,15 +399,6 @@ class SystemService:
 
     def create_default_table_laws(self):
         Law.objects().delete()
-        Law(
-            name='Immigration', description='Open border for all', price=20000,
-            modifiers=[
-                Modifier(value=2, address_from='Immigration', address_to='basic_percent_growth_rate'),
-                Modifier(value=5, address_from='Immigration', address_to='production_speed'),
-                Modifier(value=-8, address_from='Immigration', address_to='attack_value'),
-                Modifier(value=-8, address_from='Immigration', address_to='defence_value'),
-            ]
-        ).save()
 
         Law(
             name='Isolation', description='Close border for all', price=20000,
@@ -415,6 +406,14 @@ class SystemService:
                 Modifier(value=-5, address_from='Isolation', address_to='basic_percent_growth_rate'),
                 Modifier(value=-5, address_from='Isolation', address_to='production_speed'),
                 Modifier(value=15, address_from='Isolation', address_to='defence_value'),
+            ]
+        ).save()
+
+        Law(
+            name='Free medicine', description='Medicine is free for everyone', price=20000,
+            modifiers=[
+                Modifier(value=5, address_from='Free medicine', address_to='basic_percent_growth_rate'),
+                Modifier(value=-10, address_from='Free medicine', address_to='production_speed'),
             ]
         ).save()
 

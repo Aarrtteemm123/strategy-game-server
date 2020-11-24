@@ -133,7 +133,7 @@ class GameService:
                                                      * obj.army.conscript_law_value // 100
                 obj.population.free_people *= (1 - obj.army.conscript_law_value // 100)
                 obj.population.solders = obj.army.reserve_military_manpower + self.get_number_soldiers_from_units(obj)
-        elif type_building == 'mines':
+        elif type_building == 'mine' or type_building == 'well':
             mine = obj.mines.filter(name=name_building).first()
             if obj.budget.money >= mine.price_build and \
                     obj.population.free_people >= mine.workers:
@@ -186,7 +186,7 @@ class GameService:
                 obj.population.free_people *= (1 - obj.army.conscript_law_value // 100)
                 obj.population.solders = obj.army.reserve_military_manpower + self.get_number_soldiers_from_units(obj)
 
-        elif type_building == 'mines':
+        elif type_building == 'mine' or type_building == 'well':
             mine = obj.mines.filter(name=name_building).first()
             if mine.number > 0:
                 obj.population.free_people += mine.workers
@@ -228,9 +228,9 @@ class GameService:
         return number
 
     def upgrade_warehouse(self, country_name, name_goods):
-        obj = Country.objects(name=country_name).only('budget', 'warehouses').first()
+        obj = Country.objects(name=country_name).first()
         warehouse = [item for item in obj.warehouses if item.goods.name == name_goods][0]
-        if obj.budget.money >= warehouse.price_upgrade:
+        if obj.budget.money >= warehouse.price_upgrade and warehouse.level < warehouse.max_level:
             obj.budget.money -= warehouse.price_upgrade
             warehouse.price_upgrade *= warehouse.increasePrice
             warehouse.level += 1
@@ -240,14 +240,12 @@ class GameService:
     def set_politics_law(self,country_name,name_law):
         obj = Country.objects(name=country_name).first()
         law = Law.objects(name=name_law).first()
-        if name_law == 'Immigration' and obj.budget.money >= law.price and \
+        if name_law == 'Free medicine' and obj.budget.money >= law.price and \
                 not name_law in obj.adopted_laws:
             obj.budget.money -=law.price
             obj.adopted_laws.append(name_law)
-            obj.population.modifiers.append(Modifier(value=2,address_from=name_law))
-            obj.industry_modifiers.append(Modifier(value=5,address_from=name_law,address_to='industry'))
-            obj.army.attack_modifiers.append(Modifier(value=-8,address_from=name_law))
-            obj.army.defence_modifiers.append(Modifier(value=-8,address_from=name_law))
+            obj.population.modifiers.append(Modifier(value=5,address_from=name_law))
+            obj.industry_modifiers.append(Modifier(value=-10,address_from=name_law,address_to='industry'))
         elif name_law == 'Isolation' and obj.budget.money >= law.price and \
                 not name_law in obj.adopted_laws:
             obj.budget.money -=law.price
@@ -345,14 +343,12 @@ class GameService:
     def cancel_politics_law(self,country_name,name_law):
         obj = Country.objects(name=country_name).first()
         law = Law.objects(name=name_law).first()
-        if name_law == 'Immigration' and obj.budget.money >= law.price and \
+        if name_law == 'Free medicine' and obj.budget.money >= law.price and \
                 name_law in obj.adopted_laws:
             obj.budget.money -= law.price
             obj.adopted_laws.remove(name_law)
-            obj.population.modifiers.remove(Modifier(value=2, address_from=name_law))
-            obj.industry_modifiers.remove(Modifier(value=5, address_from=name_law,address_to='industry'))
-            obj.army.attack_modifiers.remove(Modifier(value=-8, address_from=name_law))
-            obj.army.defence_modifiers.remove(Modifier(value=-8, address_from=name_law))
+            obj.population.modifiers.remove(Modifier(value=5, address_from=name_law))
+            obj.industry_modifiers.remove(Modifier(value=-10, address_from=name_law,address_to='industry'))
         elif name_law == 'Isolation' and obj.budget.money >= law.price and \
                 name_law in obj.adopted_laws:
             obj.budget.money -=law.price
@@ -378,7 +374,7 @@ class GameService:
         obj.save()
 
     def buy_goods(self,country_name,name_goods,number):
-        obj = Country.objects(name=country_name).only('budget', 'warehouses').first()
+        obj = Country.objects(name=country_name).first()
         warehouse = [item for item in obj.warehouses if item.goods.name == name_goods][0]
         if number <= warehouse.capacity - warehouse.goods.value:
             price_goods = Trade.objects(name=name_goods).first().price_now * number
@@ -388,7 +384,7 @@ class GameService:
                 obj.save()
 
     def sell_goods(self,country_name,name_goods,number):
-        obj = Country.objects(name=country_name).only('budget', 'warehouses').first()
+        obj = Country.objects(name=country_name).first()
         warehouse = [item for item in obj.warehouses if item.goods.name == name_goods][0]
         if number <= warehouse.goods.value:
             price_goods = Trade.objects(name=name_goods).first().price_now * number

@@ -5,7 +5,6 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='index'),
-    url(r'^api/tutorials$', views.tutorial_list),
 
     url(r'^login/(?P<username>[0-9|a-zA-Z]+)/(?P<password>[0-9|a-zA-Z]+)$', views.login),
     url(r'^logout/(?P<user_id>[0-9|a-z]+)$', views.logout),
@@ -14,8 +13,9 @@ urlpatterns = [
     url(r'^game/change_user_data/(?P<user_id>[0-9|a-z]+)$', views.change_user_data),
 
     url(r'^game/feedback/(?P<user_id>[0-9|a-z]+)$', views.redirect_feedback),
+    url(r'^game/get_view/(?P<user_id>[0-9|a-z]+)/(?P<name_view>[0-9|a-zA-Z]+)$', views.get_view),
 
-    url(r'^game/(?P<user_id>[0-9|a-z]+)$', views.get_all),
+
     url(r'^game/change_taxes/(?P<user_id>[0-9|a-z]+)$', views.change_taxes),
     url(r'^game/upgrade_technology/(?P<user_id>[0-9|a-z]+)$', views.upgrade_technology),
     url(r'^game/build_industry/(?P<user_id>[0-9|a-z]+)$', views.build_industry),

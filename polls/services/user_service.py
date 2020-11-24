@@ -17,12 +17,14 @@ class UserService:
         country = SystemService().create_default_country(country_name,link_country_flag)
         try:
             country.save()
-        except:
+        except Exception as error:
+            print(error)
             return False
         user = User(username=username, password=password, email=email, country=country.pk)
         try:
             user.save()
-        except:
+        except Exception as error:
+            print(error)
             country.delete()
             return False
         #html_msg = EmailTemplate().get_html_registration(username, password, country_name, str(user.pk),link_country_flag)

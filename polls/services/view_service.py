@@ -22,7 +22,7 @@ class CountryViewService:
         user = User.objects(_id=user_id).first()
         country = Country.objects(_id=user.country._id).first()
 
-        total_profit = GameService().get_total_profit(country)
+        total_profit = round(GameService().get_total_profit(country))
         economic_place = GameService().get_economic_place(country.name)
         army_place = GameService().get_army_place(country.name)
 
@@ -37,14 +37,14 @@ class CountryViewService:
         chart_pop = ChartPopulationData(pop_data, x_pop_data)
 
         chart_profit_data = [
-            GameService().get_pop_taxes_profit(country) / (total_profit + country.budget.military_expenses),
-            GameService().get_mines_profit(country) / (total_profit + country.budget.military_expenses),
-            GameService().get_farms_profit(country) / (total_profit + country.budget.military_expenses),
-            GameService().get_factories_profit(country) / (total_profit + country.budget.military_expenses)
+            round(GameService().get_pop_taxes_profit(country) / (total_profit + country.budget.military_expenses) * 100),
+            round(GameService().get_mines_profit(country) / (total_profit + country.budget.military_expenses) * 100),
+            round(GameService().get_farms_profit(country) / (total_profit + country.budget.military_expenses) * 100),
+            round(GameService().get_factories_profit(country) / (total_profit + country.budget.military_expenses) * 100)
         ]
 
         chart_profit = ChartProfitData(chart_profit_data, ['Taxes', 'Mines', 'Farms', 'Industry'],
-                                       max(chart_profit_data))
+                                       round(max(chart_profit_data)))
 
         goods_data = GameService().get_goods_data(country)
         chart_farms_goods_data = ChartGoodsData(goods_data['farms']['values'], goods_data['farms']['names'])
@@ -150,6 +150,7 @@ class CountryViewService:
         farms_list = []
         mines_list = []
         factories_list = []
+        military_factories_list = []
         industry_modifiers = 100  # -> 1(100%)
         if country.industry_modifiers is not None:
             for mod in country.industry_modifiers:
@@ -197,7 +198,8 @@ class CountryViewService:
                 [TableRowGoodsView(item.link_img, item.name, item.value) for item in factory.needGoods]
             )
             factories_list.append(industrial_card_view)
-        industry_dict['factories'] = factories_list
+        industry_dict['factories'] = factories_list[:18]
+        industry_dict['military_factories'] = factories_list[18:]
         finish = time.time()
         #print(finish -start)
         return industry_dict
@@ -234,19 +236,17 @@ class CountryViewService:
         user = User.objects(_id=user_id).first()
         country = Country.objects(_id=user.country._id).first()
         modifiers_view_list = []
-        population_modifiers = 100  # -> 1(100%)
+        population_modifiers = 0  # -> 1(100%)
         for mod in country.population.modifiers:
             modifiers_view_list.append(ModifierView(mod.value,mod.address_from))
             population_modifiers+=mod.value
         modifiers_view_list.append(ModifierView(country.population.basic_percent_growth_rate,'basic percent'))
-        percent_total_progress = (population_modifiers + country.population.basic_percent_growth_rate)/100
-
-        total_population = country.population.total_population
+        percent_total_progress = (population_modifiers+country.population.basic_percent_growth_rate)
         pie_chart_labels = ['Farmers','Miners','Workers','Solders','Free','Others']
         pie_chart_data = [
-            country.population.farmers/total_population,country.population.miners/total_population,
-            country.population.factory_workers/total_population,country.population.solders/total_population,
-            country.population.free_people/total_population,total_population * country.population.min_percent_others/100
+            country.population.farmers,country.population.miners,
+            country.population.factory_workers,country.population.solders,
+            country.population.free_people,country.population.total_population*country.population.min_percent_others/100
         ]
 
         population_view = PopulationView(
