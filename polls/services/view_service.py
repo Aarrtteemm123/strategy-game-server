@@ -285,6 +285,9 @@ class CountryViewService:
                 )
                 data_top_producer.append(producer_view)
 
+            data_top_producer.sort(key=lambda x: x.number, reverse=True)
+
+
             warehouse = next(filter(lambda x:x.goods.name==item.name,target_country.warehouses),None)
 
             price_list = [history.value for history in item.history_price]
@@ -294,7 +297,7 @@ class CountryViewService:
             )
             trade_card_view = TradeCardView(
                 item.name,warehouse.goods.link_img,
-                item.price_now,warehouse.goods.value,0,data_top_producer,chart_price_goods
+                item.price_now,warehouse.goods.value,warehouse.capacity,data_top_producer,chart_price_goods
             )
             trade_cards_view_list.append(trade_card_view)
         finish = time.time()
@@ -311,18 +314,30 @@ class CountryViewService:
         sum_attack_modifiers = sum(mod.value for mod in country.army.attack_modifiers) / 100 + 1
         sum_defence_modifiers = sum(mod.value for mod in country.army.defence_modifiers) / 100 + 1
         for name_unit in army:
+            if name_unit == 'Infantry':
+                weapons = next(filter(lambda x:x.goods.name=='Infantry equipment',country.warehouses),None).goods.value
+            elif name_unit == 'Artillery':
+                weapons = next(filter(lambda x:x.goods.name=='Artillery',country.warehouses),None).goods.value
+            elif name_unit == 'PTO':
+                weapons = next(filter(lambda x:x.goods.name=='PTO',country.warehouses),None).goods.value
+            elif name_unit == 'PVO':
+                weapons = next(filter(lambda x:x.goods.name=='PVO',country.warehouses),None).goods.value
+            elif name_unit == 'Tank':
+                weapons = next(filter(lambda x:x.goods.name=='Tanks',country.warehouses),None).goods.value
+            elif name_unit == 'Aviation':
+                weapons = next(filter(lambda x:x.goods.name=='Aviation',country.warehouses),None).goods.value
             unit = army_units.filter(name=name_unit).first()
             unit_characteristic_view_list = [UnitCharacteristicView(item.unit_name,
                 item.attack_value * sum_attack_modifiers,
                 item.defence_value * sum_defence_modifiers)
                 for item in unit.unit_characteristic.values()]
 
-            modifiers = [ModifierView(mod.value,mod.address_from) for mod in country.army.attack_modifiers]
-            modifiers.extend([ModifierView(mod.value,mod.address_from) for mod in country.army.defence_modifiers])
+            modifiers = [ModifierView(mod.value,mod.address_from+' TO ATTACK') for mod in country.army.attack_modifiers]
+            modifiers.extend([ModifierView(mod.value,mod.address_from+' TO DEFENCE') for mod in country.army.defence_modifiers])
             army_card_view = ArmyCardView(
                 name_unit,unit.link_img,army[name_unit],unit.need_peoples,
                 unit.maintenance_price,unit.maintenance_price*army[name_unit],
-                country.army.reserve_military_manpower,modifiers,unit_characteristic_view_list
+                country.army.reserve_military_manpower,weapons,modifiers,unit_characteristic_view_list
             )
             army_view_list.append(army_card_view)
         finish = time.time()

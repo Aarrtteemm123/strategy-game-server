@@ -376,7 +376,7 @@ class GameService:
     def buy_goods(self,country_name,name_goods,number):
         obj = Country.objects(name=country_name).first()
         warehouse = [item for item in obj.warehouses if item.goods.name == name_goods][0]
-        if number <= warehouse.capacity - warehouse.goods.value:
+        if 0 < number <= warehouse.capacity - warehouse.goods.value:
             price_goods = Trade.objects(name=name_goods).first().price_now * number
             if obj.budget.money >= price_goods:
                 obj.budget.money -= price_goods
@@ -386,7 +386,7 @@ class GameService:
     def sell_goods(self,country_name,name_goods,number):
         obj = Country.objects(name=country_name).first()
         warehouse = [item for item in obj.warehouses if item.goods.name == name_goods][0]
-        if number <= warehouse.goods.value:
+        if 0 < number <= warehouse.goods.value:
             price_goods = Trade.objects(name=name_goods).first().price_now * number
             obj.budget.money += price_goods
             warehouse.goods.value -= number
@@ -396,17 +396,27 @@ class GameService:
         obj = Country.objects(name=country_name).first()
         dif = obj.army.units[name_unit] - new_number
         unit = ArmyUnit.objects(name=name_unit).first()
-        if obj.army.reserve_military_manpower + dif >= 0:
+        if name_unit == 'Infantry':
+            warehouse = [item for item in obj.warehouses if item.goods.name == 'Infantry equipment'][0]
+        elif name_unit == 'Artillery':
+            warehouse = [item for item in obj.warehouses if item.goods.name == 'Artillery'][0]
+        elif name_unit == 'PTO':
+            warehouse = [item for item in obj.warehouses if item.goods.name == 'PTO'][0]
+        elif name_unit == 'PVO':
+            warehouse = [item for item in obj.warehouses if item.goods.name == 'PVO'][0]
+        elif name_unit == 'Tank':
+            warehouse = [item for item in obj.warehouses if item.goods.name == 'Tanks'][0]
+        elif name_unit == 'Aviation':
+            warehouse = [item for item in obj.warehouses if item.goods.name == 'Aviation'][0]
+        if obj.army.reserve_military_manpower + (dif * unit.need_peoples) >= 0 and warehouse.goods.value + dif >= 0 and new_number > 0:
             obj.army.reserve_military_manpower += dif * unit.need_peoples
             obj.budget.military_expenses -= dif * unit.maintenance_price
-            if name_unit == 'Infantry':
-                warehouse = [item for item in obj.warehouses if item.goods.name == 'Infantry equipment'][0]
-            else:
-                warehouse = [item for item in obj.warehouses if item.goods.name == name_unit][0]
-            if warehouse.goods.value + dif >= 0:
-                warehouse.goods.value += dif
-        obj.population.solders = obj.army.reserve_military_manpower + self.get_number_soldiers_from_units(obj)
-        obj.save()
+            warehouse.goods.value += dif
+            if warehouse.goods.value > warehouse.capacity:
+                warehouse.goods.value = warehouse.capacity
+            obj.army.units[name_unit] -=dif
+            obj.population.solders = obj.army.reserve_military_manpower + self.get_number_soldiers_from_units(obj)
+            obj.save()
 
     def calculate_war(self,attacking_country_name,defending_country_name):
         attacking_country = Country.objects(name=attacking_country_name).first()

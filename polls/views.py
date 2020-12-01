@@ -129,6 +129,8 @@ def get_view(request,user_id,name_view):
                 view_obj = CountryViewService().get_army(user_id)
             elif name_view == 'News':
                 view_obj = NewsViewService().get_news()
+            elif name_view == 'Settings':
+                view_obj = SystemService().get_user_settings(user_id)
 
             return HttpResponse(json.dumps(view_obj, default=lambda x: x.__dict__), status=status.HTTP_200_OK)
         except Exception as error:
@@ -261,7 +263,7 @@ def buy_goods(request,user_id):
                 return HttpResponse({}, status=status.HTTP_401_UNAUTHORIZED)
             country = Country.objects(_id=user.country._id).first()
             request_data = JSONParser().parse(request)
-            GameService().buy_goods(country.name, request.request_data['name_goods'],request_data['number'])
+            GameService().buy_goods(country.name, request_data['name_goods'],int(request_data['number']))
             return HttpResponse({}, status=status.HTTP_200_OK)
         except Exception as error:
             return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -277,7 +279,7 @@ def sell_goods(request,user_id):
                 return HttpResponse({}, status=status.HTTP_401_UNAUTHORIZED)
             country = Country.objects(_id=user.country._id).first()
             request_data = JSONParser().parse(request)
-            GameService().sell_goods(country.name, request.request_data['name_goods'],request_data['number'])
+            GameService().sell_goods(country.name, request_data['name_goods'],int(request_data['number']))
             return HttpResponse({}, status=status.HTTP_200_OK)
         except Exception as error:
             return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -294,7 +296,7 @@ def edit_army(request,user_id):
                 return HttpResponse({}, status=status.HTTP_401_UNAUTHORIZED)
             country = Country.objects(_id=user.country._id).first()
             request_data = JSONParser().parse(request)
-            GameService().edit_army(country.name,request_data['name_unit'],request_data['new_number'])
+            GameService().edit_army(country.name,request_data['name_unit'],int(request_data['new_number']))
             return HttpResponse({}, status=status.HTTP_200_OK)
         except Exception as error:
             return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

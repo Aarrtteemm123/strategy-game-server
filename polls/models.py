@@ -129,7 +129,7 @@ class User(Document):
     email = EmailField(default='user_email@gmail.com')
     date_registration = DateTimeField(default=timezone.now)
     settings = DictField(default={
-        'news':False,'updates':True,'work on server':False,
+        'news':False,'updates':True,
         'attacks':True,'warehouse overflow':False,'low budget':False
     })
     country = ReferenceField('Country',reverse_delete_rule=mongoengine.CASCADE)

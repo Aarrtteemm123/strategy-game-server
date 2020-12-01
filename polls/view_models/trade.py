@@ -18,14 +18,14 @@ class TableRowProducerView:
         self.number = number
 
 class TradeCardView:
-    def __init__(self,name = '',link_img = '',price = 0,warehouse_has = 0,
-                 min_price = 0,data_top_producer=None,chart_price_goods = ChartPriceGoods()):
+    def __init__(self, name = '', link_img = '', price = 0, warehouse_has = 0,
+                 warehouse_capacity = 0, data_top_producer=None, chart_price_goods = ChartPriceGoods()):
         if data_top_producer is None:
             data_top_producer = [TableRowProducerView()]
         self.name = name
         self.link_img = link_img
         self.price = price
-        self.min_price = min_price
+        self.warehouse_capacity = warehouse_capacity
         self.warehouse_has = warehouse_has
         self.data_top_producer = data_top_producer
         self.chart_price_goods = chart_price_goods
