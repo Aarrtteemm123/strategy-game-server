@@ -14,6 +14,7 @@ urlpatterns = [
 
     url(r'^game/feedback/(?P<user_id>[0-9|a-z]+)$', views.redirect_feedback),
     url(r'^game/get_view/(?P<user_id>[0-9|a-z]+)/(?P<name_view>[0-9|a-zA-Z]+)$', views.get_view),
+    url(r'^game/set_setting/(?P<user_id>[0-9|a-z]+)$', views.set_settings),
 
 
     url(r'^game/change_taxes/(?P<user_id>[0-9|a-z]+)$', views.change_taxes),

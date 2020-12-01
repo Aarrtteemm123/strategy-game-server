@@ -318,4 +318,17 @@ def calculate_war(request,user_id,defending_player_name):
     else:
         return HttpResponse({}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-
+@api_view(['PUT'])
+def set_settings(request,user_id):
+    if request.method == 'PUT':
+        try:
+            user = User.objects(_id=user_id).first()
+            if not user.isAuth:
+                return HttpResponse({}, status=status.HTTP_401_UNAUTHORIZED)
+            request_data = JSONParser().parse(request)
+            SystemService().set_user_settings(user,request_data['setting_list'])
+            return HttpResponse({}, status=status.HTTP_200_OK)
+        except Exception as error:
+            return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    else:
+        return HttpResponse({}, status=status.HTTP_405_METHOD_NOT_ALLOWED)

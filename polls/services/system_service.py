@@ -19,6 +19,11 @@ class SystemService:
         user = User.objects(_id=user_id).first()
         return user.settings
 
+    def set_user_settings(self,user,settings):
+        for setting in user.settings:
+            user.settings[setting] = setting in settings
+        user.save()
+
     def send_email(self, from_email, to_email, password, message, title):
         msg = MIMEMultipart()  # create msg object
         msg['Subject'] = title  # title
