@@ -39,23 +39,6 @@ class SystemService:
         self.send_email(ADMIN_EMAIL, ADMIN_EMAIL, ADMIN_EMAIL_PASSWORD,
                         msg_html, EmailTemplate.FEEDBACK_TITLE)
 
-    def find_player(self,username):
-        start = time.time()
-        user = User.objects(username=username).first()
-        if user is not None:
-            print(user)
-            country = Country.objects(_id=user.country._id).first()
-            player_view = PlayerView(
-                country.link_img,country.name,user.username,GameService().get_economic_place(country.name),
-                GameService().get_army_place(country.name),country.budget.money,country.population.total_population,
-                sum([farm.number for farm in country.farms]),sum([mine.number for mine in country.mines]),
-                sum([sum([factory.number for factory in country.factories]),sum([factory.number for factory in country.military_factories])]),
-                country.population.solders,country.army.units)
-            finish = time.time()
-            #print(finish -start)
-            return player_view
-        else: return None
-
     def create_default_country(self,name,link_img):
         return Country(
             link_img=link_img,
@@ -907,7 +890,7 @@ class EmailTemplate:
         html = """<html><body><h1 style="font-weight: bolder">
                         Player """ + username + """ write feedback!</h1><hr>
                         <h3>Message:</h3>
-                        <p>Rating: """ + rating + """/6
+                        <p>Rating: """ + str(rating) + """/6
                         <p>""" + msg + """
                         <p><strong>Player email """ + player_email + """</strong>
                         </body></html>"""

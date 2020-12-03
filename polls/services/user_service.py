@@ -49,12 +49,13 @@ class UserService:
                          new_country_name=None,new_country_flag=None):
         user = User.objects(_id=user_id).first()
         if user is not None:
-            country = Country.objects(pk=user.country.pk).first()
+            country = Country.objects(_id=user.country._id).first()
             user.username = new_username if new_username is not None and User.objects(username=new_username).count() == 0 else user.username
             user.password = new_password if new_password is not None else user.password
             country.name = new_country_name if new_country_name is not None and Country.objects(name=new_country_name).count() == 0 else country.name
             country.link_img = new_country_flag if new_country_flag is not None else country.link_img
             country.save()
+            user.country = country.to_dbref()
             user.save()
             #html_msg = EmailTemplate().get_html_edit_account(user.username, user.password, country.name,country.link_img)
             #SystemService().send_email(ADMIN_EMAIL, user.email, ADMIN_EMAIL_PASSWORD, html_msg,EmailTemplate.CHANGE_TITLE)

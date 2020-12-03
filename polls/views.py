@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse
 
 from django.shortcuts import redirect
+from django.utils import timezone
 from rest_framework.parsers import JSONParser
 from rest_framework import status
 
@@ -14,7 +15,7 @@ import json
 from polls.services.game_service import GameService
 from polls.services.system_service import SystemService
 from polls.services.user_service import UserService
-from polls.services.view_service import CountryViewService, NewsViewService
+from polls.services.view_service import CountryViewService, NewsViewService, PlayerViewService
 
 connect('TestDb')
 
@@ -67,7 +68,7 @@ def delete_account(request,user_id,password):
             result_bool = UserService().delete_user_account(user_id,password)
         except Exception as error:
             return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return HttpResponse({}, status=status.HTTP_204_NO_CONTENT) if result_bool else HttpResponse({},status=status.HTTP_400_BAD_REQUEST)
+        return HttpResponse({}, status=status.HTTP_200_OK) if result_bool else HttpResponse({},status=status.HTTP_400_BAD_REQUEST)
     else:
         return HttpResponse({}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -94,7 +95,7 @@ def redirect_feedback(request,user_id):
                 return HttpResponse({}, status=status.HTTP_401_UNAUTHORIZED)
             request_data = JSONParser().parse(request)
             if user is not None:
-                SystemService().get_feedback(request_data['username'],request_data['email'],request_data['rating'],request_data['msg'])
+                SystemService().get_feedback(user.username,user.email,request_data['rating'],request_data['msg'])
                 return HttpResponse({}, status=status.HTTP_200_OK)
         except Exception as error:
             return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -131,6 +132,8 @@ def get_view(request,user_id,name_view):
                 view_obj = NewsViewService().get_news()
             elif name_view == 'Settings':
                 view_obj = SystemService().get_user_settings(user_id)
+            elif name_view == 'Account':
+                view_obj = PlayerViewService().get_account(user_id)
 
             return HttpResponse(json.dumps(view_obj, default=lambda x: x.__dict__), status=status.HTTP_200_OK)
         except Exception as error:

@@ -1,8 +1,12 @@
+import datetime
 import json, time
 import re
 
+from django.utils import timezone
+
 from polls.models import User, Country, Trade, News, ArmyUnit
 from polls.services.game_service import GameService
+from polls.view_models.account import AccountView
 from polls.view_models.army import ArmyCardView, UnitCharacteristicView
 from polls.view_models.basic_statistic import BasicStatisticView, ChartBudgetData, ChartPopulationData, ChartProfitData, \
     ChartGoodsData, TableRowDataView
@@ -10,6 +14,7 @@ from polls.view_models.budget import BudgetView, TaxesCard
 from polls.view_models.industry import IndustrialCardView, TableRowGoodsView
 from polls.view_models.modifier import ModifierView
 from polls.view_models.news import NewsView
+from polls.view_models.player import PlayerView
 from polls.view_models.population import PopulationView
 from polls.view_models.technology import TechnologyView
 from polls.view_models.trade import TradeCardView, TableRowProducerView, ChartPriceGoods
@@ -344,7 +349,6 @@ class CountryViewService:
         #print(finish -start)
         return army_view_list
 
-
 class NewsViewService:
     def get_news(self):
         start = time.time()
@@ -352,3 +356,34 @@ class NewsViewService:
         finish = time.time()
         #print(finish -start)
         return news_view_list
+
+class PlayerViewService:
+    def get_account(self,user_id):
+        user = User.objects(_id=user_id).first()
+        country = Country.objects(_id=user.country._id).first()
+        game_service = GameService()
+        days_in_game = (datetime.datetime.now() - user.date_registration).days
+        date_reg = user.date_registration.strftime('%d.%m.%Y')
+        account_view = AccountView(
+            user_id,country.link_img,country.name,game_service.get_total_profit(country),
+            game_service.get_economic_place(country.name),game_service.get_army_place(country.name),
+            user.username,user.password,user.email,date_reg,days_in_game
+        )
+        return account_view
+
+    def find_player(self,username):
+        start = time.time()
+        user = User.objects(username=username).first()
+        if user is not None:
+            print(user)
+            country = Country.objects(_id=user.country._id).first()
+            player_view = PlayerView(
+                country.link_img,country.name,user.username,GameService().get_economic_place(country.name),
+                GameService().get_army_place(country.name),country.budget.money,country.population.total_population,
+                sum([farm.number for farm in country.farms]),sum([mine.number for mine in country.mines]),
+                sum([sum([factory.number for factory in country.factories]),sum([factory.number for factory in country.military_factories])]),
+                country.population.solders,country.army.units)
+            finish = time.time()
+            #print(finish -start)
+            return player_view
+        else: return None
