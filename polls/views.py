@@ -103,6 +103,23 @@ def redirect_feedback(request,user_id):
     else:
         return HttpResponse({}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@api_view(['POST'])
+def find_player(request, user_id, player_name):
+    if request.method == 'POST':
+        try:
+            user = User.objects(_id=user_id).first()
+            if not user.isAuth:
+                return HttpResponse({}, status=status.HTTP_401_UNAUTHORIZED)
+            request_users = list(filter(lambda x: player_name in x.username,User.objects()))
+            if request_users:
+                view_list = [PlayerViewService().get_player(user.username) for user in request_users]
+                return HttpResponse(json.dumps(view_list, default=lambda x: x.__dict__), status=status.HTTP_200_OK)
+            return HttpResponse({}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as error:
+            return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    else:
+        return HttpResponse({}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
 @api_view(['GET'])
 def get_view(request,user_id,name_view):
     if request.method == 'GET':
@@ -134,6 +151,8 @@ def get_view(request,user_id,name_view):
                 view_obj = SystemService().get_user_settings(user_id)
             elif name_view == 'Account':
                 view_obj = PlayerViewService().get_account(user_id)
+            elif name_view == 'TopPlayers':
+                view_obj = PlayerViewService().get_view_page(user_id)
 
             return HttpResponse(json.dumps(view_obj, default=lambda x: x.__dict__), status=status.HTTP_200_OK)
         except Exception as error:
@@ -313,9 +332,11 @@ def calculate_war(request,user_id,defending_player_name):
             user_1,user_2 = User.objects(_id=user_id).first(),User.objects(username=defending_player_name).first()
             if not user_1.isAuth:
                 return HttpResponse({}, status=status.HTTP_401_UNAUTHORIZED)
-            country_1,country_2 = Country.objects(_id=user_1.country._id).first(),Country.objects(_id=user_2.country._id).first()
-            GameService().calculate_war(country_1.name,country_2.username)
-            return HttpResponse({}, status=status.HTTP_200_OK)
+            if user_1.username != user_2.username:
+                country_1,country_2 = Country.objects(_id=user_1.country._id).first(),Country.objects(_id=user_2.country._id).first()
+                view_obj = GameService().calculate_war(country_1.name,country_2.name)
+                return HttpResponse(json.dumps(view_obj, default=lambda x: x.__dict__), status=status.HTTP_200_OK)
+            return HttpResponse({}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as error:
             return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:

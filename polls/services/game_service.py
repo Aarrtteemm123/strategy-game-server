@@ -1,6 +1,9 @@
 from polls.models import Country, Modifier, Trade, Law, ArmyUnit, Warehouse
 import re
 
+from polls.view_models.army import ResultWarView, ItemWarResult
+
+
 class GameService:
     def set_taxes(self,country_name,type_taxes,new_value):
         if type_taxes == 'population_taxes' and 100 >= new_value >= 0:
@@ -419,10 +422,12 @@ class GameService:
             obj.save()
 
     def calculate_war(self,attacking_country_name,defending_country_name):
+        # bug (weapon after battle more then before)!
         attacking_country = Country.objects(name=attacking_country_name).first()
         defending_country = Country.objects(name=defending_country_name).first()
         army_units = ArmyUnit.objects()
-        victory_flag = True
+        res_war_view = ResultWarView()
+        army_before_battle = attacking_country.army.units.copy()
         for unit in army_units:
             sorted_units_by_attack = sorted(unit.unit_characteristic.items(), key=lambda x: x[1].attack_value, reverse=True)
             if attacking_country.army.units[unit.name] !=0:
@@ -445,23 +450,33 @@ class GameService:
         if next(filter(lambda x:x[1]!=0,defending_country.army.units.items()),None) is None:
             defending_country.army.losses +=1
             attacking_country.army.victories +=1
+            # add money to budget
             warehouses_victory_country = attacking_country.warehouses
             for warehouse in defending_country.warehouses:
                 some_warehouse = next(filter(lambda x:x.goods.name==warehouse.goods.name,warehouses_victory_country),None)
                 some_warehouse.goods.value += warehouse.goods.value
+                if warehouse.goods.value != 0:
+                    res_war_view.prey.append(ItemWarResult(warehouse.goods.name,warehouse.goods.value))
                 warehouse.goods.value = 0
                 if some_warehouse.goods.value > warehouse.capacity:
                     some_warehouse.goods.value = warehouse.capacity
         else:
             defending_country.army.victories += 1
             attacking_country.army.losses += 1
-            victory_flag = False
+            res_war_view.victory_flag = False
         attacking_country.population.solders = attacking_country.army.reserve_military_manpower + self.get_number_soldiers_from_units(attacking_country)
         defending_country.population.solders = defending_country.army.reserve_military_manpower + self.get_number_soldiers_from_units(defending_country)
+
+        for name,number in attacking_country.army.units.items():
+            if army_before_battle[name] != number:
+                res_war_view.losses.append(ItemWarResult(name,army_before_battle[name] - number))
+
+
+
         # change military expenses
-        attacking_country.save()
-        defending_country.save()
-        return victory_flag
+        #attacking_country.save() !!!!
+        #defending_country.save() !!!!
+        return res_war_view
 
     def get_farms_production_profit(self,country):
         goods = Trade.objects()

@@ -108,7 +108,7 @@ class Army(EmbeddedDocument):
 class Country(Document):
     _id = ObjectIdField()
     link_img = StringField(default='',max_length=1000)
-    name = StringField(default='',max_length=100,unique=False)
+    name = StringField(default='',max_length=100,unique=True)
     budget = EmbeddedDocumentField('Budget')
     technologies = EmbeddedDocumentListField('Technology',default=[])
     farms = EmbeddedDocumentListField('IndustrialBuildings',default=[])
@@ -124,7 +124,7 @@ class Country(Document):
 class User(Document):
     _id = ObjectIdField()
     isAuth = BooleanField(default=False)
-    username = StringField(default='', max_length=100,unique=False)
+    username = StringField(default='', max_length=100,unique=True)
     password = StringField(default='', max_length=100)
     email = EmailField(default='user_email@gmail.com')
     date_registration = DateTimeField(default=timezone.now)

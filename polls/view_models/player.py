@@ -13,3 +13,9 @@ class PlayerView:
         self.factories = factories
         self.solders = solders
         self.army_units_dict = army_units_dict
+
+class TopPlayersPage:
+    def __init__(self,economic_place,military_place,top_players):
+        self.economic_place = economic_place
+        self.military_place = military_place
+        self.top_players = top_players

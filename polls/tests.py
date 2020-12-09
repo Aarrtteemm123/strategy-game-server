@@ -13,7 +13,7 @@ from polls.services.system_service import SystemService
 #print(UserService().register_new_user('pl4','pas4','er4@gmail.com','Mol','gfg/fgfgf'))
 from polls.services.view_service import CountryViewService, NewsViewService
 
-#GameService().calculate_war('Ukr','Mol')
+GameService().calculate_war('Ukraine','Mol')
 #CountryViewService().get_army('5f3d511cdd22f0b5a1862f9f')
 
 

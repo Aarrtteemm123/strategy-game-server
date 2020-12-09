@@ -1,7 +1,19 @@
-import json
-
 from polls.view_models.modifier import ModifierView
 
+class ResultWarView:
+    def __init__(self, losses=None, prey=None,  victory_flag = True):
+        if prey is None:
+            prey = []
+        if losses is None:
+            losses = []
+        self.losses = losses
+        self.prey = prey
+        self.victory_flag = victory_flag
+
+class ItemWarResult:
+    def __init__(self,name = '', number = 0):
+        self.name = name
+        self.number = number
 
 class UnitCharacteristicView:
     def __init__(self,unit_name = '',attack_value = 1.0,defence_value = 1.0):
@@ -28,6 +40,3 @@ class ArmyCardView:
         self.reserve_weapon = reserve_weapon
         self.modifiers = modifiers
         self.unit_characteristic = unit_characteristic
-
-#tv = ArmyCardView()
-#print(json.dumps(tv.__dict__, default=lambda x: x.__dict__))
