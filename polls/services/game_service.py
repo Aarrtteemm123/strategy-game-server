@@ -1,10 +1,38 @@
-from polls.models import Country, Modifier, Trade, Law, ArmyUnit, Warehouse
+import random
+
+from django.utils import timezone
+
+from polls.models import Country, Modifier, Trade, Law, ArmyUnit, Warehouse, History
 import re
 
 from polls.view_models.army import ResultWarView, ItemWarResult
 
 
 class GameService:
+
+    def update_budget(self,country):
+        pass
+
+    def update_warehouses(self,country):
+        pass
+
+    def update_population(self,country):
+        pass
+
+    def update_price_goods(self):
+        trade_lst = Trade.objects()
+        for goods in trade_lst:
+            new_price = random.randint(-10,10)
+            goods.price_now += new_price
+            if goods.price_now < 1:
+                goods.price_now = random.randint(5,20)
+            if len(goods.history_price) > 6:
+                goods.history_price.pop(0)
+            goods.history_price.append(History(name='',value=goods.price_now,time=timezone.now()))
+            goods.save()
+
+
+
     def set_taxes(self,country_name,type_taxes,new_value):
         if type_taxes == 'population_taxes' and 100 >= new_value >= 0:
             obj = Country.objects(name=country_name).first()
@@ -450,7 +478,8 @@ class GameService:
         if next(filter(lambda x:x[1]!=0,defending_country.army.units.items()),None) is None:
             defending_country.army.losses +=1
             attacking_country.army.victories +=1
-            # add money to budget
+            attacking_country.budget.money+=defending_country.budget.money
+            defending_country.budget.money = 0
             warehouses_victory_country = attacking_country.warehouses
             for warehouse in defending_country.warehouses:
                 some_warehouse = next(filter(lambda x:x.goods.name==warehouse.goods.name,warehouses_victory_country),None)

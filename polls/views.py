@@ -335,6 +335,7 @@ def calculate_war(request,user_id,defending_player_name):
             if user_1.username != user_2.username:
                 country_1,country_2 = Country.objects(_id=user_1.country._id).first(),Country.objects(_id=user_2.country._id).first()
                 view_obj = GameService().calculate_war(country_1.name,country_2.name)
+                # send email to attacked player
                 return HttpResponse(json.dumps(view_obj, default=lambda x: x.__dict__), status=status.HTTP_200_OK)
             return HttpResponse({}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as error:

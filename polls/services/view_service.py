@@ -34,11 +34,11 @@ class CountryViewService:
         profit_data = [history.value for history in country.budget.profit_history]
         expenses_data = [history.value for history in country.budget.expenses_history]
         x_budget_data = [str(history.time) for history in country.budget.profit_history]
-        max_chart_budget_y_axis_value = max(max(profit_data), max(expenses_data)) * 1.1
+        max_chart_budget_y_axis_value = max(max(profit_data), max(expenses_data)) * 1.1 # 1.1
         chart_budget = ChartBudgetData(profit_data, expenses_data, x_budget_data, max_chart_budget_y_axis_value)
 
         pop_data = [history.value for history in country.population.population_history]
-        x_pop_data = [str(history.time) for history in country.budget.profit_history]
+        x_pop_data = [str(history.time) for history in country.population.population_history]
         chart_pop = ChartPopulationData(pop_data, x_pop_data)
 
         chart_profit_data = [

@@ -1,5 +1,3 @@
-import json
-import time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
@@ -7,13 +5,18 @@ import smtplib
 from polls.models import Trade, History, Modifier, ArmyUnitCharacteristic, ArmyUnit, Population, \
     Army, Goods, Warehouse, IndustrialBuildings, Technology, Budget, Country, Law, User
 from polls.services.game_service import GameService
-from polls.view_models.player import PlayerView
 from serverDjango.settings import ADMIN_EMAIL, ADMIN_EMAIL_PASSWORD
 
 
 class SystemService:
     def update_system(self):
-        pass
+        game_service = GameService()
+        for country in Country.objects():
+            game_service.update_population(country)
+            game_service.update_warehouses(country)
+            game_service.update_budget(country)
+        game_service.update_price_goods()
+
 
     def get_user_settings(self,user_id):
         user = User.objects(_id=user_id).first()

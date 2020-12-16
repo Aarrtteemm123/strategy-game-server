@@ -16,7 +16,7 @@ class History(EmbeddedDocument):
     time = DateTimeField(default=timezone.now)
 
 class Budget(EmbeddedDocument):
-    money = IntField(default=0,min_value=-10000)
+    money = IntField(default=0)
     population_taxes = IntField(default=0,min_value=0,max_value=100)
     farms_taxes = IntField(default=0,min_value=0,max_value=100)
     mines_taxes = IntField(default=0,min_value=0,max_value=100)
@@ -98,7 +98,7 @@ class ArmyUnit(Document):
 
 class Army(EmbeddedDocument):
     conscript_law_value = FloatField(default=0, min_value=0)
-    reserve_military_manpower = IntField(default=0,min_value=0)
+    reserve_military_manpower = IntField(default=0)
     victories = IntField(default=0,min_value=0)
     losses = IntField(default=0,min_value=0)
     attack_modifiers = EmbeddedDocumentListField('Modifier', default=[])
