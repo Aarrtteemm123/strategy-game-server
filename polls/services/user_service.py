@@ -36,12 +36,13 @@ class UserService:
             try:
                 obj = User.objects(_id=user_id).first()
                 user_email = obj.email
-                country_pk = obj.country.pk
+                country_pk = obj.country._id
                 Country.objects(pk=country_pk).delete()
                 #html_msg = EmailTemplate().get_html_delete_account(obj.username)
                 #SystemService().send_email(ADMIN_EMAIL, user_email, ADMIN_EMAIL_PASSWORD, html_msg,EmailTemplate.DELETE_TITLE)
                 return True
-            except:
+            except Exception as e:
+                print(e)
                 return False
         return False
 

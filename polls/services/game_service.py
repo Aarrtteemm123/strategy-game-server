@@ -17,7 +17,29 @@ class GameService:
         pass
 
     def update_population(self,country):
-        pass
+        modifiers = 100
+        for mod in country.population.modifiers:
+            modifiers += mod.value
+        modifiers += country.population.basic_percent_growth_rate
+
+        population_before_update = country.population.total_population
+        country.population.total_population *= (modifiers/100)
+        total_growth_people = (country.population.total_population - population_before_update)
+
+        growth_others = (country.population.min_percent_others / 100) * total_growth_people
+        country.population.others += growth_others
+        country.population.free_people += (total_growth_people - growth_others)
+
+        solders_before_update = country.population.solders
+        country.population.solders = (country.population.free_people*(country.army.conscript_law_value/100))
+
+        country.population.free_people -= (country.population.solders - solders_before_update)
+        country.army.reserve_military_manpower += (country.population.solders - solders_before_update)
+
+        if len(country.population.population_history) > 10:
+            country.population.population_history.pop(0)
+        country.population.population_history.append(History(name='',value=modifiers-100,time=timezone.now()))
+        country.save()
 
     def update_price_goods(self):
         trade_lst = Trade.objects()
@@ -455,6 +477,7 @@ class GameService:
         defending_country = Country.objects(name=defending_country_name).first()
         army_units = ArmyUnit.objects()
         res_war_view = ResultWarView()
+        # change total population after war
         army_before_battle = attacking_country.army.units.copy()
         for unit in army_units:
             sorted_units_by_attack = sorted(unit.unit_characteristic.items(), key=lambda x: x[1].attack_value, reverse=True)

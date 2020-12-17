@@ -7,18 +7,13 @@ from polls.services.user_service import UserService
 from polls.services.game_service import GameService
 from polls.services.system_service import SystemService
 
-#print(UserService().register_new_user('pl1','pas1','er@gmail.com','Ukraine','gfg/fgfgf'))
-#print(UserService().register_new_user('pl2','pas2','er2@gmail.com','Rus','gfg/fgfgf'))
-#print(UserService().register_new_user('pl3','pas3','er3@gmail.com','Ger','gfg/fgfgf'))
-#print(UserService().register_new_user('pl4','pas4','er4@gmail.com','Mol','gfg/fgfgf'))
+#print(UserService().register_new_user('pl1','pas1','er@gmail.com','Ukraine','https://i.pinimg.com/originals/c2/b2/75/c2b2757203f9b9e1b86986aad502d2d5.jpg'))
+#print(UserService().register_new_user('pl2','pas2','er2@gmail.com','Great Britain','https://images-na.ssl-images-amazon.com/images/I/71d6ai1UMEL._AC_SL1500_.jpg'))
+#print(UserService().register_new_user('pl3','pas3','er3@gmail.com','Germany','https://image.winudf.com/v2/image1/Y29tLmZsYWd3YWxscGFwZXIuZ2VybWFueV9zY3JlZW5fNF8xNTQ3NDgyNTMyXzA1OA/screen-5.jpg?fakeurl=1&type=.jpg'))
+#print(UserService().register_new_user('pl4','pas4','er4@gmail.com','Moldova','https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Flag_of_Moldova.svg/1280px-Flag_of_Moldova.svg.png'))
 from polls.services.view_service import CountryViewService, NewsViewService
-
-#GameService().calculate_war('Ukraine','Mol')
-#CountryViewService().get_army('5f3d511cdd22f0b5a1862f9f')
-
-
-GameService().update_population(Country.objects(name='Ukraine').first())
-
+for i in range(100):
+    SystemService().update_system()
 
 class ServiceTestCase(TestCase):
     def setUp(self):

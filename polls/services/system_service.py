@@ -382,11 +382,11 @@ class SystemService:
             ],
             adopted_laws=['Conscript law: Volunteer'],
             population=Population(total_population=50000, factory_workers=0, miners=0,
-                                  farmers=0, solders=750, free_people=39250, others=10000, min_percent_others=20,
+                                  farmers=0, solders=600, free_people=39400, others=10000, min_percent_others=20,
                                   basic_percent_growth_rate=5,
                                   population_history=[History(value=5),History(value=-2),History(value=8)],
                                   modifiers=[]),
-            army=Army(reserve_military_manpower=650, victories=0, losses=0,conscript_law_value = 1.5,
+            army=Army(reserve_military_manpower=500, victories=0, losses=0,conscript_law_value = 1.5,
                       units={
                           'Infantry': 100, 'Artillery': 0, 'PTO': 0, 'PVO': 0, 'Tank': 0, 'Aviation': 0
                       })
