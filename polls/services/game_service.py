@@ -11,7 +11,23 @@ from polls.view_models.army import ResultWarView, ItemWarResult
 class GameService:
 
     def update_budget(self,country):
-        pass
+        pop_taxes_profit = self.get_pop_taxes_profit(country)
+        farms_taxes_profit = self.get_farms_taxes_profit(country)
+        mines_taxes_profit = self.get_mines_taxes_profit(country)
+        factories_taxes_profit = self.get_military_factories_taxes_profit(country) \
+                                 + self.get_civil_factories_taxes_profit(country)
+
+        total_taxes_profit = pop_taxes_profit + farms_taxes_profit + mines_taxes_profit + factories_taxes_profit
+        expenses = sum([country.army.units[unit.name] * unit.maintenance_price for unit in ArmyUnit.objects()])
+        country.budget.money += (total_taxes_profit - expenses)
+        if len(country.budget.profit_history) > 10:
+            country.budget.profit_history.pop(0)
+        country.budget.profit_history.append(History(name='',value=total_taxes_profit,time=timezone.now()))
+        if len(country.budget.expenses_history) > 10:
+            country.budget.expenses_history.pop(0)
+        country.budget.expenses_history.append(History(name='',value=expenses,time=timezone.now()))
+        # if budget low end notify on - send email
+        country.save()
 
     def update_warehouses(self,country):
         pass
@@ -39,6 +55,7 @@ class GameService:
         if len(country.population.population_history) > 10:
             country.population.population_history.pop(0)
         country.population.population_history.append(History(name='',value=modifiers-100,time=timezone.now()))
+        # if population low end notify on - send email
         country.save()
 
     def update_price_goods(self):
