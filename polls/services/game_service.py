@@ -29,8 +29,74 @@ class GameService:
         # if budget low end notify on - send email
         country.save()
 
-    def update_warehouses(self,country):
-        pass
+    def update_industry(self, country):
+        industry_modifiers = 100
+        for mod in country.industry_modifiers:
+            industry_modifiers += mod.value
+        industry_modifiers /= 100
+
+        for farm in country.farms:
+            if farm.number != 0:
+                name_warehouse = self.get_name_goods_from_building(farm.name)
+                warehouse = [item for item in country.warehouses if item.goods.name == name_warehouse][0]
+                warehouse.goods.value += farm.number * farm.production_speed * industry_modifiers
+                if warehouse.goods.value > warehouse.capacity:
+                    warehouse.goods.value = warehouse.capacity
+
+        for mine in country.mines:
+            if mine.number != 0:
+                name_warehouse = self.get_name_goods_from_building(mine.name)
+                warehouse = [item for item in country.warehouses if item.goods.name == name_warehouse][0]
+                warehouse.goods.value += mine.number * mine.production_speed * industry_modifiers
+                if warehouse.goods.value > warehouse.capacity:
+                    warehouse.goods.value = warehouse.capacity
+
+        for factory in country.factories:
+            if factory.number != 0:
+                resources_dict = {}
+                for need_goods in factory.needGoods:
+                    warehouse = [item for item in country.warehouses if item.goods.name == need_goods.name][0]
+                    need_resources = need_goods.value * factory.number
+                    if need_resources <= warehouse.goods.value:
+                        resources_dict[need_goods.name] = need_resources
+                    else:
+                        resources_dict[need_goods.name] = warehouse.goods.value - need_resources # value < 0
+                max_deficit_name_resource = min(resources_dict)
+                deficit_goods = next(filter(lambda x: x.name == max_deficit_name_resource,factory.needGoods),None)
+                active_factories = factory.number + (int(resources_dict[max_deficit_name_resource]/deficit_goods.value) - 1) # actually ...+(-value)
+                for need_goods in factory.needGoods:
+                    warehouse = [item for item in country.warehouses if item.goods.name == need_goods.name][0]
+                    warehouse.goods.value -= active_factories * need_goods.value
+                product_name = self.get_name_goods_from_building(factory.name)
+                warehouse = [item for item in country.warehouses if item.goods.name == product_name][0]
+                warehouse.goods.value += industry_modifiers * active_factories * factory.production_speed
+                if warehouse.goods.value > warehouse.capacity:
+                    warehouse.goods.value = warehouse.capacity
+
+        for military_factory in country.military_factories:
+            if military_factory.number != 0:
+                resources_dict = {}
+                for need_goods in military_factory.needGoods:
+                    warehouse = [item for item in country.warehouses if item.goods.name == need_goods.name][0]
+                    need_resources = need_goods.value * military_factory.number
+                    if need_resources <= warehouse.goods.value:
+                        resources_dict[need_goods.name] = need_resources
+                    else:
+                        resources_dict[need_goods.name] = warehouse.goods.value - need_resources  # value < 0
+                max_deficit_name_resource = min(resources_dict)
+                deficit_goods = next(filter(lambda x: x.name == max_deficit_name_resource, military_factory.needGoods), None)
+                active_factories = military_factory.number + (int(
+                    resources_dict[max_deficit_name_resource] / deficit_goods.value) - 1)  # actually ...+(-value)
+                for need_goods in military_factory.needGoods:
+                    warehouse = [item for item in country.warehouses if item.goods.name == need_goods.name][0]
+                    warehouse.goods.value -= active_factories * need_goods.value
+                product_name = self.get_name_goods_from_building(military_factory.name)
+                warehouse = [item for item in country.warehouses if item.goods.name == product_name][0]
+                warehouse.goods.value += industry_modifiers * active_factories * military_factory.production_speed
+                if warehouse.goods.value > warehouse.capacity:
+                    warehouse.goods.value = warehouse.capacity
+
+        country.save()
 
     def update_population(self,country):
         modifiers = 100
@@ -452,6 +518,10 @@ class GameService:
                 obj.budget.money -= price_goods
                 warehouse.goods.value += number
                 obj.save()
+                return 'Ok'
+            else:
+                return 'Low budget'
+        return 'Invalid data'
 
     def sell_goods(self,country_name,name_goods,number):
         obj = Country.objects(name=country_name).first()

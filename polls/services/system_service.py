@@ -13,7 +13,7 @@ class SystemService:
         game_service = GameService()
         for country in Country.objects():
             game_service.update_population(country)
-            game_service.update_warehouses(country)
+            game_service.update_industry(country)
             game_service.update_budget(country)
         game_service.update_price_goods()
 
