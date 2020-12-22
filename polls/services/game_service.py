@@ -39,7 +39,8 @@ class GameService:
             if farm.number != 0:
                 name_warehouse = self.get_name_goods_from_building(farm.name)
                 warehouse = [item for item in country.warehouses if item.goods.name == name_warehouse][0]
-                warehouse.goods.value += farm.number * farm.production_speed * industry_modifiers
+                total_production = farm.number * farm.production_speed * industry_modifiers
+                warehouse.goods.value += total_production
                 if warehouse.goods.value > warehouse.capacity:
                     warehouse.goods.value = warehouse.capacity
 
@@ -47,7 +48,8 @@ class GameService:
             if mine.number != 0:
                 name_warehouse = self.get_name_goods_from_building(mine.name)
                 warehouse = [item for item in country.warehouses if item.goods.name == name_warehouse][0]
-                warehouse.goods.value += mine.number * mine.production_speed * industry_modifiers
+                total_production = mine.number * mine.production_speed * industry_modifiers
+                warehouse.goods.value += total_production
                 if warehouse.goods.value > warehouse.capacity:
                     warehouse.goods.value = warehouse.capacity
 
@@ -69,7 +71,8 @@ class GameService:
                     warehouse.goods.value -= active_factories * need_goods.value
                 product_name = self.get_name_goods_from_building(factory.name)
                 warehouse = [item for item in country.warehouses if item.goods.name == product_name][0]
-                warehouse.goods.value += industry_modifiers * active_factories * factory.production_speed
+                total_production = industry_modifiers * active_factories * factory.production_speed
+                warehouse.goods.value += total_production
                 if warehouse.goods.value > warehouse.capacity:
                     warehouse.goods.value = warehouse.capacity
 
@@ -92,10 +95,12 @@ class GameService:
                     warehouse.goods.value -= active_factories * need_goods.value
                 product_name = self.get_name_goods_from_building(military_factory.name)
                 warehouse = [item for item in country.warehouses if item.goods.name == product_name][0]
-                warehouse.goods.value += industry_modifiers * active_factories * military_factory.production_speed
+                total_production = industry_modifiers * active_factories * military_factory.production_speed
+                warehouse.goods.value += total_production
                 if warehouse.goods.value > warehouse.capacity:
                     warehouse.goods.value = warehouse.capacity
 
+        self.update_warehouses_filling_speed(country)
         country.save()
 
     def update_population(self,country):
@@ -117,6 +122,11 @@ class GameService:
 
         country.population.free_people -= (country.population.solders - solders_before_update)
         country.army.reserve_military_manpower += (country.population.solders - solders_before_update)
+
+        country.population.total_population = country.population.farmers + \
+                country.population.miners + country.population.factory_workers + \
+                country.population.solders + country.population.free_people + \
+                country.population.others
 
         if len(country.population.population_history) > 10:
             country.population.population_history.pop(0)
@@ -192,6 +202,9 @@ class GameService:
                 existing.update(value=-new_value + 50)
                 existing2.update(value=-new_value + 50)
             obj.save()
+        country = Country.objects(name=country_name).first()
+        self.update_warehouses_filling_speed(country)
+        country.save()
 
     def upgrade_technology(self,country_name,technology_name):
         if technology_name == 'Medicine technology':
@@ -222,6 +235,7 @@ class GameService:
                                                                     address_from='Computers technology'))
                 else:
                     existing.update(value=technology.modifiers[0].value * technology.level)
+                self.update_warehouses_filling_speed(obj)
                 obj.save()
 
         elif technology_name == 'Upgrade weapons':
@@ -353,7 +367,52 @@ class GameService:
                                                          * obj.army.conscript_law_value // 100
                     obj.population.free_people *= (1 - obj.army.conscript_law_value // 100)
                     obj.population.solders =  obj.army.reserve_military_manpower + self.get_number_soldiers_from_units(obj)
+        self.update_warehouses_filling_speed(obj)
         obj.save()
+
+    def update_warehouses_filling_speed(self, country):
+        industry_modifiers = 100
+        for mod in country.industry_modifiers:
+            industry_modifiers += mod.value
+        industry_modifiers /= 100
+
+        need_resources = {}
+
+        for farm in country.farms:
+            product_name = self.get_name_goods_from_building(farm.name)
+            need_resources[product_name] = 0
+            if farm.number != 0:
+                warehouse = [item for item in country.warehouses if item.goods.name == product_name][0]
+                warehouse.filling_speed = industry_modifiers * farm.production_speed * farm.number
+
+        for mine in country.mines:
+            product_name = self.get_name_goods_from_building(mine.name)
+            need_resources[product_name] = 0
+            if mine.number != 0:
+                warehouse = [item for item in country.warehouses if item.goods.name == product_name][0]
+                warehouse.filling_speed = industry_modifiers * mine.production_speed * mine.number
+
+        all_factories = country.factories + country.military_factories
+
+        for factory in all_factories:
+            product_name = self.get_name_goods_from_building(factory.name)
+            need_resources[product_name] = 0
+
+        for factory in all_factories:
+            for goods in factory.needGoods:
+                need_resources[goods.name] += goods.value * factory.number
+
+        for factory in all_factories:
+            if factory.number != 0:
+                product_name = self.get_name_goods_from_building(factory.name)
+                warehouse = [item for item in country.warehouses if item.goods.name == product_name][0]
+                warehouse.filling_speed = industry_modifiers * factory.production_speed * factory.number
+                for goods in factory.needGoods:
+                    warehouse = [item for item in country.warehouses if item.goods.name == goods.name][0]
+                    warehouse.filling_speed -= need_resources[goods.name]
+
+        country.save()
+
 
     def get_number_soldiers_from_units(self,country):
         number = 0
@@ -404,6 +463,7 @@ class GameService:
             obj.population.modifiers.append(Modifier(value=-2,address_from=name_law))
             obj.industry_modifiers.append(Modifier(value=15,address_from=name_law,address_to='industry'))
             obj.army.attack_modifiers.append(Modifier(value=-10,address_from=name_law))
+        self.update_warehouses_filling_speed(obj)
         obj.save()
 
     def __update_conscript_law(self, obj, name_law, law, conscript_law_value,
@@ -461,6 +521,7 @@ class GameService:
                                         indus_mod=Modifier(value=-35, address_from=name_law,address_to='industry'),
                                         attack_mod=Modifier(value=-15, address_from=name_law),
                                         def_mod=Modifier(value=-10, address_from=name_law))
+        self.update_warehouses_filling_speed(obj)
         obj.save()
 
     def __cansel_conscript_law(self, country):
@@ -507,6 +568,7 @@ class GameService:
             obj.population.modifiers.remove(Modifier(value=-2,address_from=name_law))
             obj.industry_modifiers.remove(Modifier(value=15,address_from=name_law,address_to='industry'))
             obj.army.attack_modifiers.remove(Modifier(value=-10,address_from=name_law))
+        self.update_warehouses_filling_speed(obj)
         obj.save()
 
     def buy_goods(self,country_name,name_goods,number):

@@ -320,17 +320,29 @@ class CountryViewService:
         sum_defence_modifiers = sum(mod.value for mod in country.army.defence_modifiers) / 100 + 1
         for name_unit in army:
             if name_unit == 'Infantry':
-                weapons = next(filter(lambda x:x.goods.name=='Infantry equipment',country.warehouses),None).goods.value
+                warehouse = next(filter(lambda x:x.goods.name=='Infantry equipment',country.warehouses),None)
+                weapons = warehouse.goods.value
+                storage_capacity = warehouse.capacity
             elif name_unit == 'Artillery':
-                weapons = next(filter(lambda x:x.goods.name=='Artillery',country.warehouses),None).goods.value
+                warehouse = next(filter(lambda x:x.goods.name=='Artillery',country.warehouses),None)
+                weapons = warehouse.goods.value
+                storage_capacity = warehouse.capacity
             elif name_unit == 'PTO':
-                weapons = next(filter(lambda x:x.goods.name=='PTO',country.warehouses),None).goods.value
+                warehouse = next(filter(lambda x:x.goods.name=='PTO',country.warehouses),None)
+                weapons = warehouse.goods.value
+                storage_capacity = warehouse.capacity
             elif name_unit == 'PVO':
-                weapons = next(filter(lambda x:x.goods.name=='PVO',country.warehouses),None).goods.value
+                warehouse = next(filter(lambda x:x.goods.name=='PVO',country.warehouses),None)
+                weapons = warehouse.goods.value
+                storage_capacity = warehouse.capacity
             elif name_unit == 'Tank':
-                weapons = next(filter(lambda x:x.goods.name=='Tanks',country.warehouses),None).goods.value
+                warehouse = next(filter(lambda x:x.goods.name=='Tanks',country.warehouses),None)
+                weapons = warehouse.goods.value
+                storage_capacity = warehouse.capacity
             elif name_unit == 'Aviation':
-                weapons = next(filter(lambda x:x.goods.name=='Aviation',country.warehouses),None).goods.value
+                warehouse = next(filter(lambda x:x.goods.name=='Aviation',country.warehouses),None)
+                weapons = warehouse.goods.value
+                storage_capacity = warehouse.capacity
             unit = army_units.filter(name=name_unit).first()
             unit_characteristic_view_list = [UnitCharacteristicView(item.unit_name,
                 item.attack_value * sum_attack_modifiers,
@@ -342,7 +354,7 @@ class CountryViewService:
             army_card_view = ArmyCardView(
                 name_unit,unit.link_img,army[name_unit],unit.need_peoples,
                 unit.maintenance_price,unit.maintenance_price*army[name_unit],
-                country.army.reserve_military_manpower,weapons,modifiers,unit_characteristic_view_list
+                country.army.reserve_military_manpower,weapons,storage_capacity,modifiers,unit_characteristic_view_list
             )
             army_view_list.append(army_card_view)
         finish = time.time()

@@ -25,7 +25,7 @@ class UnitCharacteristicView:
 class ArmyCardView:
     def __init__(self, name = '', link_img = '', number = 0, need_peoples = 0,
                  maintenance_price = 0, total_maintenance_price = 0,
-                 reserve = 0,reserve_weapon = 0,modifiers=None,unit_characteristic=None):
+                 reserve = 0, reserve_weapon = 0, storage_capacity = 0, modifiers=None, unit_characteristic=None):
         if modifiers is None:
             modifiers = [ModifierView()]
         if unit_characteristic is None:
@@ -38,5 +38,6 @@ class ArmyCardView:
         self.total_maintenance_price = total_maintenance_price
         self.reserve = reserve
         self.reserve_weapon = reserve_weapon
+        self.storage_capacity = storage_capacity
         self.modifiers = modifiers
         self.unit_characteristic = unit_characteristic

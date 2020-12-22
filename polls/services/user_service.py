@@ -34,10 +34,13 @@ class UserService:
     def delete_user_account(self, user_id,password):
         if User.objects(_id=user_id).count() == 1 and User.objects(_id=user_id).first().password == password:
             try:
+                print('inside try')
                 obj = User.objects(_id=user_id).first()
                 user_email = obj.email
                 country_pk = obj.country._id
-                Country.objects(pk=country_pk).delete()
+                print(country_pk)
+                country = Country.objects(pk=country_pk).first()
+                print(country.name,country.delete())
                 #html_msg = EmailTemplate().get_html_delete_account(obj.username)
                 #SystemService().send_email(ADMIN_EMAIL, user_email, ADMIN_EMAIL_PASSWORD, html_msg,EmailTemplate.DELETE_TITLE)
                 return True

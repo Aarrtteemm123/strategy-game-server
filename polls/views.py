@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 
@@ -94,8 +96,10 @@ def redirect_feedback(request,user_id):
             if not user.isAuth:
                 return HttpResponse({}, status=status.HTTP_401_UNAUTHORIZED)
             request_data = JSONParser().parse(request)
-            if user is not None:
+            if user is not None and (datetime.datetime.now() - user.date_last_send_feedback).days >= 1:
+                user.date_last_send_feedback = datetime.datetime.now()
                 SystemService().get_feedback(user.username,user.email,request_data['rating'],request_data['msg'])
+                user.save()
                 return HttpResponse({}, status=status.HTTP_200_OK)
         except Exception as error:
             return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
