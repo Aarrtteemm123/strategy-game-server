@@ -58,7 +58,7 @@ class TableRowDataView:
 class BasicStatisticView:
     def __init__(self, link_img = '', name_country = '', population = 0, budget = 0,
                  total_profit_country = 0, economic_place = 0, military_place = 0,
-                 victories_battles = 0, losses_battles = 0, chart_budget = ChartBudgetData(),
+                 victories_battles = 0, losses_battles = 0,chart_money = ChartPopulationData(), chart_budget = ChartBudgetData(),
                  chart_population = ChartPopulationData(), chart_profit = ChartProfitData(),
                  farms_goods_chart = ChartGoodsData(), mines_goods_chart = ChartGoodsData(),
                  industrial_goods_chart = ChartGoodsData(), military_goods_chart = ChartGoodsData(),
@@ -81,6 +81,7 @@ class BasicStatisticView:
         self.military_place = military_place
         self.victories_battles = victories_battles
         self.losses_battles = losses_battles
+        self.chart_money = chart_money
         self.chart_budget = chart_budget
         self.chart_population = chart_population
         self.chart_profit = chart_profit

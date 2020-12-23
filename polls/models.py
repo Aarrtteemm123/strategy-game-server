@@ -23,8 +23,11 @@ class Budget(EmbeddedDocument):
     factories_taxes = IntField(default=0,min_value=0,max_value=100)
     military_taxes = IntField(default=0,min_value=0,max_value=100)
     military_expenses = IntField(default=0,min_value=0)
+    total_profit = IntField(default=0)
+    total_expenses = IntField(default=0)
     profit_history = EmbeddedDocumentListField('History',default=[])
     expenses_history = EmbeddedDocumentListField('History',default=[])
+    budget_history = EmbeddedDocumentListField('History',default=[])
 
 class Modifier(EmbeddedDocument):
     value = FloatField(default=0.0)
@@ -53,7 +56,7 @@ class IndustrialBuildings(EmbeddedDocument):
     workers = IntField(default=0,min_value=0)
     number = IntField(default=0,min_value=0)
     needGoods = EmbeddedDocumentListField('Goods',default=[])
-    isWorking = BooleanField(default=True)
+    active_number = IntField(default=0,min_value=0)
 
 class Warehouse(EmbeddedDocument):
     goods = EmbeddedDocumentField('Goods')

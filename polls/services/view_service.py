@@ -1,8 +1,6 @@
 import datetime
-import json, time
+import time
 import re
-
-from django.utils import timezone
 
 from polls.models import User, Country, Trade, News, ArmyUnit
 from polls.services.game_service import GameService
@@ -30,6 +28,10 @@ class CountryViewService:
         total_profit = round(GameService().get_total_profit(country))
         economic_place = GameService().get_economic_place(country.name)
         army_place = GameService().get_army_place(country.name)
+
+        money_history = [history.value for history in country.budget.budget_history]
+        x_money_data = [str(history.time) for history in country.budget.budget_history]
+        chart_money = ChartPopulationData(money_history,x_money_data)
 
         profit_data = [history.value for history in country.budget.profit_history]
         expenses_data = [history.value for history in country.budget.expenses_history]
@@ -82,7 +84,7 @@ class CountryViewService:
         bsv = BasicStatisticView(
             country.link_img, country.name, country.population.total_population,
             country.budget.money, total_profit, economic_place, army_place, country.army.victories,
-            country.army.losses, chart_budget, chart_pop, chart_profit, chart_farms_goods_data,
+            country.army.losses,chart_money, chart_budget, chart_pop, chart_profit, chart_farms_goods_data,
             chart_mines_goods_data, chart_factories_goods_data, chart_military_factories_goods_data,
             farm_goods_table, mine_goods_table, industrial_goods_table, military_goods_table
         )
@@ -165,7 +167,7 @@ class CountryViewService:
             industrial_card_view = IndustrialCardView(
                 farm.name,farm.link_img,farm.production_speed,
                 farm.number * farm.production_speed * industry_modifiers / 100,
-                farm.price_build,farm.workers,farm.number,farm.number * farm.workers,[]
+                farm.price_build,farm.workers,farm.number,farm.active_number,farm.number * farm.workers,[]
             )
             farms_list.append(industrial_card_view)
         industry_dict['farms'] = farms_list
@@ -178,7 +180,7 @@ class CountryViewService:
             industrial_card_view = IndustrialCardView(
                 mine.name,mine.link_img,mine.production_speed,
                 mine.number * mine.production_speed * industry_modifiers / 100,
-                mine.price_build,mine.workers,mine.number,mine.number * mine.workers,[]
+                mine.price_build,mine.workers,mine.number,mine.active_number,mine.number * mine.workers,[]
             )
             mines_list.append(industrial_card_view)
         industry_dict['mines'] = mines_list
@@ -191,7 +193,7 @@ class CountryViewService:
             industrial_card_view = IndustrialCardView(
                 factory.name,factory.link_img,factory.production_speed,
                 factory.number * factory.production_speed * industry_modifiers / 100,
-                factory.price_build,factory.workers,factory.number,factory.number * factory.workers,
+                factory.price_build,factory.workers,factory.number,factory.active_number,factory.number * factory.workers,
                 [TableRowGoodsView(item.link_img,item.name,item.value) for item in factory.needGoods]
             )
             factories_list.append(industrial_card_view)
@@ -199,7 +201,7 @@ class CountryViewService:
             industrial_card_view = IndustrialCardView(
                 factory.name, factory.link_img, factory.production_speed,
                 factory.number * factory.production_speed * industry_modifiers / 100,
-                factory.price_build, factory.workers, factory.number, factory.number * factory.workers,
+                factory.price_build, factory.workers, factory.number,factory.active_number, factory.number * factory.workers,
                 [TableRowGoodsView(item.link_img, item.name, item.value) for item in factory.needGoods]
             )
             factories_list.append(industrial_card_view)

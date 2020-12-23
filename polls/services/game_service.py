@@ -17,15 +17,24 @@ class GameService:
         factories_taxes_profit = self.get_military_factories_taxes_profit(country) \
                                  + self.get_civil_factories_taxes_profit(country)
 
+
         total_taxes_profit = pop_taxes_profit + farms_taxes_profit + mines_taxes_profit + factories_taxes_profit
-        expenses = sum([country.army.units[unit.name] * unit.maintenance_price for unit in ArmyUnit.objects()])
-        country.budget.money += (total_taxes_profit - expenses)
+        military_expenses = sum([country.army.units[unit.name] * unit.maintenance_price for unit in ArmyUnit.objects()])
+        country.budget.total_profit += total_taxes_profit
+        country.budget.total_expenses += military_expenses
+
+        country.budget.money += (total_taxes_profit - military_expenses)
         if len(country.budget.profit_history) > 10:
             country.budget.profit_history.pop(0)
-        country.budget.profit_history.append(History(name='',value=total_taxes_profit,time=timezone.now()))
+        country.budget.profit_history.append(History(name='',value=country.budget.total_profit,time=timezone.now()))
         if len(country.budget.expenses_history) > 10:
             country.budget.expenses_history.pop(0)
-        country.budget.expenses_history.append(History(name='',value=expenses,time=timezone.now()))
+        country.budget.expenses_history.append(History(name='',value=country.budget.total_expenses,time=timezone.now()))
+        if len(country.budget.budget_history) > 10:
+            country.budget.budget_history.pop(0)
+        country.budget.budget_history.append(History(name='',value=country.budget.money,time=timezone.now()))
+        country.budget.total_profit = 0
+        country.budget.total_expenses = 0
         # if budget low end notify on - send email
         country.save()
 
@@ -41,6 +50,7 @@ class GameService:
                 warehouse = [item for item in country.warehouses if item.goods.name == name_warehouse][0]
                 total_production = farm.number * farm.production_speed * industry_modifiers
                 warehouse.goods.value += total_production
+                farm.active_number = farm.number
                 if warehouse.goods.value > warehouse.capacity:
                     warehouse.goods.value = warehouse.capacity
 
@@ -50,6 +60,7 @@ class GameService:
                 warehouse = [item for item in country.warehouses if item.goods.name == name_warehouse][0]
                 total_production = mine.number * mine.production_speed * industry_modifiers
                 warehouse.goods.value += total_production
+                mine.active_number = mine.number
                 if warehouse.goods.value > warehouse.capacity:
                     warehouse.goods.value = warehouse.capacity
 
@@ -66,6 +77,7 @@ class GameService:
                 max_deficit_name_resource = min(resources_dict)
                 deficit_goods = next(filter(lambda x: x.name == max_deficit_name_resource,factory.needGoods),None)
                 active_factories = factory.number + (int(resources_dict[max_deficit_name_resource]/deficit_goods.value) - 1) # actually ...+(-value)
+                factory.active_number = active_factories
                 for need_goods in factory.needGoods:
                     warehouse = [item for item in country.warehouses if item.goods.name == need_goods.name][0]
                     warehouse.goods.value -= active_factories * need_goods.value
@@ -90,6 +102,7 @@ class GameService:
                 deficit_goods = next(filter(lambda x: x.name == max_deficit_name_resource, military_factory.needGoods), None)
                 active_factories = military_factory.number + (int(
                     resources_dict[max_deficit_name_resource] / deficit_goods.value) - 1)  # actually ...+(-value)
+                military_factory.active_number = active_factories
                 for need_goods in military_factory.needGoods:
                     warehouse = [item for item in country.warehouses if item.goods.name == need_goods.name][0]
                     warehouse.goods.value -= active_factories * need_goods.value
@@ -211,6 +224,7 @@ class GameService:
             obj = Country.objects(name=country_name).first()
             technology = obj.technologies.filter(name='Medicine technology').first()
             if obj.budget.money >= technology.price_upgrade:
+                obj.budget.total_expenses += technology.price_upgrade
                 obj.budget.money -= technology.price_upgrade
                 technology.price_upgrade*=technology.increasePrice
                 technology.level +=1
@@ -226,6 +240,7 @@ class GameService:
             obj = Country.objects(name=country_name).first()
             technology = obj.technologies.filter(name='Computers technology').first()
             if obj.budget.money >= technology.price_upgrade:
+                obj.budget.total_expenses += technology.price_upgrade
                 obj.budget.money -= technology.price_upgrade
                 technology.price_upgrade*=technology.increasePrice
                 technology.level +=1
@@ -242,6 +257,7 @@ class GameService:
             obj = Country.objects(name=country_name).first()
             technology = obj.technologies.filter(name='Upgrade weapons').first()
             if obj.budget.money >= technology.price_upgrade:
+                obj.budget.total_expenses += technology.price_upgrade
                 obj.budget.money -= technology.price_upgrade
                 technology.price_upgrade*=technology.increasePrice
                 technology.level +=1
@@ -257,6 +273,7 @@ class GameService:
             obj = Country.objects(name=country_name).first()
             technology = obj.technologies.filter(name='Upgrade defence system').first()
             if obj.budget.money >= technology.price_upgrade:
+                obj.budget.total_expenses += technology.price_upgrade
                 obj.budget.money -= technology.price_upgrade
                 technology.price_upgrade *= technology.increasePrice
                 technology.level += 1
@@ -275,6 +292,7 @@ class GameService:
             farm = obj.farms.filter(name=name_building).first()
             if obj.budget.money >= farm.price_build and \
                     obj.population.free_people >= farm.workers:
+                obj.budget.total_expenses += farm.price_build
                 obj.budget.money -= farm.price_build
                 obj.population.free_people -= farm.workers
                 obj.population.farmers +=farm.workers
@@ -287,6 +305,7 @@ class GameService:
             mine = obj.mines.filter(name=name_building).first()
             if obj.budget.money >= mine.price_build and \
                     obj.population.free_people >= mine.workers:
+                obj.budget.total_expenses += mine.price_build
                 obj.budget.money -= mine.price_build
                 obj.population.free_people -= mine.workers
                 obj.population.miners += mine.workers
@@ -299,6 +318,7 @@ class GameService:
             factory = obj.factories.filter(name=name_building).first()
             if factory is not None and obj.budget.money >= factory.price_build and \
                     obj.population.free_people >= factory.workers:
+                obj.budget.total_expenses += factory.price_build
                 obj.budget.money -= factory.price_build
                 obj.population.free_people -= factory.workers
                 obj.population.factory_workers += factory.workers
@@ -311,6 +331,7 @@ class GameService:
                 factory = obj.military_factories.filter(name=name_building).first()
                 if obj.budget.money >= factory.price_build and \
                         obj.population.free_people >= factory.workers:
+                    obj.budget.total_expenses += factory.price_build
                     obj.budget.money -= factory.price_build
                     obj.population.free_people -= factory.workers
                     obj.population.factory_workers += factory.workers
@@ -426,6 +447,7 @@ class GameService:
         obj = Country.objects(name=country_name).first()
         warehouse = [item for item in obj.warehouses if item.goods.name == name_goods][0]
         if obj.budget.money >= warehouse.price_upgrade and warehouse.level < warehouse.max_level:
+            obj.budget.total_expenses += warehouse.price_upgrade
             obj.budget.money -= warehouse.price_upgrade
             warehouse.price_upgrade *= warehouse.increasePrice
             warehouse.level += 1
@@ -437,12 +459,14 @@ class GameService:
         law = Law.objects(name=name_law).first()
         if name_law == 'Free medicine' and obj.budget.money >= law.price and \
                 not name_law in obj.adopted_laws:
+            obj.budget.total_expenses += law.price
             obj.budget.money -=law.price
             obj.adopted_laws.append(name_law)
             obj.population.modifiers.append(Modifier(value=5,address_from=name_law))
             obj.industry_modifiers.append(Modifier(value=-10,address_from=name_law,address_to='industry'))
         elif name_law == 'Isolation' and obj.budget.money >= law.price and \
                 not name_law in obj.adopted_laws:
+            obj.budget.total_expenses += law.price
             obj.budget.money -=law.price
             obj.adopted_laws.append(name_law)
             obj.population.modifiers.append(Modifier(value=-5,address_from=name_law))
@@ -450,6 +474,7 @@ class GameService:
             obj.army.defence_modifiers.append(Modifier(value=15,address_from=name_law))
         elif name_law == 'Free housing' and obj.budget.money >= law.price and \
                 not name_law in obj.adopted_laws:
+            obj.budget.total_expenses += law.price
             obj.budget.money -=law.price
             obj.adopted_laws.append(name_law)
             obj.population.modifiers.append(Modifier(value=5,address_from=name_law))
@@ -458,6 +483,7 @@ class GameService:
             obj.army.defence_modifiers.append(Modifier(value=10,address_from=name_law))
         elif name_law == 'Free education' and obj.budget.money >= law.price and \
                 not name_law in obj.adopted_laws:
+            obj.budget.total_expenses += law.price
             obj.budget.money -=law.price
             obj.adopted_laws.append(name_law)
             obj.population.modifiers.append(Modifier(value=-2,address_from=name_law))
@@ -470,6 +496,7 @@ class GameService:
                                pop_mod=None, indus_mod=None, attack_mod=None, def_mod=None):
         self.__cansel_conscript_law(obj)
         obj.adopted_laws.append(name_law)
+        obj.budget.total_expenses += law.price
         obj.budget.money -= law.price
         obj.army.conscript_law_value = conscript_law_value
         obj.army.reserve_military_manpower = obj.population.free_people \
@@ -542,12 +569,14 @@ class GameService:
         law = Law.objects(name=name_law).first()
         if name_law == 'Free medicine' and obj.budget.money >= law.price and \
                 name_law in obj.adopted_laws:
+            obj.budget.total_expenses += law.price
             obj.budget.money -= law.price
             obj.adopted_laws.remove(name_law)
             obj.population.modifiers.remove(Modifier(value=5, address_from=name_law))
             obj.industry_modifiers.remove(Modifier(value=-10, address_from=name_law,address_to='industry'))
         elif name_law == 'Isolation' and obj.budget.money >= law.price and \
                 name_law in obj.adopted_laws:
+            obj.budget.total_expenses += law.price
             obj.budget.money -=law.price
             obj.adopted_laws.remove(name_law)
             obj.population.modifiers.remove(Modifier(value=-5,address_from=name_law))
@@ -555,6 +584,7 @@ class GameService:
             obj.army.defence_modifiers.remove(Modifier(value=15,address_from=name_law))
         elif name_law == 'Free housing' and obj.budget.money >= law.price and \
                 name_law in obj.adopted_laws:
+            obj.budget.total_expenses += law.price
             obj.budget.money -=law.price
             obj.adopted_laws.remove(name_law)
             obj.population.modifiers.remove(Modifier(value=5,address_from=name_law))
@@ -563,6 +593,7 @@ class GameService:
             obj.army.defence_modifiers.remove(Modifier(value=10,address_from=name_law))
         elif name_law == 'Free education' and obj.budget.money >= law.price and \
                 name_law in obj.adopted_laws:
+            obj.budget.total_expenses += law.price
             obj.budget.money -=law.price
             obj.adopted_laws.remove(name_law)
             obj.population.modifiers.remove(Modifier(value=-2,address_from=name_law))
@@ -577,6 +608,7 @@ class GameService:
         if 0 < number <= warehouse.capacity - warehouse.goods.value:
             price_goods = Trade.objects(name=name_goods).first().price_now * number
             if obj.budget.money >= price_goods:
+                obj.budget.total_expenses += price_goods
                 obj.budget.money -= price_goods
                 warehouse.goods.value += number
                 obj.save()
@@ -590,6 +622,7 @@ class GameService:
         warehouse = [item for item in obj.warehouses if item.goods.name == name_goods][0]
         if 0 < number <= warehouse.goods.value:
             price_goods = Trade.objects(name=name_goods).first().price_now * number
+            obj.budget.total_profit += price_goods
             obj.budget.money += price_goods
             warehouse.goods.value -= number
             obj.save()
@@ -722,7 +755,7 @@ class GameService:
                 if factory.needGoods:
                     for item in factory.needGoods:
                         expenses += item.value * goods.filter(name=item.name).first().price_now
-                production_power = factory.production_speed * factory.number * industry_modifiers / 100 * goods.filter(
+                production_power = factory.production_speed * factory.active_number * industry_modifiers / 100 * goods.filter(
                     name=name_goods).first().price_now - expenses
                 total_profit += production_power
         return total_profit
@@ -742,7 +775,7 @@ class GameService:
                 if military_factory.needGoods:
                     for item in military_factory.needGoods:
                         expenses += item.value * goods.filter(name=item.name).first().price_now
-                production_power = military_factory.production_speed * military_factory.number * industry_modifiers / 100 * goods.filter(
+                production_power = military_factory.production_speed * military_factory.active_number * industry_modifiers / 100 * goods.filter(
                     name=name_goods).first().price_now - expenses
                 total_profit += production_power
         return total_profit
@@ -762,7 +795,7 @@ class GameService:
                 if factory.needGoods:
                     for item in factory.needGoods:
                         expenses += item.value * goods.filter(name=item.name).first().price_now
-                production_power = factory.production_speed * factory.number * industry_modifiers / 100 * goods.filter(
+                production_power = factory.production_speed * factory.active_number * industry_modifiers / 100 * goods.filter(
                     name=name_goods).first().price_now - expenses
                 total_profit += production_power + 0.25 * production_power * country.budget.factories_taxes / 100
         for military_factory in country.military_factories:
@@ -772,7 +805,7 @@ class GameService:
                 if military_factory.needGoods:
                     for item in military_factory.needGoods:
                         expenses += item.value * goods.filter(name=item.name).first().price_now
-                production_power = military_factory.production_speed * military_factory.number * industry_modifiers / 100 * goods.filter(name=name_goods).first().price_now - expenses
+                production_power = military_factory.production_speed * military_factory.active_number * industry_modifiers / 100 * goods.filter(name=name_goods).first().price_now - expenses
                 total_profit += production_power + 0.25 * production_power * country.budget.factories_taxes / 100
         return total_profit
 
@@ -934,11 +967,11 @@ class GameService:
             for factory in country.factories:
                 if is_first_iteration:
                     data[self.get_name_goods_from_building(factory.name)] = []
-                data[self.get_name_goods_from_building(factory.name)].append((country.name,factory.number * factory.production_speed * industry_modifiers / 100))
+                data[self.get_name_goods_from_building(factory.name)].append((country.name,factory.active_number * factory.production_speed * industry_modifiers / 100))
             for military_factory in country.military_factories:
                 if is_first_iteration:
                     data[self.get_name_goods_from_building(military_factory.name)] = []
-                data[self.get_name_goods_from_building(military_factory.name)].append((country.name,military_factory.number * military_factory.production_speed * industry_modifiers / 100))
+                data[self.get_name_goods_from_building(military_factory.name)].append((country.name,military_factory.active_number * military_factory.production_speed * industry_modifiers / 100))
             is_first_iteration = False
 
         for key in data:

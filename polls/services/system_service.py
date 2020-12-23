@@ -50,6 +50,7 @@ class SystemService:
                           factories_taxes=50, military_taxes=50, military_expenses=1000,
                           profit_history = [History(value=5), History(value=-2), History(value=8)],
                           expenses_history = [History(value=5), History(value=-2), History(value=8)],
+                          budget_history = [History(value=100000)],
                           ),
             technologies=[
                 Technology(name='Medicine technology', price_upgrade=5000, level=0, max_level=100, total_result=0.0,
