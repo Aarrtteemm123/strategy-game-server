@@ -11,7 +11,7 @@ class UserService:
         return User.objects(username=username, password=password).update_one(isAuth=True) == 1
 
     def logout(self, user_id):
-        return User.objects(_id=user_id).update_one(isAuth=False) == 1
+        return User.objects(id=user_id).update_one(isAuth=False) == 1
 
     def register_new_user(self, username, password, email, country_name, link_country_flag):
         country = SystemService().create_default_country(country_name,link_country_flag)
@@ -32,14 +32,14 @@ class UserService:
         return True
 
     def delete_user_account(self, user_id,password):
-        if User.objects(_id=user_id).count() == 1 and User.objects(_id=user_id).first().password == password:
+        if User.objects(id=user_id).count() == 1 and User.objects(id=user_id).first().password == password:
             try:
                 print('inside try')
-                obj = User.objects(_id=user_id).first()
+                obj = User.objects(id=user_id).first()
                 user_email = obj.email
-                country_pk = obj.country._id
+                country_pk = obj.country.id
                 print(country_pk)
-                country = Country.objects(pk=country_pk).first()
+                country = Country.objects(id=country_pk).first()
                 print(country.name,country.delete())
                 #html_msg = EmailTemplate().get_html_delete_account(obj.username)
                 #SystemService().send_email(ADMIN_EMAIL, user_email, ADMIN_EMAIL_PASSWORD, html_msg,EmailTemplate.DELETE_TITLE)
@@ -51,9 +51,9 @@ class UserService:
 
     def change_user_data(self,user_id,new_username=None,new_password=None,
                          new_country_name=None,new_country_flag=None):
-        user = User.objects(_id=user_id).first()
+        user = User.objects(id=user_id).first()
         if user is not None:
-            country = Country.objects(_id=user.country._id).first()
+            country = Country.objects(id=user.country.id).first()
             user.username = new_username if new_username is not None and User.objects(username=new_username).count() == 0 else user.username
             user.password = new_password if new_password is not None else user.password
             country.name = new_country_name if new_country_name is not None and Country.objects(name=new_country_name).count() == 0 else country.name

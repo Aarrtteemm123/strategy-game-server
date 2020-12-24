@@ -5,7 +5,6 @@ from mongoengine import *
 connect('TestDb')
 
 class News(Document):
-    _id = ObjectIdField()
     title = StringField(default='',max_length=200)
     date = DateTimeField(default=timezone.now)
     text = StringField(default='',max_length=1000)
@@ -109,7 +108,6 @@ class Army(EmbeddedDocument):
     units = DictField(default={})
 
 class Country(Document):
-    _id = ObjectIdField()
     link_img = StringField(default='',max_length=1000)
     name = StringField(default='',max_length=100,unique=True)
     budget = EmbeddedDocumentField('Budget')
@@ -125,7 +123,6 @@ class Country(Document):
     army = EmbeddedDocumentField('Army')
 
 class User(Document):
-    _id = ObjectIdField()
     isAuth = BooleanField(default=False)
     username = StringField(default='', max_length=100,unique=True)
     password = StringField(default='', max_length=100)
@@ -139,7 +136,6 @@ class User(Document):
     date_last_send_feedback = DateTimeField(default=timezone.now)
 
 class Trade(Document):
-    _id = ObjectIdField()
     name = StringField(default='',max_length=100)
     price_now = FloatField(default=0.0,min_value=0)
     history_price = EmbeddedDocumentListField('History',default=[])

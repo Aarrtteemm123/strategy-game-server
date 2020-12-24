@@ -22,8 +22,8 @@ from polls.view_models.warehouse import WarehouseCardView
 class CountryViewService:
     def get_basic_statistic(self, user_id):
         start = time.time()
-        user = User.objects(_id=user_id).first()
-        country = Country.objects(_id=user.country._id).first()
+        user = User.objects(id=user_id).first()
+        country = Country.objects(id=user.country.id).first()
 
         total_profit = round(GameService().get_total_profit(country))
         economic_place = GameService().get_economic_place(country.name)
@@ -93,8 +93,8 @@ class CountryViewService:
 
     def get_budget(self, user_id):
         start = time.time()
-        user = User.objects(_id=user_id).first()
-        country = Country.objects(_id=user.country._id).first()
+        user = User.objects(id=user_id).first()
+        country = Country.objects(id=user.country.id).first()
 
         pop_taxes_profit = GameService().get_pop_taxes_profit(country)
         army_taxes_profit = GameService().get_army_taxes_profit(country)
@@ -137,8 +137,8 @@ class CountryViewService:
 
     def get_technologies(self, user_id):
         start = time.time()
-        user = User.objects(_id=user_id).first()
-        country = Country.objects(_id=user.country._id).first()
+        user = User.objects(id=user_id).first()
+        country = Country.objects(id=user.country.id).first()
         technologies_view_list = []
         for technology in country.technologies:
             technology_view = TechnologyView(technology.name,technology.price_upgrade,
@@ -151,8 +151,8 @@ class CountryViewService:
 
     def get_industry(self, user_id):
         start = time.time()
-        user = User.objects(_id=user_id).first()
-        country = Country.objects(_id=user.country._id).first()
+        user = User.objects(id=user_id).first()
+        country = Country.objects(id=user.country.id).first()
         industry_dict = {}
         farms_list = []
         mines_list = []
@@ -213,8 +213,8 @@ class CountryViewService:
 
     def get_warehouses(self, user_id):
         start = time.time()
-        user = User.objects(_id=user_id).first()
-        country = Country.objects(_id=user.country._id).first()
+        user = User.objects(id=user_id).first()
+        country = Country.objects(id=user.country.id).first()
         warehouses_list = []
         for warehouse in country.warehouses:
             warehouse_card_view = WarehouseCardView(
@@ -231,8 +231,8 @@ class CountryViewService:
 
     def get_politics_laws(self, user_id):
         start = time.time()
-        user = User.objects(_id=user_id).first()
-        country = Country.objects(_id=user.country._id).first()
+        user = User.objects(id=user_id).first()
+        country = Country.objects(id=user.country.id).first()
         adopted_laws_name_list = country.adopted_laws
         finish = time.time()
         # print(finish -start)
@@ -240,8 +240,8 @@ class CountryViewService:
 
     def get_population(self, user_id):
         start = time.time()
-        user = User.objects(_id=user_id).first()
-        country = Country.objects(_id=user.country._id).first()
+        user = User.objects(id=user_id).first()
+        country = Country.objects(id=user.country.id).first()
         modifiers_view_list = []
         population_modifiers = 0  # -> 1(100%)
         for mod in country.population.modifiers:
@@ -269,9 +269,9 @@ class CountryViewService:
 
     def get_trade(self, user_id):
         start = time.time()
-        user = User.objects(_id=user_id).first()
+        user = User.objects(id=user_id).first()
         goods = Trade.objects
-        target_country = Country.objects(_id=user.country._id).first()
+        target_country = Country.objects(id=user.country.id).first()
         countries = Country.objects
 
         trade_cards_view_list = []
@@ -313,8 +313,8 @@ class CountryViewService:
 
     def get_army(self, user_id):
         start = time.time()
-        user = User.objects(_id=user_id).first()
-        country = Country.objects(_id=user.country._id).first()
+        user = User.objects(id=user_id).first()
+        country = Country.objects(id=user.country.id).first()
         army = country.army.units
         army_units = ArmyUnit.objects()
         army_view_list = []
@@ -373,8 +373,8 @@ class NewsViewService:
 
 class PlayerViewService:
     def get_account(self,user_id):
-        user = User.objects(_id=user_id).first()
-        country = Country.objects(_id=user.country._id).first()
+        user = User.objects(id=user_id).first()
+        country = Country.objects(id=user.country.id).first()
         game_service = GameService()
         days_in_game = (datetime.datetime.now() - user.date_registration).days
         date_reg = user.date_registration.strftime('%d.%m.%Y')
@@ -389,7 +389,7 @@ class PlayerViewService:
         start = time.time()
         user = User.objects(username=username).first()
         if user is not None:
-            country = Country.objects(_id=user.country._id).first()
+            country = Country.objects(id=user.country.id).first()
             player_view = PlayerView(
                 country.link_img,country.name,user.username,GameService().get_economic_place(country.name),
                 GameService().get_army_place(country.name),country.budget.money,country.population.total_population,
@@ -408,8 +408,8 @@ class PlayerViewService:
         return sorted(view_list,key=lambda x: x.economic_place)[:number]
 
     def get_view_page(self,user_id):
-        user = User.objects(_id=user_id).first()
-        country = Country.objects(_id=user.country._id).first()
+        user = User.objects(id=user_id).first()
+        country = Country.objects(id=user.country.id).first()
         economic_place = GameService().get_economic_place(country.name)
         army_place = GameService().get_army_place(country.name)
         top_players = self.get_top_players(10)

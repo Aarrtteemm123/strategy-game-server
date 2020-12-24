@@ -3,7 +3,7 @@ import time
 
 from django.test import TestCase
 
-from polls.models import News, Country, User
+from polls.models import News, Country, User, ArmyUnit
 from polls.services.user_service import UserService
 from polls.services.game_service import GameService
 from polls.services.system_service import SystemService
@@ -20,8 +20,6 @@ user = User.objects(username='pl2').first()
 #GameService().buy_goods(country.name,'Minerals',100)
 #SystemService().update_system()
 #GameService().update_population(country)
-for i in range(5):
-    SystemService().update_system()
 #print(UserService().delete_user_account('5fe0d7a9c17049903ac3b6f3','pas12'))
 class ServiceTestCase(TestCase):
     def setUp(self):

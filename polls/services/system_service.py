@@ -19,7 +19,7 @@ class SystemService:
 
 
     def get_user_settings(self,user_id):
-        user = User.objects(_id=user_id).first()
+        user = User.objects(id=user_id).first()
         return user.settings
 
     def set_user_settings(self,user,settings):

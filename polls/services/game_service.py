@@ -437,7 +437,7 @@ class GameService:
 
     def get_number_soldiers_from_units(self,country):
         number = 0
-        army_units = ArmyUnit.objects
+        army_units = ArmyUnit.objects()
         army = country.army.units
         for unit in army:
             number+=army[unit]*army_units.filter(name=unit).first().need_peoples
@@ -654,12 +654,12 @@ class GameService:
             obj.save()
 
     def calculate_war(self,attacking_country_name,defending_country_name):
-        # bug (weapon after battle more then before)!
         attacking_country = Country.objects(name=attacking_country_name).first()
         defending_country = Country.objects(name=defending_country_name).first()
         army_units = ArmyUnit.objects()
         res_war_view = ResultWarView()
-        # change total population after war
+        unit_solders_attacking_country_before_war = self.get_number_soldiers_from_units(attacking_country)
+        unit_solders_defending_country_before_war = self.get_number_soldiers_from_units(defending_country)
         army_before_battle = attacking_country.army.units.copy()
         for unit in army_units:
             sorted_units_by_attack = sorted(unit.unit_characteristic.items(), key=lambda x: x[1].attack_value, reverse=True)
@@ -673,9 +673,9 @@ class GameService:
                         dif = defence_power - attack_power
                         if dif > 0:
                             attacking_country.army.units[unit.name] = 0
-                            defending_country.army.units[item[1].unit_name] =  dif // item[1].defence_value
+                            defending_country.army.units[item[1].unit_name] =  (dif/sum_defence_modifiers) // item[1].defence_value
                         elif dif < 0:
-                            attacking_country.army.units[unit.name] = -dif // item[1].attack_value
+                            attacking_country.army.units[unit.name] = (-dif/sum_attack_modifiers) // item[1].attack_value
                             defending_country.army.units[item[1].unit_name] = 0
                         elif dif == 0:
                             attacking_country.army.units[unit.name] = 0
@@ -698,19 +698,32 @@ class GameService:
             defending_country.army.victories += 1
             attacking_country.army.losses += 1
             res_war_view.victory_flag = False
+
+        losses_people_attacking_country = unit_solders_attacking_country_before_war - self.get_number_soldiers_from_units(attacking_country)
+        losses_people_defending_country = unit_solders_defending_country_before_war - self.get_number_soldiers_from_units(defending_country)
         attacking_country.population.solders = attacking_country.army.reserve_military_manpower + self.get_number_soldiers_from_units(attacking_country)
         defending_country.population.solders = defending_country.army.reserve_military_manpower + self.get_number_soldiers_from_units(defending_country)
+        attacking_country.population.total_population -= losses_people_attacking_country
+        defending_country.population.total_population -= losses_people_defending_country
 
         for name,number in attacking_country.army.units.items():
             if army_before_battle[name] != number:
                 res_war_view.losses.append(ItemWarResult(name,army_before_battle[name] - number))
 
+        attacking_country.budget.military_expenses = self.get_military_expenses(attacking_country)
+        defending_country.budget.military_expenses = self.get_military_expenses(defending_country)
 
-
-        # change military expenses
-        #attacking_country.save() !!!!
-        #defending_country.save() !!!!
+        #attacking_country.save() !
+        #defending_country.save() !
         return res_war_view
+
+    def get_military_expenses(self,country):
+        military_expenses = 0
+        army_units = ArmyUnit.objects()
+        army = country.army.units
+        for unit in army:
+            military_expenses += army[unit] * army_units.filter(name=unit).first().maintenance_price
+        return military_expenses
 
     def get_farms_production_profit(self,country):
         goods = Trade.objects()
