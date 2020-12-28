@@ -100,7 +100,7 @@ class CountryViewService:
         army_taxes_profit = GameService().get_army_taxes_profit(country)
         farms_taxes_profit = GameService().get_farms_taxes_profit(country)
         mines_taxes_profit = GameService().get_mines_taxes_profit(country)
-        all_factory_taxes_profit = GameService().get_civil_factories_taxes_profit(country) \
+        all_factory_taxes_profit = GameService().get_factories_taxes_profit(country) \
             + GameService().get_military_factories_taxes_profit(country)
         taxes_profit = pop_taxes_profit \
             + farms_taxes_profit \
@@ -108,7 +108,7 @@ class CountryViewService:
             + all_factory_taxes_profit
         farms_profit = GameService().get_farms_production_profit(country)
         mines_profit = GameService().get_mines_production_profit(country)
-        civil_factories_profit = GameService().get_civil_factories_production_profit(country)
+        civil_factories_profit = GameService().get_factories_production_profit(country)
         military_factories_profit = GameService().get_military_factories_production_profit(country)
         total_profit = taxes_profit + farms_profit + mines_profit + civil_factories_profit + military_factories_profit
         pop_tax_card = TaxesCard('population taxes',country.budget.population_taxes,

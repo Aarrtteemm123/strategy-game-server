@@ -170,7 +170,7 @@ def change_taxes(request,user_id):
             user = User.objects(id=user_id).first()
             if not user.isAuth:
                 return HttpResponse({}, status=status.HTTP_401_UNAUTHORIZED)
-            country = Country.objects(id=user.country._id).first()
+            country = Country.objects(id=user.country.id).first()
             request_data = JSONParser().parse(request)
             GameService().set_taxes(country.name,request_data['name_tax'],request_data['new_value'])
             return HttpResponse({}, status=status.HTTP_200_OK)
