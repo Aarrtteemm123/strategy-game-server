@@ -45,7 +45,7 @@ class GameService:
         if country.population.modifiers is not None:
             pop_modifiers = sum([mod.value for mod in country.population.modifiers])
             return (pop_modifiers + country.population.basic_percent_growth_rate + 100) / 100
-        return country.population.basic_percent_growth_rate / 100
+        return (country.population.basic_percent_growth_rate + 100) / 100
 
     def get_industry_modifiers(self,country,address_to):
         if country.industry_modifiers is not None:

@@ -172,7 +172,7 @@ def change_taxes(request,user_id):
                 return HttpResponse({}, status=status.HTTP_401_UNAUTHORIZED)
             country = Country.objects(id=user.country.id).first()
             request_data = JSONParser().parse(request)
-            GameService().set_taxes(country.name,request_data['name_tax'],request_data['new_value'])
+            GameService().set_taxes(country,request_data['name_tax'],request_data['new_value'])
             return HttpResponse({}, status=status.HTTP_200_OK)
         except Exception as error:
             return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -188,7 +188,7 @@ def upgrade_technology(request,user_id):
                 return HttpResponse({}, status=status.HTTP_401_UNAUTHORIZED)
             country = Country.objects(id=user.country.id).first()
             request_data = JSONParser().parse(request)
-            GameService().upgrade_technology(country.name, request_data['name_technology'])
+            GameService().upgrade_technology(country, request_data['name_technology'])
         except Exception as error:
             return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return HttpResponse({}, status=status.HTTP_200_OK)
@@ -204,7 +204,7 @@ def build_industry(request,user_id):
                 return HttpResponse({}, status=status.HTTP_401_UNAUTHORIZED)
             country = Country.objects(id=user.country.id).first()
             request_data = JSONParser().parse(request)
-            GameService().build_industry(country.name,request_data['name_building'])
+            GameService().build_industry(country,request_data['name_building'])
         except Exception as error:
             return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return HttpResponse({}, status=status.HTTP_200_OK)
@@ -220,7 +220,7 @@ def remove_industry(request,user_id):
                 return HttpResponse({}, status=status.HTTP_401_UNAUTHORIZED)
             country = Country.objects(id=user.country.id).first()
             request_data = JSONParser().parse(request)
-            GameService().remove_industry(country.name, request_data['name_building'])
+            GameService().remove_industry(country, request_data['name_building'])
             return HttpResponse({}, status=status.HTTP_200_OK)
         except Exception as error:
             return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -236,7 +236,7 @@ def upgrade_warehouse(request,user_id):
                 return HttpResponse({}, status=status.HTTP_401_UNAUTHORIZED)
             country = Country.objects(id=user.country.id).first()
             request_data = JSONParser().parse(request)
-            GameService().upgrade_warehouse(country.name, request_data['name_warehouse'])
+            GameService().upgrade_warehouse(country, request_data['name_warehouse'])
             return HttpResponse({}, status=status.HTTP_200_OK)
         except Exception as error:
             return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -250,13 +250,13 @@ def set_law(request,user_id):
             user = User.objects(id=user_id).first()
             if not user.isAuth:
                 return HttpResponse({}, status=status.HTTP_401_UNAUTHORIZED)
-            country = Country.objects(v=user.country.id).first()
+            country = Country.objects(id=user.country.id).first()
             request_data = JSONParser().parse(request)
             names_political_laws = ['Isolation','Free medicine','Free housing','Free education']
             if request_data['name_law'] in names_political_laws:
-                GameService().set_politics_law(country.name, request_data['name_law'])
+                GameService().set_politics_law(country, request_data['name_law'])
             else:
-                GameService().set_conscript_law(country.name, request_data['name_law'])
+                GameService().set_conscript_law(country, request_data['name_law'])
             return HttpResponse({}, status=status.HTTP_200_OK)
         except Exception as error:
             return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -272,7 +272,7 @@ def cancel_law(request,user_id):
                 return HttpResponse({}, status=status.HTTP_401_UNAUTHORIZED)
             country = Country.objects(id=user.country.id).first()
             request_data = JSONParser().parse(request)
-            GameService().cancel_politics_law(country.name, request_data['name_law'])
+            GameService().cancel_politics_law(country, request_data['name_law'])
             return HttpResponse({}, status=status.HTTP_200_OK)
         except Exception as error:
             return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -288,7 +288,7 @@ def buy_goods(request,user_id):
                 return HttpResponse({}, status=status.HTTP_401_UNAUTHORIZED)
             country = Country.objects(id=user.country.id).first()
             request_data = JSONParser().parse(request)
-            GameService().buy_goods(country.name, request_data['name_goods'],int(request_data['number']))
+            GameService().buy_goods(country, request_data['name_goods'],int(request_data['number']))
             return HttpResponse({}, status=status.HTTP_200_OK)
         except Exception as error:
             return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -304,7 +304,7 @@ def sell_goods(request,user_id):
                 return HttpResponse({}, status=status.HTTP_401_UNAUTHORIZED)
             country = Country.objects(id=user.country.id).first()
             request_data = JSONParser().parse(request)
-            GameService().sell_goods(country.name, request_data['name_goods'],int(request_data['number']))
+            GameService().sell_goods(country, request_data['name_goods'],int(request_data['number']))
             return HttpResponse({}, status=status.HTTP_200_OK)
         except Exception as error:
             return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -321,7 +321,7 @@ def edit_army(request,user_id):
                 return HttpResponse({}, status=status.HTTP_401_UNAUTHORIZED)
             country = Country.objects(id=user.country.id).first()
             request_data = JSONParser().parse(request)
-            GameService().edit_army(country.name,request_data['name_unit'],int(request_data['new_number']))
+            GameService().edit_army(country,request_data['name_unit'],int(request_data['new_number']))
             return HttpResponse({}, status=status.HTTP_200_OK)
         except Exception as error:
             return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
