@@ -1,5 +1,6 @@
 import random,re
 from django.utils import timezone
+from polls.errors import *
 from polls.models import Country, Modifier, Trade, Law, ArmyUnit, History
 from polls.view_models.army import ResultWarView, ItemWarResult
 
@@ -153,50 +154,62 @@ class GameService:
             goods.save()
 
     def set_taxes(self, country, type_taxes, new_value):
-        if type_taxes == 'population_taxes' and 100 >= new_value >= 0:
-            country.budget.population_taxes = new_value
-            existing_modifiers = country.population.modifiers.filter(address_from='population taxes')
-            if existing_modifiers.count() == 0:
-                country.population.modifiers.append(Modifier(value=-0.2 * new_value + 10, address_from='population taxes'))
-            else:
-                existing_modifiers.update(value=-0.2 * new_value + 10)
+        if type_taxes == 'population_taxes':
+            if 100 >= new_value >= 0:
+                country.budget.population_taxes = new_value
+                existing_modifiers = country.population.modifiers.filter(address_from='population taxes')
+                if existing_modifiers.count() == 0:
+                    country.population.modifiers.append(Modifier(value=-0.2 * new_value + 10, address_from='population taxes'))
+                else:
+                    existing_modifiers.update(value=-0.2 * new_value + 10)
+            else: raise TaxValueNotInRangeError
 
-        elif type_taxes == 'farms_taxes' and 100 >= new_value >= 0:
-            country.budget.farms_taxes = new_value
-            existing_modifiers = country.industry_modifiers.filter(address_from='farms taxes')
-            if existing_modifiers.count() == 0:
-                country.industry_modifiers.append(Modifier(value=-0.6 * new_value + 30, address_from='farms taxes', address_to='farms'))
-            else:
-                existing_modifiers.update(value=-0.6 * new_value + 30)
+        elif type_taxes == 'farms_taxes':
+            if 100 >= new_value >= 0:
+                country.budget.farms_taxes = new_value
+                existing_modifiers = country.industry_modifiers.filter(address_from='farms taxes')
+                if existing_modifiers.count() == 0:
+                    country.industry_modifiers.append(Modifier(value=-0.6 * new_value + 30, address_from='farms taxes', address_to='farms'))
+                else:
+                    existing_modifiers.update(value=-0.6 * new_value + 30)
+            else: raise TaxValueNotInRangeError
 
-        elif type_taxes == 'mines_taxes' and 100 >= new_value >= 0:
-            country.budget.mines_taxes = new_value
-            existing_modifiers = country.industry_modifiers.filter(address_from='mines taxes')
-            if existing_modifiers.count() == 0:
-                country.industry_modifiers.append(
-                    Modifier(value=-0.6 * new_value + 30, address_from='mines taxes', address_to='mines'))
-            else:
-                existing_modifiers.update(value=-0.6 * new_value + 30)
+        elif type_taxes == 'mines_taxes':
+            if 100 >= new_value >= 0:
+                country.budget.mines_taxes = new_value
+                existing_modifiers = country.industry_modifiers.filter(address_from='mines taxes')
+                if existing_modifiers.count() == 0:
+                    country.industry_modifiers.append(
+                        Modifier(value=-0.6 * new_value + 30, address_from='mines taxes', address_to='mines'))
+                else:
+                    existing_modifiers.update(value=-0.6 * new_value + 30)
+            else: raise TaxValueNotInRangeError
 
         elif type_taxes == 'factories_taxes' and 100 >= new_value >= 0:
-            country.budget.factories_taxes = new_value
-            existing_modifiers = country.industry_modifiers.filter(address_from='factories taxes')
-            if existing_modifiers.count() == 0:
-                country.industry_modifiers.append(
-                    Modifier(value=-0.6 * new_value + 30, address_from='factories taxes', address_to='factories'))
-            else:
-                existing_modifiers.update(value=-0.6 * new_value + 30)
+            if 100 >= new_value >= 0:
+                country.budget.factories_taxes = new_value
+                existing_modifiers = country.industry_modifiers.filter(address_from='factories taxes')
+                if existing_modifiers.count() == 0:
+                    country.industry_modifiers.append(
+                        Modifier(value=-0.6 * new_value + 30, address_from='factories taxes', address_to='factories'))
+                else:
+                    existing_modifiers.update(value=-0.6 * new_value + 30)
+            else: raise TaxValueNotInRangeError
 
         elif type_taxes == 'military_taxes' and 100 >= new_value >= 0:
-            country.budget.military_taxes = new_value
-            existing_attack_modifiers = country.army.attack_modifiers.filter(address_from='army taxes')
-            existing_defence_modifiers = country.army.defence_modifiers.filter(address_from='army taxes')
-            if existing_attack_modifiers.count() == 0:
-                country.army.attack_modifiers.append(Modifier(value=-new_value + 50, address_from='army taxes'))
-                country.army.defence_modifiers.append(Modifier(value=-new_value + 50, address_from='army taxes'))
-            else:
-                existing_attack_modifiers.update(value=-new_value + 50)
-                existing_defence_modifiers.update(value=-new_value + 50)
+            if 100 >= new_value >= 0:
+                country.budget.military_taxes = new_value
+                existing_attack_modifiers = country.army.attack_modifiers.filter(address_from='army taxes')
+                existing_defence_modifiers = country.army.defence_modifiers.filter(address_from='army taxes')
+                if existing_attack_modifiers.count() == 0:
+                    country.army.attack_modifiers.append(Modifier(value=-new_value + 50, address_from='army taxes'))
+                    country.army.defence_modifiers.append(Modifier(value=-new_value + 50, address_from='army taxes'))
+                else:
+                    existing_attack_modifiers.update(value=-new_value + 50)
+                    existing_defence_modifiers.update(value=-new_value + 50)
+            else: raise TaxValueNotInRangeError
+
+        else: raise UnknownNameTaxError(type_taxes)
 
         self.update_warehouses_filling_speed(country)
         country.save()
@@ -204,59 +217,66 @@ class GameService:
     def upgrade_technology(self, country, technology_name):
         technology = country.technologies.filter(name=technology_name).first()
         if country.budget.money >= technology.price_upgrade:
-            country.budget.total_expenses += technology.price_upgrade
-            country.budget.money -= technology.price_upgrade
-            technology.price_upgrade *= technology.increasePrice
-            technology.level += 1
+            if technology.level < technology.max_level:
+                country.budget.total_expenses += technology.price_upgrade
+                country.budget.money -= technology.price_upgrade
+                technology.price_upgrade *= technology.increasePrice
+                technology.level += 1
 
-            if technology.name == 'Medicine technology':
-                existing_modifiers = country.population.modifiers.filter(address_from=technology.name)
-                if existing_modifiers.count() == 0:
-                    country.population.modifiers.append(Modifier(value=technology.modifiers[0].value,
-                                                                 address_from=technology.name))
-                else:
-                    existing_modifiers.update(value=technology.modifiers[0].value * technology.level)
+                if technology.name == 'Medicine technology':
+                    existing_modifiers = country.population.modifiers.filter(address_from=technology.name)
+                    if existing_modifiers.count() == 0:
+                        country.population.modifiers.append(Modifier(value=technology.modifiers[0].value,
+                                                                     address_from=technology.name))
+                    else:
+                        existing_modifiers.update(value=technology.modifiers[0].value * technology.level)
 
-            if technology.name == 'Computers technology':
-                existing_modifiers = country.industry_modifiers.filter(address_from=technology.name)
-                if existing_modifiers.count() == 0:
-                    country.industry_modifiers.append(Modifier(value=technology.modifiers[0].value,
-                                                               address_from=technology.name))
-                else:
-                    existing_modifiers.update(value=technology.modifiers[0].value * technology.level)
-                self.update_warehouses_filling_speed(country)
-
-            if technology.name == 'Upgrade weapons':
-                existing_modifiers = country.army.attack_modifiers.filter(address_from=technology.name)
-                if existing_modifiers.count() == 0:
-                    country.army.attack_modifiers.append(Modifier(value=technology.modifiers[0].value,
-                                                                  address_from=technology.name))
-                else:
-                    existing_modifiers.update(value=technology.modifiers[0].value * technology.level)
-
-            if technology.name == 'Upgrade defence system':
-                existing_modifiers = country.army.defence_modifiers.filter(address_from=technology.name)
-                if existing_modifiers.count() == 0:
-                    country.army.defence_modifiers.append(Modifier(value=technology.modifiers[0].value,
+                if technology.name == 'Computers technology':
+                    existing_modifiers = country.industry_modifiers.filter(address_from=technology.name)
+                    if existing_modifiers.count() == 0:
+                        country.industry_modifiers.append(Modifier(value=technology.modifiers[0].value,
                                                                    address_from=technology.name))
-                else:
-                    existing_modifiers.update(value=technology.modifiers[0].value * technology.level)
+                    else:
+                        existing_modifiers.update(value=technology.modifiers[0].value * technology.level)
+                    self.update_warehouses_filling_speed(country)
 
+                if technology.name == 'Upgrade weapons':
+                    existing_modifiers = country.army.attack_modifiers.filter(address_from=technology.name)
+                    if existing_modifiers.count() == 0:
+                        country.army.attack_modifiers.append(Modifier(value=technology.modifiers[0].value,
+                                                                      address_from=technology.name))
+                    else:
+                        existing_modifiers.update(value=technology.modifiers[0].value * technology.level)
+
+                if technology.name == 'Upgrade defence system':
+                    existing_modifiers = country.army.defence_modifiers.filter(address_from=technology.name)
+                    if existing_modifiers.count() == 0:
+                        country.army.defence_modifiers.append(Modifier(value=technology.modifiers[0].value,
+                                                                       address_from=technology.name))
+                    else:
+                        existing_modifiers.update(value=technology.modifiers[0].value * technology.level)
+
+                else: raise UnknownNameTechnologyError(technology_name)
+            else: raise MaxLevelError(technology.max_level)
+        else: raise LowBudgetError
         country.save()
 
     def __calculate_build_of_industrial_building(self, country, building, type_building):
-        if country.budget.money >= building.price_build and \
-                country.population.free_people >= building.workers:
-            country.budget.total_expenses += building.price_build
-            country.budget.money -= building.price_build
-            country.population.free_people -= building.workers
-            building.number += 1
-            country.army.reserve_military_manpower = country.population.free_people * (country.army.conscript_law_value / 100)
-            country.population.free_people *= (1 - country.army.conscript_law_value / 100)
-            country.population.solders = country.army.reserve_military_manpower + self.get_number_soldiers_from_units(country)
-            if type_building == 'farm': country.population.farmers += building.workers
-            if type_building == 'mine' or type_building == 'well': country.population.miners += building.workers
-            if type_building == 'factory': country.population.factory_workers += building.workers
+        if country.budget.money >= building.price_build:
+            if country.population.free_people >= building.workers:
+                country.budget.total_expenses += building.price_build
+                country.budget.money -= building.price_build
+                country.population.free_people -= building.workers
+                building.number += 1
+                country.army.reserve_military_manpower = country.population.free_people * (country.army.conscript_law_value / 100)
+                country.population.free_people *= (1 - country.army.conscript_law_value / 100)
+                country.population.solders = country.army.reserve_military_manpower + self.get_number_soldiers_from_units(country)
+                if type_building == 'farm': country.population.farmers += building.workers
+                if type_building == 'mine' or type_building == 'well': country.population.miners += building.workers
+                if type_building == 'factory': country.population.factory_workers += building.workers
+                else: raise UnknownTypeBuildingError(type_building)
+            else: raise FreePeopleError
+        else: raise LowBudgetError
 
     def build_industry(self, country, name_building):
         type_building = re.split(r' ', name_building)[-1]
@@ -277,6 +297,8 @@ class GameService:
                 factory = country.military_factories.filter(name=name_building).first()
                 self.__calculate_build_of_industrial_building(country, factory, type_building)
 
+        else: raise UnknownTypeBuildingError(type_building)
+
         country.save()
 
     def __calculate_remove_of_industrial_building(self, country, building, type_building):
@@ -289,6 +311,7 @@ class GameService:
             if type_building == 'farm': country.population.farmers -= building.workers
             if type_building == 'mine' or type_building == 'well': country.population.miners -= building.workers
             if type_building == 'factory': country.population.factory_workers -= building.workers
+            else: raise UnknownTypeBuildingError(type_building)
 
     def remove_industry(self, country, name_building):
         type_building = re.split(r' ', name_building)[-1]
@@ -308,6 +331,8 @@ class GameService:
             else:
                 factory = country.military_factories.filter(name=name_building).first()
                 self.__calculate_remove_of_industrial_building(country, factory, type_building)
+
+        else: raise UnknownTypeBuildingError(type_building)
 
         self.update_warehouses_filling_speed(country)
         country.save()
@@ -361,45 +386,53 @@ class GameService:
 
     def upgrade_warehouse(self, country, name_goods):
         warehouse = [item for item in country.warehouses if item.goods.name == name_goods][0]
-        if country.budget.money >= warehouse.price_upgrade and warehouse.level < warehouse.max_level:
-            country.budget.total_expenses += warehouse.price_upgrade
-            country.budget.money -= warehouse.price_upgrade
-            warehouse.price_upgrade *= warehouse.increasePrice
-            warehouse.level += 1
-            warehouse.capacity += warehouse.added_capacity
-            country.save()
+        if country.budget.money >= warehouse.price_upgrade:
+            if warehouse.level < warehouse.max_level:
+                country.budget.total_expenses += warehouse.price_upgrade
+                country.budget.money -= warehouse.price_upgrade
+                warehouse.price_upgrade *= warehouse.increasePrice
+                warehouse.level += 1
+                warehouse.capacity += warehouse.added_capacity
+                country.save()
+            else: raise MaxLevelError(warehouse.max_level)
+        else: raise LowBudgetError
 
     def set_politics_law(self, country, name_law):
         law = Law.objects(name=name_law).first()
 
-        if country.budget.money >= law.price and \
-                not name_law in country.adopted_laws:
+        if country.budget.money >= law.price:
 
-            if name_law == 'Free medicine':
-                country.population.modifiers.append(Modifier(value=5, address_from=name_law))
-                country.industry_modifiers.append(Modifier(value=-10, address_from=name_law, address_to='industry'))
+            if not name_law in country.adopted_laws:
 
-            elif name_law == 'Isolation':
-                country.population.modifiers.append(Modifier(value=-5, address_from=name_law))
-                country.industry_modifiers.append(Modifier(value=-5, address_from=name_law, address_to='industry'))
-                country.army.defence_modifiers.append(Modifier(value=15, address_from=name_law))
+                if name_law == 'Free medicine':
+                    country.population.modifiers.append(Modifier(value=5, address_from=name_law))
+                    country.industry_modifiers.append(Modifier(value=-10, address_from=name_law, address_to='industry'))
 
-            elif name_law == 'Free housing':
-                country.population.modifiers.append(Modifier(value=5, address_from=name_law))
-                country.industry_modifiers.append(Modifier(value=-10, address_from=name_law, address_to='industry'))
-                country.army.attack_modifiers.append(Modifier(value=-10, address_from=name_law))
-                country.army.defence_modifiers.append(Modifier(value=10, address_from=name_law))
+                elif name_law == 'Isolation':
+                    country.population.modifiers.append(Modifier(value=-5, address_from=name_law))
+                    country.industry_modifiers.append(Modifier(value=-5, address_from=name_law, address_to='industry'))
+                    country.army.defence_modifiers.append(Modifier(value=15, address_from=name_law))
 
-            elif name_law == 'Free education':
-                country.population.modifiers.append(Modifier(value=-2, address_from=name_law))
-                country.industry_modifiers.append(Modifier(value=15, address_from=name_law, address_to='industry'))
-                country.army.attack_modifiers.append(Modifier(value=-10, address_from=name_law))
+                elif name_law == 'Free housing':
+                    country.population.modifiers.append(Modifier(value=5, address_from=name_law))
+                    country.industry_modifiers.append(Modifier(value=-10, address_from=name_law, address_to='industry'))
+                    country.army.attack_modifiers.append(Modifier(value=-10, address_from=name_law))
+                    country.army.defence_modifiers.append(Modifier(value=10, address_from=name_law))
 
-            country.budget.total_expenses += law.price
-            country.budget.money -= law.price
-            country.adopted_laws.append(name_law)
-            self.update_warehouses_filling_speed(country)
-            country.save()
+                elif name_law == 'Free education':
+                    country.population.modifiers.append(Modifier(value=-2, address_from=name_law))
+                    country.industry_modifiers.append(Modifier(value=15, address_from=name_law, address_to='industry'))
+                    country.army.attack_modifiers.append(Modifier(value=-10, address_from=name_law))
+
+                else: raise UnknownNameLawError(name_law)
+
+                country.budget.total_expenses += law.price
+                country.budget.money -= law.price
+                country.adopted_laws.append(name_law)
+                self.update_warehouses_filling_speed(country)
+                country.save()
+
+        else: raise LowBudgetError
 
     def __update_conscript_law(self, country, name_law, law, conscript_law_value,
                                pop_mod=None, indus_mod=None, attack_mod=None, def_mod=None):
@@ -425,49 +458,55 @@ class GameService:
     def set_conscript_law(self, country, name_law):
         law = Law.objects(name=name_law).first()
 
-        if name_law == 'Conscript law: Elite' and country.budget.money >= law.price:
-            self.__update_conscript_law(country, name_law, law, 0.5,
-                                        pop_mod=Modifier(value=-10, address_from=name_law),
-                                        indus_mod=Modifier(value=10, address_from=name_law, address_to='industry'),
-                                        attack_mod=Modifier(value=10, address_from=name_law),
-                                        def_mod=Modifier(value=10, address_from=name_law))
+        if country.budget.money >= law.price:
 
-        elif name_law == 'Conscript law: Volunteer' and country.budget.money >= law.price:
-            self.__update_conscript_law(country, name_law, law, 1.5)
+            if name_law == 'Conscript law: Elite':
+                self.__update_conscript_law(country, name_law, law, 0.5,
+                                            pop_mod=Modifier(value=-10, address_from=name_law),
+                                            indus_mod=Modifier(value=10, address_from=name_law, address_to='industry'),
+                                            attack_mod=Modifier(value=10, address_from=name_law),
+                                            def_mod=Modifier(value=10, address_from=name_law))
 
-        elif name_law == 'Conscript law: Limited Conscription' and country.budget.money >= law.price:
-            self.__update_conscript_law(country, name_law, law, 2.5,
-                                        indus_mod=Modifier(value=-5, address_from=name_law, address_to='industry'),
-                                        attack_mod=Modifier(value=5, address_from=name_law),
-                                        def_mod=Modifier(value=5, address_from=name_law))
+            elif name_law == 'Conscript law: Volunteer':
+                self.__update_conscript_law(country, name_law, law, 1.5)
 
-        elif name_law == 'Conscript law: Extensive Conscription' and country.budget.money >= law.price:
-            self.__update_conscript_law(country, name_law, law, 5,
-                                        indus_mod=Modifier(value=-5, address_from=name_law, address_to='industry'))
+            elif name_law == 'Conscript law: Limited Conscription':
+                self.__update_conscript_law(country, name_law, law, 2.5,
+                                            indus_mod=Modifier(value=-5, address_from=name_law, address_to='industry'),
+                                            attack_mod=Modifier(value=5, address_from=name_law),
+                                            def_mod=Modifier(value=5, address_from=name_law))
 
-        elif name_law == 'Conscript law: Service by Requirement' and country.budget.money >= law.price:
-            self.__update_conscript_law(country, name_law, law, 10,
-                                        pop_mod=Modifier(value=-5, address_from=name_law),
-                                        indus_mod=Modifier(value=5, address_from=name_law, address_to='industry'),
-                                        attack_mod=Modifier(value=-5, address_from=name_law),
-                                        def_mod=Modifier(value=-5, address_from=name_law))
+            elif name_law == 'Conscript law: Extensive Conscription':
+                self.__update_conscript_law(country, name_law, law, 5,
+                                            indus_mod=Modifier(value=-5, address_from=name_law, address_to='industry'))
 
-        elif name_law == 'Conscript law: All Adults Serve' and country.budget.money >= law.price:
-            self.__update_conscript_law(country, name_law, law, 20,
-                                        pop_mod=Modifier(value=-10, address_from=name_law),
-                                        indus_mod=Modifier(value=-15, address_from=name_law, address_to='industry'),
-                                        attack_mod=Modifier(value=-5, address_from=name_law),
-                                        def_mod=Modifier(value=-5, address_from=name_law))
+            elif name_law == 'Conscript law: Service by Requirement':
+                self.__update_conscript_law(country, name_law, law, 10,
+                                            pop_mod=Modifier(value=-5, address_from=name_law),
+                                            indus_mod=Modifier(value=5, address_from=name_law, address_to='industry'),
+                                            attack_mod=Modifier(value=-5, address_from=name_law),
+                                            def_mod=Modifier(value=-5, address_from=name_law))
 
-        elif name_law == 'Conscript law: All with weapons' and country.budget.money >= law.price:
-            self.__update_conscript_law(country, name_law, law, 30,
-                                        pop_mod=Modifier(value=-15, address_from=name_law),
-                                        indus_mod=Modifier(value=-35, address_from=name_law, address_to='industry'),
-                                        attack_mod=Modifier(value=-15, address_from=name_law),
-                                        def_mod=Modifier(value=-10, address_from=name_law))
+            elif name_law == 'Conscript law: All Adults Serve':
+                self.__update_conscript_law(country, name_law, law, 20,
+                                            pop_mod=Modifier(value=-10, address_from=name_law),
+                                            indus_mod=Modifier(value=-15, address_from=name_law, address_to='industry'),
+                                            attack_mod=Modifier(value=-5, address_from=name_law),
+                                            def_mod=Modifier(value=-5, address_from=name_law))
 
-        self.update_warehouses_filling_speed(country)
-        country.save()
+            elif name_law == 'Conscript law: All with weapons':
+                self.__update_conscript_law(country, name_law, law, 30,
+                                            pop_mod=Modifier(value=-15, address_from=name_law),
+                                            indus_mod=Modifier(value=-35, address_from=name_law, address_to='industry'),
+                                            attack_mod=Modifier(value=-15, address_from=name_law),
+                                            def_mod=Modifier(value=-10, address_from=name_law))
+
+            else: raise UnknownNameConscriptLawError(name_law)
+
+            self.update_warehouses_filling_speed(country)
+            country.save()
+
+        else: raise LowBudgetError
 
     def __cansel_conscript_law(self, country):
         conscript_laws = ['Conscript law: Elite', 'Conscript law: Volunteer',
@@ -486,49 +525,51 @@ class GameService:
     def cancel_politics_law(self, country, name_law):
         law = Law.objects(name=name_law).first()
 
-        if country.budget.money >= law.price and \
-                name_law in country.adopted_laws:
+        if country.budget.money >= law.price:
 
-            country.budget.total_expenses += law.price
-            country.budget.money -= law.price
-            country.adopted_laws.remove(name_law)
+            if name_law in country.adopted_laws:
 
-            if name_law == 'Free medicine' and country.budget.money >= law.price and \
-                    name_law in country.adopted_laws:
-                country.population.modifiers.remove(Modifier(value=5, address_from=name_law))
-                country.industry_modifiers.remove(Modifier(value=-10, address_from=name_law, address_to='industry'))
+                country.budget.total_expenses += law.price
+                country.budget.money -= law.price
+                country.adopted_laws.remove(name_law)
 
-            elif name_law == 'Isolation' and country.budget.money >= law.price and \
-                    name_law in country.adopted_laws:
-                country.population.modifiers.remove(Modifier(value=-5, address_from=name_law))
-                country.industry_modifiers.remove(Modifier(value=-5, address_from=name_law, address_to='industry'))
-                country.army.defence_modifiers.remove(Modifier(value=15, address_from=name_law))
+                if name_law == 'Free medicine':
+                    country.population.modifiers.remove(Modifier(value=5, address_from=name_law))
+                    country.industry_modifiers.remove(Modifier(value=-10, address_from=name_law, address_to='industry'))
 
-            elif name_law == 'Free housing' and country.budget.money >= law.price and \
-                    name_law in country.adopted_laws:
-                country.population.modifiers.remove(Modifier(value=5, address_from=name_law))
-                country.industry_modifiers.remove(Modifier(value=-10, address_from=name_law, address_to='industry'))
-                country.army.attack_modifiers.remove(Modifier(value=-10, address_from=name_law))
-                country.army.defence_modifiers.remove(Modifier(value=10, address_from=name_law))
+                elif name_law == 'Isolation':
+                    country.population.modifiers.remove(Modifier(value=-5, address_from=name_law))
+                    country.industry_modifiers.remove(Modifier(value=-5, address_from=name_law, address_to='industry'))
+                    country.army.defence_modifiers.remove(Modifier(value=15, address_from=name_law))
 
-            elif name_law == 'Free education' and country.budget.money >= law.price and \
-                    name_law in country.adopted_laws:
-                country.population.modifiers.remove(Modifier(value=-2, address_from=name_law))
-                country.industry_modifiers.remove(Modifier(value=15, address_from=name_law, address_to='industry'))
-                country.army.attack_modifiers.remove(Modifier(value=-10, address_from=name_law))
+                elif name_law == 'Free housing':
+                    country.population.modifiers.remove(Modifier(value=5, address_from=name_law))
+                    country.industry_modifiers.remove(Modifier(value=-10, address_from=name_law, address_to='industry'))
+                    country.army.attack_modifiers.remove(Modifier(value=-10, address_from=name_law))
+                    country.army.defence_modifiers.remove(Modifier(value=10, address_from=name_law))
 
-            self.update_warehouses_filling_speed(country)
-            country.save()
+                elif name_law == 'Free education':
+                    country.population.modifiers.remove(Modifier(value=-2, address_from=name_law))
+                    country.industry_modifiers.remove(Modifier(value=15, address_from=name_law, address_to='industry'))
+                    country.army.attack_modifiers.remove(Modifier(value=-10, address_from=name_law))
+
+                self.update_warehouses_filling_speed(country)
+                country.save()
+            else: raise UnknownNameLawError(name_law)
+        else: raise LowBudgetError
 
     def buy_goods(self, country, name_goods, number):
         warehouse = [item for item in country.warehouses if item.goods.name == name_goods][0]
-        if 0 < number <= warehouse.capacity - warehouse.goods.value:
+        max_number_buy = warehouse.capacity - warehouse.goods.value
+        if 0 < number <= max_number_buy:
             price_goods = Trade.objects(name=name_goods).first().price_now * number
             if country.budget.money >= price_goods:
                 country.budget.total_expenses += price_goods
                 country.budget.money -= price_goods
                 warehouse.goods.value += number
                 country.save()
+            else: raise LowBudgetError
+        else: GoodsValueNotInRangeError(max_number_buy)
 
     def sell_goods(self, country, name_goods, number):
         warehouse = [item for item in country.warehouses if item.goods.name == name_goods][0]
@@ -538,6 +579,7 @@ class GameService:
             country.budget.money += price_goods
             warehouse.goods.value -= number
             country.save()
+        else: raise GoodsValueNotInRangeError(warehouse.goods.value)
 
     def edit_army(self, country, name_unit, new_number):
         difference = country.army.units[name_unit] - new_number
@@ -555,20 +597,25 @@ class GameService:
             warehouse = [item for item in country.warehouses if item.goods.name == 'Tanks'][0]
         elif name_unit == 'Aviation':
             warehouse = [item for item in country.warehouses if item.goods.name == 'Aviation'][0]
+        else: raise UnknownNameUnitError(name_unit)
 
-        if country.army.reserve_military_manpower + (
-                difference * unit.need_peoples) >= 0 and warehouse.goods.value + difference >= 0 and new_number > 0:
+        if warehouse.goods.value + difference >= 0 and new_number > 0:
 
-            country.army.reserve_military_manpower += difference * unit.need_peoples
-            country.budget.military_expenses -= difference * unit.maintenance_price
-            warehouse.goods.value += difference
+            if country.army.reserve_military_manpower + (difference * unit.need_peoples) >= 0:
 
-            if warehouse.goods.value > warehouse.capacity:
-                warehouse.goods.value = warehouse.capacity
+                country.army.reserve_military_manpower += difference * unit.need_peoples
+                country.budget.military_expenses -= difference * unit.maintenance_price
+                warehouse.goods.value += difference
 
-            country.army.units[name_unit] -= difference
-            country.population.solders = country.army.reserve_military_manpower + self.get_number_soldiers_from_units(country)
-            country.save()
+                if warehouse.goods.value > warehouse.capacity:
+                    warehouse.goods.value = warehouse.capacity
+
+                country.army.units[name_unit] -= difference
+                country.population.solders = country.army.reserve_military_manpower + self.get_number_soldiers_from_units(country)
+                country.save()
+
+            else: raise MilitaryManpowerError
+        else: raise UnitError
 
     def calculate_war(self, attacking_country_name, defending_country_name):
         attacking_country = Country.objects(name=attacking_country_name).first()

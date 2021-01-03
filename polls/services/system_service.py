@@ -10,7 +10,7 @@ from serverDjango.settings import ADMIN_EMAIL, ADMIN_EMAIL_PASSWORD
 
 class SystemService:
     def update_system(self):
-        print('update system...')
+        print('system updating...')
         game_service = GameService()
         for country in Country.objects():
             game_service.update_population(country)

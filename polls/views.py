@@ -1,4 +1,4 @@
-import datetime
+import datetime, json
 
 from django.contrib.auth.models import User
 from django.http import HttpResponse
@@ -10,8 +10,6 @@ from rest_framework import status
 from polls.models import User, Country
 from rest_framework.decorators import api_view
 from mongoengine import *
-
-import json
 
 from polls.services.game_service import GameService
 from polls.services.system_service import SystemService

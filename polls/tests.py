@@ -2,6 +2,8 @@ import datetime
 import time
 
 from django.test import TestCase
+
+from polls.errors import UnknownNameTaxError
 from polls.models import News, Country, User, ArmyUnit
 from polls.services.user_service import UserService
 from polls.services.game_service import GameService

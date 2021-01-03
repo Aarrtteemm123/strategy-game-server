@@ -1,7 +1,4 @@
-import json
-
-from polls.models import Country, Budget, Population, Army, User
-from polls.services.game_service import GameService
+from polls.models import Country, User
 from polls.services.system_service import EmailTemplate, SystemService
 from serverDjango.settings import ADMIN_EMAIL, ADMIN_EMAIL_PASSWORD
 
