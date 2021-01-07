@@ -231,7 +231,7 @@ class GameService:
                     else:
                         existing_modifiers.update(value=technology.modifiers[0].value * technology.level)
 
-                if technology.name == 'Computers technology':
+                elif technology.name == 'Computers technology':
                     existing_modifiers = country.industry_modifiers.filter(address_from=technology.name)
                     if existing_modifiers.count() == 0:
                         country.industry_modifiers.append(Modifier(value=technology.modifiers[0].value,
@@ -240,7 +240,7 @@ class GameService:
                         existing_modifiers.update(value=technology.modifiers[0].value * technology.level)
                     self.update_warehouses_filling_speed(country)
 
-                if technology.name == 'Upgrade weapons':
+                elif technology.name == 'Upgrade weapons':
                     existing_modifiers = country.army.attack_modifiers.filter(address_from=technology.name)
                     if existing_modifiers.count() == 0:
                         country.army.attack_modifiers.append(Modifier(value=technology.modifiers[0].value,
@@ -248,7 +248,7 @@ class GameService:
                     else:
                         existing_modifiers.update(value=technology.modifiers[0].value * technology.level)
 
-                if technology.name == 'Upgrade defence system':
+                elif technology.name == 'Upgrade defence system':
                     existing_modifiers = country.army.defence_modifiers.filter(address_from=technology.name)
                     if existing_modifiers.count() == 0:
                         country.army.defence_modifiers.append(Modifier(value=technology.modifiers[0].value,
@@ -272,15 +272,16 @@ class GameService:
                 country.population.free_people *= (1 - country.army.conscript_law_value / 100)
                 country.population.solders = country.army.reserve_military_manpower + self.get_number_soldiers_from_units(country)
                 if type_building == 'farm': country.population.farmers += building.workers
-                if type_building == 'mine' or type_building == 'well': country.population.miners += building.workers
-                if type_building == 'factory': country.population.factory_workers += building.workers
+                elif type_building == 'mine' or type_building == 'well': country.population.miners += building.workers
+                elif type_building == 'factory': country.population.factory_workers += building.workers
                 else: raise UnknownTypeBuildingError(type_building)
             else: raise FreePeopleError
         else: raise LowBudgetError
 
     def build_industry(self, country, name_building):
+        print(name_building)
         type_building = re.split(r' ', name_building)[-1]
-
+        print(type_building)
         if type_building == 'farm':
             farm = country.farms.filter(name=name_building).first()
             self.__calculate_build_of_industrial_building(country, farm, type_building)
@@ -309,8 +310,8 @@ class GameService:
             country.population.free_people *= (1 - country.army.conscript_law_value / 100)
             country.population.solders = country.army.reserve_military_manpower + self.get_number_soldiers_from_units(country)
             if type_building == 'farm': country.population.farmers -= building.workers
-            if type_building == 'mine' or type_building == 'well': country.population.miners -= building.workers
-            if type_building == 'factory': country.population.factory_workers -= building.workers
+            elif type_building == 'mine' or type_building == 'well': country.population.miners -= building.workers
+            elif type_building == 'factory': country.population.factory_workers -= building.workers
             else: raise UnknownTypeBuildingError(type_building)
 
     def remove_industry(self, country, name_building):
@@ -569,7 +570,7 @@ class GameService:
                 warehouse.goods.value += number
                 country.save()
             else: raise LowBudgetError
-        else: GoodsValueNotInRangeError(max_number_buy)
+        else: raise GoodsValueNotInRangeError(max_number_buy)
 
     def sell_goods(self, country, name_goods, number):
         warehouse = [item for item in country.warehouses if item.goods.name == name_goods][0]
