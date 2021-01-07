@@ -1,5 +1,5 @@
 celery==5.0.5
-Django==3.0.5
+Django==3.0.7
 django-cors-headers==3.4.0
 django-mongoengine==0.4.4
 django-rest-framework-mongoengine==3.4.1
