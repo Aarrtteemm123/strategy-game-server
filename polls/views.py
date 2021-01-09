@@ -124,7 +124,7 @@ def find_player(request, user_id, player_name):
         return HttpResponse({}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated,JSONWebTokenAuthentication])
+#@permission_classes([IsAuthenticated,JSONWebTokenAuthentication])
 def get_view(request,user_id,name_view):
     if request.method == 'GET':
         try:

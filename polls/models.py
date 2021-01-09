@@ -5,9 +5,9 @@ from mongoengine import *
 connect('TestDb')
 
 class News(Document):
-    title = StringField(default='',max_length=200)
-    date = DateTimeField(default=timezone.now)
-    text = StringField(default='',max_length=1000)
+    title = fields.StringField(default='',max_length=200)
+    date = fields.DateTimeField(default=timezone.now)
+    text = fields.StringField(default='',max_length=1000)
 
 class History(EmbeddedDocument):
     name = StringField(max_length=100,default='')
@@ -137,5 +137,6 @@ class User(Document):
 
 class Trade(Document):
     name = StringField(default='',max_length=100)
+    default_price = FloatField(default=0.0,min_value=0)
     price_now = FloatField(default=0.0,min_value=0)
     history_price = EmbeddedDocumentListField('History',default=[])

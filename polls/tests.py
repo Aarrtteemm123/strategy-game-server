@@ -22,7 +22,7 @@ user = User.objects(username='pl2').first()
 #GameService().buy_goods(country.name,'Minerals',100)
 #SystemService().update_system()
 #GameService().update_population(country)
-print(make_password('pas0'))
+#print(make_password('pas0'))
 #print(UserService().delete_user_account('5fe0d7a9c17049903ac3b6f3','pas12'))
 class ServiceTestCase(TestCase):
     def setUp(self):

@@ -502,237 +502,159 @@ class SystemService:
 
     def create_default_table_goods(self):
         Trade.objects().delete()
-        Trade(name='Seed', price_now=10, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Seed', default_price=5, price_now=5, history_price=[
         ]
               ).save()
 
-        Trade(name='Meat', price_now=15, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Meat', default_price=10, price_now=10, history_price=[
         ]
               ).save()
 
-        Trade(name='Milk', price_now=20, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Milk', default_price=15, price_now=15, history_price=[
         ]
               ).save()
 
-        Trade(name='Fish', price_now=10, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Fish', default_price=30, price_now=30, history_price=[
         ]
               ).save()
 
-        Trade(name='Fruits', price_now=15, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Fruits', default_price=40, price_now=40, history_price=[
         ]
               ).save()
 
-        Trade(name='Vegetables', price_now=20, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Vegetables',default_price=25, price_now=25, history_price=[
         ]
               ).save()
 
-        Trade(name='Iron', price_now=10, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Iron',default_price=50, price_now=50, history_price=[
         ]
               ).save()
 
-        Trade(name='Aluminum', price_now=15, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Aluminum',default_price=60, price_now=60, history_price=[
         ]
               ).save()
 
-        Trade(name='Coal', price_now=20, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Coal',default_price=45, price_now=45, history_price=[
         ]
               ).save()
 
-        Trade(name='Oil', price_now=10, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Oil',default_price=70, price_now=70, history_price=[
         ]
               ).save()
 
-        Trade(name='Silicon', price_now=15, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Silicon',default_price=35, price_now=35, history_price=[
         ]
               ).save()
 
-        Trade(name='Salt', price_now=20, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Salt',default_price=15, price_now=15, history_price=[
         ]
               ).save()
 
-        Trade(name='Minerals', price_now=10, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Minerals',default_price=80, price_now=80, history_price=[
         ]
               ).save()
 
-        Trade(name='Gold', price_now=15, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Gold',default_price=340, price_now=340, history_price=[
         ]
               ).save()
 
-        Trade(name='Diamond', price_now=20, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Diamond',default_price=500, price_now=500, history_price=[
         ]
               ).save()
 
-        Trade(name='Bakery', price_now=10, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Bakery',default_price=30, price_now=30, history_price=[
         ]
               ).save()
 
-        Trade(name='Canned food', price_now=15, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Canned food',default_price=35, price_now=35, history_price=[
         ]
               ).save()
 
-        Trade(name='Cheese', price_now=20, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Cheese',default_price=25, price_now=25, history_price=[
         ]
               ).save()
 
-        Trade(name='Salt fish', price_now=10, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Salt fish',default_price=15, price_now=15, history_price=[
         ]
               ).save()
 
-        Trade(name='Juice', price_now=15, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Juice',default_price=40, price_now=40, history_price=[
         ]
               ).save()
 
-        Trade(name='Fuel', price_now=20, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Fuel',default_price=60, price_now=60, history_price=[
         ]
               ).save()
 
-        Trade(name='Electronics', price_now=10, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Electronics',default_price=80, price_now=80, history_price=[
         ]
               ).save()
 
-        Trade(name='Chemicals', price_now=15, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Chemicals',default_price=60, price_now=60, history_price=[
         ]
               ).save()
 
-        Trade(name='Computers', price_now=20, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Computers',default_price=100, price_now=100, history_price=[
         ]
               ).save()
 
-        Trade(name='Steel', price_now=10, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Steel',default_price=120, price_now=120, history_price=[
         ]
               ).save()
 
-        Trade(name='Rubber', price_now=15, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Rubber',default_price=90, price_now=90, history_price=[
         ]
               ).save()
 
-        Trade(name='Plastic', price_now=20, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Plastic',default_price=60, price_now=60, history_price=[
         ]
               ).save()
 
-        Trade(name='Glass', price_now=10, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Glass',default_price=80, price_now=80, history_price=[
         ]
               ).save()
 
-        Trade(name='Fertilizer', price_now=15, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Fertilizer',default_price=70, price_now=70, history_price=[
         ]
               ).save()
 
-        Trade(name='Medicine', price_now=20, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Medicine',default_price=110, price_now=110, history_price=[
         ]
               ).save()
 
-        Trade(name='Solar panel', price_now=10, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Solar panel',default_price=150, price_now=150, history_price=[
         ]
               ).save()
 
-        Trade(name='Battery', price_now=15, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Battery',default_price=150, price_now=150, history_price=[
         ]
               ).save()
 
-        Trade(name='Jewelry', price_now=20, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Jewelry',default_price=1000, price_now=1000, history_price=[
         ]
               ).save()
 
-        Trade(name='Infantry equipment', price_now=10, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Infantry equipment',default_price=500, price_now=500, history_price=[
         ]
               ).save()
 
-        Trade(name='Artillery', price_now=15, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Artillery',default_price=1000, price_now=1000, history_price=[
         ]
               ).save()
 
-        Trade(name='PTO', price_now=20, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='PTO',default_price=2000, price_now=2000, history_price=[
         ]
               ).save()
 
-        Trade(name='PVO', price_now=10, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='PVO',default_price=5000, price_now=5000, history_price=[
         ]
               ).save()
 
-        Trade(name='Tanks', price_now=15, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Tanks',default_price=10000, price_now=10000, history_price=[
         ]
               ).save()
 
-        Trade(name='Aviation', price_now=20, history_price=[
-            History(value=10), History(value=20), History(value=30),
-            History(value=25), History(value=40), History(value=15),
+        Trade(name='Aviation',default_price=25000, price_now=25000, history_price=[
         ]
               ).save()
 

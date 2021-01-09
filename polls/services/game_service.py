@@ -144,10 +144,10 @@ class GameService:
 
     def update_price_goods(self):
         for goods in Trade.objects():
-            new_price = random.randint(-10, 10)
+            new_price = round(random.uniform(-0.1*goods.default_price, 0.1*goods.default_price),2)
             goods.price_now += new_price
-            if goods.price_now < 1:
-                goods.price_now = random.randint(5, 20)
+            if goods.price_now < 0:
+                goods.price_now = goods.default_price
             if len(goods.history_price) > 6:
                 goods.history_price.pop(0)
             goods.history_price.append(History(name='', value=goods.price_now, time=timezone.now()))
