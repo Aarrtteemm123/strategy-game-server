@@ -6,9 +6,11 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from rest_framework.parsers import JSONParser
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from polls.models import User, Country
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from mongoengine import *
 
 from polls.services.game_service import GameService
@@ -122,6 +124,7 @@ def find_player(request, user_id, player_name):
         return HttpResponse({}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated,JSONWebTokenAuthentication])
 def get_view(request,user_id,name_view):
     if request.method == 'GET':
         try:
