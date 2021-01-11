@@ -75,6 +75,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_mongoengine',
+    'django_mongoengine',
+    'django_mongoengine.mongo_auth',
+    'django_mongoengine.mongo_admin',
     'corsheaders',
 ]
 
@@ -111,6 +115,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'serverDjango.wsgi.application'
 
+MONGOADMIN_OVERRIDE_ADMIN = True
+
+# MongoDB Databases
+MONGODB_DATABASES = {
+    'default': {'name': 'TestDb'}
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases

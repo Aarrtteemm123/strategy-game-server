@@ -5,9 +5,9 @@ from mongoengine import *
 connect('TestDb')
 
 class News(Document):
-    title = fields.StringField(default='',max_length=200)
-    date = fields.DateTimeField(default=timezone.now)
-    text = fields.StringField(default='',max_length=1000)
+    title = StringField(default='',max_length=200)
+    date = DateTimeField(default=timezone.now)
+    text = StringField(default='',max_length=1000)
 
 class History(EmbeddedDocument):
     name = StringField(max_length=100,default='')
