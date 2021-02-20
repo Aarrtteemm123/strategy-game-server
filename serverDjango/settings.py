@@ -14,7 +14,6 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import mongoengine
-from celery.schedules import crontab
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -115,8 +114,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'serverDjango.wsgi.application'
 
-MONGOADMIN_OVERRIDE_ADMIN = True
-
 # MongoDB Databases
 MONGODB_DATABASES = {
     'default': {'name': 'TestDb'}
@@ -164,18 +161,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
-JWT_AUTH = {
-    'JWT_ALLOW_REFRESH': True,
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=1),
-    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
-}
-
-CELERY_BROKER_URL = 'redis://redis:6379'
-CELERY_RESULT_BACKEND = 'redis://redis:6379'
-CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
 
 
 # Static files (CSS, JavaScript, Images)

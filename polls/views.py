@@ -6,28 +6,17 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from rest_framework.parsers import JSONParser
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from rest_framework_mongoengine import viewsets
 
-from polls.models import User, Country, News
-from rest_framework.decorators import api_view, permission_classes
+from polls.models import User, Country
+from rest_framework.decorators import api_view
 from mongoengine import *
 
-from polls.serializers import NewsSerializer
 from polls.services.game_service import GameService
 from polls.services.system_service import SystemService
 from polls.services.user_service import UserService
 from polls.services.view_service import CountryViewService, NewsViewService, PlayerViewService
 
 connect('TestDb')
-
-class NewsViewSet(viewsets.ModelViewSet):
-    lookup_field = 'id'
-    serializer_class = NewsSerializer
-
-    def get_queryset(self):
-        return News.objects.all()
 
 
 def index(request):

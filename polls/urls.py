@@ -30,3 +30,5 @@ urlpatterns = [
     url(r'^game/edit_army/(?P<user_id>[0-9|a-z]+)$', views.edit_army),
     url(r'^game/calculate_war/(?P<user_id>[0-9|a-z]+)/(?P<defending_player_name>[0-9|a-z]+)$', views.calculate_war),
 ]
+
+print('Run background task here...')
