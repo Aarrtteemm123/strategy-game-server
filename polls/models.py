@@ -124,6 +124,8 @@ class Country(Document):
 
 class User(Document):
     isAuth = BooleanField(default=False)
+    token = StringField(default='')
+    date_last_login = DateTimeField(default=timezone.now)
     username = StringField(default='', max_length=100,unique=True)
     password = StringField(default='', max_length=100)
     email = EmailField(default='user_email@gmail.com')

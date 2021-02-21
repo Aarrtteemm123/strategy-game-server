@@ -1,7 +1,5 @@
 import datetime
 import time
-
-from django.contrib.auth.hashers import make_password
 from django.test import TestCase
 
 from polls.errors import UnknownNameTaxError
@@ -15,8 +13,12 @@ from polls.services.system_service import SystemService
 #print(UserService().register_new_user('pl3','pas3','er3@gmail.com','Germany','https://image.winudf.com/v2/image1/Y29tLmZsYWd3YWxscGFwZXIuZ2VybWFueV9zY3JlZW5fNF8xNTQ3NDgyNTMyXzA1OA/screen-5.jpg?fakeurl=1&type=.jpg'))
 #print(UserService().register_new_user('pl4','pas4','er4@gmail.com','Moldova','https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Flag_of_Moldova.svg/1280px-Flag_of_Moldova.svg.png'))
 from polls.services.view_service import CountryViewService, NewsViewService
-country = Country.objects(name='Great Britain').first()
-user = User.objects(username='pl2').first()
+country = Country.objects(name='Ukraine').first()
+user = User.objects(username='pl1').first()
+print(user.token,user.date_last_login)
+UserService().logout(user.id)
+user = User.objects(username='pl1').first()
+print(user.token,user.date_last_login)
 #GameService().build_industry(country.name,'Fertilizer factory')
 #GameService().buy_goods(country.name,'Salt',100)
 #GameService().buy_goods(country.name,'Minerals',100)

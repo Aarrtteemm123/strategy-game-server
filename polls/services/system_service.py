@@ -1,6 +1,11 @@
+import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
+
+from polls.errors import UnknownUserError
+from lib.tokenlib.errors import ExpiredTokenError
+from tokenlib.errors import InvalidSignatureError
 
 from polls.models import Trade, History, Modifier, ArmyUnitCharacteristic, ArmyUnit, Population, \
     Army, Goods, Warehouse, IndustrialBuildings, Technology, Budget, Country, Law, User
@@ -9,6 +14,21 @@ from serverDjango.settings import ADMIN_EMAIL, ADMIN_EMAIL_PASSWORD
 
 
 class SystemService:
+
+    @staticmethod
+    def verify_token(user_id,token):
+        user = User.objects(id=user_id).fisrt()
+        if user:
+            if user.token == token:
+                if (datetime.datetime.now() - user.date_last_login).days < 1:
+                    return True
+                else:
+                    raise ExpiredTokenError
+            else:
+                raise InvalidSignatureError
+        else:
+            raise UnknownUserError(user_id)
+
     def update_system(self):
         print('system updating...')
         game_service = GameService()

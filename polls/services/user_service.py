@@ -1,14 +1,36 @@
+import random
+
+import tokenlib as tokenlib
+from django.utils import timezone
+
 from polls.models import Country, User
 from polls.services.system_service import EmailTemplate, SystemService
-from serverDjango.settings import ADMIN_EMAIL, ADMIN_EMAIL_PASSWORD
+from polls.errors import UnknownUserError
+from serverDjango.settings import ADMIN_EMAIL, ADMIN_EMAIL_PASSWORD, SECRET_KEY
 
 
 class UserService:
     def login(self, username, password):
-        return User.objects(username=username, password=password).update_one(isAuth=True) == 1
+        user = User.objects(username=username,password=password).first()
+        if user:
+            token = tokenlib.make_token({"user_id": str(user.id), 'username':username, 'password':password, 'random_value':random.randint(0,1000000)}, secret=SECRET_KEY)
+            user.isAuth = True
+            user.token = token
+            user.date_last_login = timezone.now()
+            user.save()
+            return token
+        else:
+            raise UnknownUserError(username)
 
     def logout(self, user_id):
-        return User.objects(id=user_id).update_one(isAuth=False) == 1
+        user = User.objects(id=user_id).first()
+        if user:
+            user.isAuth = False
+            user.token = ''
+            user.save()
+            return True
+        else:
+            raise UnknownUserError(str(user_id))
 
     def register_new_user(self, username, password, email, country_name, link_country_flag):
         country = SystemService().create_default_country(country_name,link_country_flag)
@@ -31,11 +53,13 @@ class UserService:
     def delete_user_account(self, user_id,password):
         if User.objects(id=user_id).count() == 1 and User.objects(id=user_id).first().password == password:
             try:
-                obj = User.objects(id=user_id).first()
-                user_email = obj.email
-                country_pk = obj.country.id
+                user = User.objects(id=user_id).first()
+                user_email = user.email
+                country_pk = user.country.id
                 country = Country.objects(id=country_pk).first()
-                #html_msg = EmailTemplate().get_html_delete_account(obj.username)
+                country.delete()
+                user.delete()
+                #html_msg = EmailTemplate().get_html_delete_account(user.username)
                 #SystemService().send_email(ADMIN_EMAIL, user_email, ADMIN_EMAIL_PASSWORD, html_msg,EmailTemplate.DELETE_TITLE)
                 return True
             except Exception as e:

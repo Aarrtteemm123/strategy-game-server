@@ -49,3 +49,7 @@ class MaxLevelError(Exception):
 class GoodsValueNotInRangeError(Exception):
     def __init__(self,max_value,min_value=0,msg='Number of goods must be in range ({},{})'):
         super().__init__(msg.format(min_value,max_value))
+
+class UnknownUserError(Exception):
+    def __init__(self,username,msg='User with name (user id) {} not found'):
+        super().__init__(msg.format(username))
