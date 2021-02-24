@@ -1,7 +1,7 @@
 import random,re
 from django.utils import timezone
 from polls.errors import *
-from polls.models import Country, Modifier, Trade, Law, ArmyUnit, History
+from polls.models import Country, Modifier, Trade, Law, ArmyUnit, History, GlobalSettings
 from polls.view_models.army import ResultWarView, ItemWarResult
 
 class GameService:
@@ -13,16 +13,18 @@ class GameService:
         country.budget.total_expenses += military_expenses
         country.budget.money += (total_taxes_profit - military_expenses)
 
-        if len(country.budget.profit_history) > 10:
+        global_settings = GlobalSettings.objects().first()
+
+        if len(country.budget.profit_history) > global_settings.length_budget_graphics:
             country.budget.profit_history.pop(0)
         country.budget.profit_history.append(History(name='', value=country.budget.total_profit, time=timezone.now()))
 
-        if len(country.budget.expenses_history) > 10:
+        if len(country.budget.expenses_history) > global_settings.length_budget_graphics:
             country.budget.expenses_history.pop(0)
         country.budget.expenses_history.append(
             History(name='', value=country.budget.total_expenses, time=timezone.now()))
 
-        if len(country.budget.budget_history) > 10:
+        if len(country.budget.budget_history) > global_settings.length_budget_graphics:
             country.budget.budget_history.pop(0)
         country.budget.budget_history.append(History(name='', value=country.budget.money, time=timezone.now()))
 
@@ -136,19 +138,22 @@ class GameService:
                                               country.population.solders + country.population.free_people + \
                                               country.population.others
 
-        if len(country.population.population_history) > 10:
+        global_settings = GlobalSettings.objects().first()
+
+        if len(country.population.population_history) > global_settings.length_population_graphics:
             country.population.population_history.pop(0)
         country.population.population_history.append(History(name='', value=pop_modifiers * 100 - 100, time=timezone.now()))
         # if population low end notify on - send email
         country.save()
 
     def update_price_goods(self):
+        global_settings = GlobalSettings.objects().first()
         for goods in Trade.objects():
-            new_price = round(random.uniform(-0.1*goods.default_price, 0.1*goods.default_price),2)
+            new_price = round(random.uniform(-global_settings.goods_price_scatter*goods.default_price, global_settings.goods_price_scatter*goods.default_price),2)
             goods.price_now += new_price
             if goods.price_now < 0:
                 goods.price_now = goods.default_price
-            if len(goods.history_price) > 6:
+            if len(goods.history_price) > global_settings.length_goods_price_graphics:
                 goods.history_price.pop(0)
             goods.history_price.append(History(name='', value=goods.price_now, time=timezone.now()))
             goods.save()
@@ -757,32 +762,32 @@ class GameService:
         return total_farms_profit
 
     def get_army_taxes_profit(self, country):
-        balance_coefficient = 2
-        return balance_coefficient * country.population.solders * (country.budget.military_taxes / 100)
+        global_settings = GlobalSettings.objects().first()
+        return global_settings.army_taxes_profit_k * country.population.solders * (country.budget.military_taxes / 100)
 
     def get_pop_taxes_profit(self, country):
-        balance_coefficient = 0.2
-        return (balance_coefficient * country.population.total_population * (country.budget.population_taxes / 100)) + self.get_army_taxes_profit(country)
+        global_settings = GlobalSettings.objects().first()
+        return (global_settings.pop_taxes_profit_k * country.population.total_population * (country.budget.population_taxes / 100)) + self.get_army_taxes_profit(country)
 
     def get_farms_taxes_profit(self, country, production_profit=None):
-        balance_coefficient = 0.5
+        global_settings = GlobalSettings.objects().first()
         if production_profit is None:
             production_profit = self.get_farms_production_profit(country)
-        taxes_profit = production_profit + balance_coefficient * production_profit * country.budget.farms_taxes
+        taxes_profit = production_profit + global_settings.farms_taxes_profit_k * production_profit * country.budget.farms_taxes
         return taxes_profit
 
     def get_mines_taxes_profit(self, country, production_profit=None):
-        balance_coefficient = 0.5
+        global_settings = GlobalSettings.objects().first()
         if production_profit is None:
             production_profit = self.get_mines_production_profit(country)
-        taxes_profit = production_profit + balance_coefficient * production_profit * country.budget.mines_taxes
+        taxes_profit = production_profit + global_settings.mines_taxes_profit_k * production_profit * country.budget.mines_taxes
         return taxes_profit
 
     def get_factories_taxes_profit(self, country, production_profit=None):
-        balance_coefficient = 0.5
+        global_settings = GlobalSettings.objects().first()
         if production_profit is None:
             production_profit = self.get_factories_production_profit(country)
-        taxes_profit = production_profit + balance_coefficient * production_profit * country.budget.factories_taxes
+        taxes_profit = production_profit + global_settings.factories_taxes_profit_k * production_profit * country.budget.factories_taxes
         return taxes_profit
 
     def get_total_profit(self, country):

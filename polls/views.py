@@ -8,7 +8,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework import status
 from tokenlib.errors import InvalidSignatureError
 
-from polls.models import User, Country
+from polls.models import User, Country, GlobalSettings
 from rest_framework.decorators import api_view
 from mongoengine import *
 from polls.errors import *
@@ -85,8 +85,9 @@ def redirect_feedback(request, user_id):
     try:
         user = User.objects(id=user_id).first()
         request_data = JSONParser().parse(request)
+        global_settings = GlobalSettings.objects().first()
         if SystemService.verify_token(user_id, request_data['token']):
-            if (datetime.datetime.now() - user.date_last_send_feedback).days >= 1:
+            if (datetime.datetime.now() - user.date_last_send_feedback).seconds/60 >= global_settings.feedback_pause:
                 user.date_last_send_feedback = datetime.datetime.now()
                 SystemService().get_feedback(user.username, user.email, request_data['rating'], request_data['msg'])
                 user.save()
@@ -112,7 +113,7 @@ def find_player(request, user_id, player_name):
         return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def get_view(request, user_id, name_view):
     try:
         request_data = JSONParser().parse(request)

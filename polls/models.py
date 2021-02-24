@@ -142,3 +142,30 @@ class Trade(Document):
     default_price = FloatField(default=0.0,min_value=0)
     price_now = FloatField(default=0.0,min_value=0)
     history_price = EmbeddedDocumentListField('History',default=[])
+
+class GlobalSettings(Document):
+    feedback_pause = IntField(default=1440,min_value=1) # +
+    frequency_update_trade = IntField(default=10,min_value=0)
+    frequency_update_top_players = IntField(default=5,min_value=0)
+    length_budget_graphics = IntField(default=10,min_value=1) # +
+    length_population_graphics = IntField(default=10,min_value=1) # +
+    length_goods_price_graphics = IntField(default=6,min_value=1) # +
+    start_budget_k = FloatField(default=1.0,min_value=0.0) # +
+    goods_price_scatter = FloatField(default=0.1,min_value=0.0) # +
+    farm_workers_k = FloatField(default=1.0,min_value=0.0) # +
+    mine_workers_k = FloatField(default=1.0,min_value=0.0) # +
+    factory_workers_k = FloatField(default=1.0,min_value=0.0) # +
+    farms_price_k = FloatField(default=1.0,min_value=0.1) # +
+    mines_price_k = FloatField(default=1.0,min_value=0.1) # +
+    factories_price_k = FloatField(default=1.0,min_value=0.1) # +
+    warehouses_price_k = FloatField(default=1.0,min_value=0.1) # +
+    technology_price_k = FloatField(default=1.0,min_value=0.1) # +
+    laws_price_k = FloatField(default=1.0,min_value=0.1) # +
+    farms_production_k = FloatField(default=1.0,min_value=0.1) # +
+    mines_production_k = FloatField(default=1.0,min_value=0.1) # +
+    factories_production_k = FloatField(default=1.0,min_value=0.1) # +
+    army_taxes_profit_k = FloatField(default=2.0,min_value=0.1) # +
+    pop_taxes_profit_k = FloatField(default=0.2,min_value=0.1) # +
+    farms_taxes_profit_k = FloatField(default=0.5,min_value=0.1) # +
+    mines_taxes_profit_k = FloatField(default=0.5,min_value=0.1) # +
+    factories_taxes_profit_k = FloatField(default=0.5,min_value=0.1) # +
