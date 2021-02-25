@@ -19,7 +19,7 @@ from polls.services.view_service import CountryViewService, NewsViewService, Pla
 #user = User.objects(username='pl1').first()
 #print(user.token,user.date_last_login)
 #UserService().logout(user.id)
-user = User.objects(username='pl1').first()
+#user = User.objects(username='pl1').first()
 #print(user.token,user.date_last_login)
 #GameService().build_industry(country.name,'Fertilizer factory')
 #GameService().buy_goods(country.name,'Salt',100)
@@ -31,6 +31,11 @@ user = User.objects(username='pl1').first()
 #SystemService().create_default_global_settings()
 #SystemService().update_top_players_cache()
 #SystemService().update_trade_cache()
+for __ in range(3):
+    print(__)
+    SystemService().update_trade_cache()
+    SystemService().update_top_players_cache()
+    SystemService().update_players()
 class ServiceTestCase(TestCase):
     def setUp(self):
         pass

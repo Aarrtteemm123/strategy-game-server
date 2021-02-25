@@ -50,14 +50,12 @@ class SystemService:
         else:
             raise UnknownUserError(user_id)
 
-    def update_system(self):
-        print('system updating...')
+    def update_players(self):
         game_service = GameService()
         for country in Country.objects():
             game_service.update_population(country)
             game_service.update_industry(country)
             game_service.update_budget(country)
-        game_service.update_price_goods()
 
 
     def get_user_settings(self,user_id):

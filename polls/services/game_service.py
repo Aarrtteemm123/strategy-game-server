@@ -797,9 +797,15 @@ class GameService:
 
     def get_economic_place(self, country_name):
         countries = Country.objects()
-        economic_profit_dict = {country.name: self.get_total_profit(country) for country in countries}
+        profit_target_country = 0
+        economic_profit_dict = {}
+        for country in countries:
+            profit = self.get_total_profit(country)
+            if country.name == country_name:
+                profit_target_country = profit
+            economic_profit_dict[country.name] = profit
         economic_rating = sorted(economic_profit_dict.items(), key=lambda x: x[1], reverse=True)
-        return economic_rating.index((country_name, self.get_total_profit(countries.filter(name=country_name).first()))) + 1
+        return economic_rating.index((country_name, profit_target_country)) + 1
 
     def get_army_place(self, country_name):
         countries = Country.objects

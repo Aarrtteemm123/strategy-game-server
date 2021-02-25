@@ -1,3 +1,6 @@
+from threading import Thread
+
+from polls.background_tasks import *
 from django.urls import path
 from django.conf.urls import url
 from . import views
@@ -30,4 +33,6 @@ urlpatterns = [
     url(r'^game/calculate_war/(?P<user_id>[0-9|a-z]+)/(?P<defending_player_name>[0-9|a-z]+)$', views.calculate_war),
 ]
 
-print('Run background task here...')
+Thread(target=run_updating_trade).start()
+Thread(target=run_updating_top_players).start()
+Thread(target=run_updating_players).start()
