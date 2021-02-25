@@ -143,6 +143,10 @@ class Trade(Document):
     price_now = FloatField(default=0.0,min_value=0)
     history_price = EmbeddedDocumentListField('History',default=[])
 
+class Cache(Document):
+    top_players = StringField(default='')
+    trade = StringField(default='')
+
 class GlobalSettings(Document):
     feedback_pause = IntField(default=1440,min_value=1) # +
     frequency_update_trade = IntField(default=10,min_value=0)

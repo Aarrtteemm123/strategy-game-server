@@ -1,4 +1,5 @@
 import datetime
+import json
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
@@ -8,8 +9,9 @@ from lib.tokenlib.errors import ExpiredTokenError
 from tokenlib.errors import InvalidSignatureError
 
 from polls.models import Trade, History, Modifier, ArmyUnitCharacteristic, ArmyUnit, Population, \
-    Army, Goods, Warehouse, IndustrialBuildings, Technology, Budget, Country, Law, User, GlobalSettings
+    Army, Goods, Warehouse, IndustrialBuildings, Technology, Budget, Country, Law, User, GlobalSettings, Cache
 from polls.services.game_service import GameService
+from polls.services.view_service import PlayerViewService, CountryViewService
 from serverDjango.settings import ADMIN_EMAIL, ADMIN_EMAIL_PASSWORD
 
 
@@ -18,6 +20,21 @@ class SystemService:
     def create_default_global_settings(self):
         GlobalSettings.objects().delete()
         GlobalSettings().save()
+
+    def update_top_players_cache(self):
+        top_players_lst = PlayerViewService().get_top_players(10)
+        json_top_players_lst = json.dumps(top_players_lst,default=lambda x:x.__dict__)
+        cache = Cache.objects().first()
+        cache.top_players = json_top_players_lst
+        cache.save()
+
+    def update_trade_cache(self):
+        user = User.objects().first()
+        if user:
+            trade_view = CountryViewService().get_trade(user.id)
+            cache = Cache.objects().first()
+            cache.trade = json.dumps(trade_view,default=lambda x:x.__dict__)
+            cache.save()
 
     @staticmethod
     def verify_token(user_id,token):

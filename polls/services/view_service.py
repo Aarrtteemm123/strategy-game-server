@@ -1,6 +1,7 @@
 import datetime,time,re
+import json
 
-from polls.models import User, Country, Trade, News, ArmyUnit
+from polls.models import User, Country, Trade, News, ArmyUnit, Cache
 from polls.services.game_service import GameService
 from polls.view_models.account import AccountView
 from polls.view_models.army import ArmyCardView, UnitCharacteristicView
@@ -238,6 +239,20 @@ class CountryViewService:
         finish = time.time()
         return population_view
 
+    def get_cache_trade(self,user_id):
+        cache = Cache.objects().first()
+        if cache.trade != '':
+            trade_view = json.loads(cache.trade)
+            user = User.objects(id=user_id).first()
+            target_country = Country.objects(id=user.country.id).first()
+            for trade_card in trade_view:
+                warehouse = next(filter(lambda x:x.goods.name==trade_card['name'],target_country.warehouses),None)
+                trade_card['warehouse_has'] = warehouse.goods.value
+                trade_card['warehouse_capacity'] = warehouse.capacity
+            return trade_view
+        else:
+            return self.get_trade(user_id)
+
     def get_trade(self, user_id):
         start = time.time()
         user = User.objects(id=user_id).first()
@@ -385,5 +400,9 @@ class PlayerViewService:
         country = Country.objects(id=user.country.id).first()
         economic_place = GameService().get_economic_place(country.name)
         army_place = GameService().get_army_place(country.name)
-        top_players = self.get_top_players(10)
+        cache = Cache.objects().first()
+        if cache.top_players != '':
+            top_players = json.loads(cache.top_players)
+        else:
+            top_players = self.get_top_players(10)
         return TopPlayersPage(economic_place,army_place,top_players)

@@ -134,7 +134,7 @@ def get_view(request, user_id, name_view):
             elif name_view == 'Population':
                 view_obj = CountryViewService().get_population(user_id)
             elif name_view == 'Trade':
-                view_obj = CountryViewService().get_trade(user_id)
+                view_obj = CountryViewService().get_cache_trade(user_id)
             elif name_view == 'Army':
                 view_obj = CountryViewService().get_army(user_id)
             elif name_view == 'News':
