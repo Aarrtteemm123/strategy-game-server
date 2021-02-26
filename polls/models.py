@@ -126,6 +126,7 @@ class User(Document):
     isAuth = BooleanField(default=False)
     token = StringField(default='')
     date_last_login = DateTimeField(default=timezone.now)
+    date_last_update = DateTimeField(default=timezone.now)
     username = StringField(default='', max_length=100,unique=True)
     password = StringField(default='', max_length=100)
     email = EmailField(default='user_email@gmail.com')
@@ -135,7 +136,7 @@ class User(Document):
         'attacks':True,'warehouse overflow':False,'low budget':False
     })
     country = ReferenceField('Country',reverse_delete_rule=mongoengine.CASCADE)
-    date_last_send_feedback = DateTimeField(default=timezone.now)
+    date_last_feedback = DateTimeField(default=timezone.now)
 
 class Trade(Document):
     name = StringField(default='',max_length=100)
@@ -148,9 +149,12 @@ class Cache(Document):
     trade = StringField(default='')
 
 class GlobalSettings(Document):
+    # time in minutes
     feedback_pause = IntField(default=1440,min_value=1) # +
-    frequency_update_trade = IntField(default=10,min_value=0)
-    frequency_update_top_players = IntField(default=5,min_value=0)
+    time_speed = IntField(default=60,min_value=1) # +
+    frequency_update_trade = IntField(default=10,min_value=0) # +
+    frequency_update_top_players = IntField(default=5,min_value=0) # +
+    number_top_players = IntField(default=10,min_value=1) # +
     length_budget_graphics = IntField(default=10,min_value=1) # +
     length_population_graphics = IntField(default=10,min_value=1) # +
     length_goods_price_graphics = IntField(default=6,min_value=1) # +

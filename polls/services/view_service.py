@@ -1,7 +1,7 @@
 import datetime,time,re
 import json
 
-from polls.models import User, Country, Trade, News, ArmyUnit, Cache
+from polls.models import User, Country, Trade, News, ArmyUnit, Cache, GlobalSettings
 from polls.services.game_service import GameService
 from polls.view_models.account import AccountView
 from polls.view_models.army import ArmyCardView, UnitCharacteristicView
@@ -404,5 +404,6 @@ class PlayerViewService:
         if cache.top_players != '':
             top_players = json.loads(cache.top_players)
         else:
-            top_players = self.get_top_players(10)
+            global_settings = GlobalSettings.objects().first()
+            top_players = self.get_top_players(global_settings.number_top_players)
         return TopPlayersPage(economic_place,army_place,top_players)

@@ -87,8 +87,8 @@ def redirect_feedback(request, user_id):
         request_data = JSONParser().parse(request)
         global_settings = GlobalSettings.objects().first()
         if SystemService.verify_token(user_id, request_data['token']):
-            if (datetime.datetime.now() - user.date_last_send_feedback).seconds/60 >= global_settings.feedback_pause:
-                user.date_last_send_feedback = datetime.datetime.now()
+            if (datetime.datetime.now() - user.date_last_feedback).seconds/60 >= global_settings.feedback_pause:
+                user.date_last_feedback = datetime.datetime.now()
                 SystemService().get_feedback(user.username, user.email, request_data['rating'], request_data['msg'])
                 user.save()
             else:

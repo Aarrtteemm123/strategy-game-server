@@ -31,11 +31,6 @@ from polls.services.view_service import CountryViewService, NewsViewService, Pla
 #SystemService().create_default_global_settings()
 #SystemService().update_top_players_cache()
 #SystemService().update_trade_cache()
-for __ in range(3):
-    print(__)
-    SystemService().update_trade_cache()
-    SystemService().update_top_players_cache()
-    SystemService().update_players()
 class ServiceTestCase(TestCase):
     def setUp(self):
         pass

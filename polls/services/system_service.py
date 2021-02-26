@@ -21,8 +21,8 @@ class SystemService:
         GlobalSettings.objects().delete()
         GlobalSettings().save()
 
-    def update_top_players_cache(self):
-        top_players_lst = PlayerViewService().get_top_players(10)
+    def update_top_players_cache(self,number):
+        top_players_lst = PlayerViewService().get_top_players(number)
         json_top_players_lst = json.dumps(top_players_lst,default=lambda x:x.__dict__)
         cache = Cache.objects().first()
         cache.top_players = json_top_players_lst

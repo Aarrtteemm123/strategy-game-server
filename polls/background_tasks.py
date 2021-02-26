@@ -15,7 +15,7 @@ def run_updating_top_players():
     system_service = SystemService()
     global_settings = GlobalSettings()
     while True:
-        system_service.update_top_players_cache()
+        system_service.update_top_players_cache(global_settings.number_top_players)
         time.sleep(global_settings.frequency_update_top_players*60)
 
 def run_updating_players():
