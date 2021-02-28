@@ -3,10 +3,10 @@ import random
 import tokenlib as tokenlib
 from django.utils import timezone
 
-from polls.models import Country, User
-from polls.services.system_service import EmailTemplate, SystemService
+from polls.models import Country, User, GlobalSettings
+from polls.services.system_service import EmailTemplate, SystemService, EmailEvent
 from polls.errors import UnknownUserError
-from serverDjango.settings import ADMIN_EMAIL, ADMIN_EMAIL_PASSWORD, SECRET_KEY
+from serverDjango.settings import ADMIN_EMAIL, SECRET_KEY
 
 
 class UserService:
@@ -46,8 +46,8 @@ class UserService:
             print(error)
             country.delete()
             return False
-        #html_msg = EmailTemplate().get_html_registration(username, password, country_name, str(user.pk),link_country_flag)
-        #SystemService().send_email(ADMIN_EMAIL, email, ADMIN_EMAIL_PASSWORD, html_msg, EmailTemplate.REGISTRATION_TITLE)
+        if GlobalSettings.objects().first().email_notification:
+            SystemService().send_notification([email], EmailEvent.REGISTRATION, username, password, country_name, str(user.pk),link_country_flag)
         return True
 
     def delete_user_account(self, user_id,password):
@@ -59,8 +59,8 @@ class UserService:
                 country = Country.objects(id=country_pk).first()
                 country.delete()
                 user.delete()
-                #html_msg = EmailTemplate().get_html_delete_account(user.username)
-                #SystemService().send_email(ADMIN_EMAIL, user_email, ADMIN_EMAIL_PASSWORD, html_msg,EmailTemplate.DELETE_TITLE)
+                if GlobalSettings.objects().first().email_notification:
+                    SystemService().send_notification([user_email], EmailEvent.DELETE, user.username)
                 return True
             except Exception as e:
                 print(e)
@@ -79,7 +79,7 @@ class UserService:
             country.save()
             user.country = country.to_dbref()
             user.save()
-            #html_msg = EmailTemplate().get_html_edit_account(user.username, user.password, country.name,country.link_img)
-            #SystemService().send_email(ADMIN_EMAIL, user.email, ADMIN_EMAIL_PASSWORD, html_msg,EmailTemplate.CHANGE_TITLE)
+            if GlobalSettings.objects().first().email_notification:
+                SystemService().send_notification([user.email], EmailEvent.CHANGE_DATA, user.username, user.password, country.name,country.link_img)
             return True
         return False

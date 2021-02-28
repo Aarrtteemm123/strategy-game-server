@@ -1,7 +1,9 @@
+import datetime
 import random,re
 from django.utils import timezone
 from polls.errors import *
-from polls.models import Country, Modifier, Trade, Law, ArmyUnit, History, GlobalSettings
+from polls.models import Country, Modifier, Trade, Law, ArmyUnit, History, GlobalSettings, User
+
 from polls.view_models.army import ResultWarView, ItemWarResult
 
 class GameService:
@@ -30,7 +32,13 @@ class GameService:
 
         country.budget.total_profit = 0
         country.budget.total_expenses = 0
-        # if budget is low and notify is on - send email
+
+        user = User.objects(country=country.id).first()
+        if country.budget.money < global_settings.low_budget and global_settings.email_notification and user.settings['low budget'] and (datetime.datetime.now() - country.date_last_budget_notification).seconds/60 > global_settings.frequency_email_notification:
+            from polls.services.system_service import SystemService, EmailEvent
+            country.date_last_budget_notification = datetime.datetime.now()
+            SystemService().send_notification([user.email],EmailEvent.LOW_BUDGET,country.budget.money)
+
         country.save()
 
     def get_army_modifiers(self,country,type_modifiers):
@@ -143,7 +151,13 @@ class GameService:
         if len(country.population.population_history) > global_settings.length_population_graphics:
             country.population.population_history.pop(0)
         country.population.population_history.append(History(name='', value=pop_modifiers * 100 - 100, time=timezone.now()))
-        # if population low end notify on - send email
+
+        user = User.objects(country=country.id).first()
+        if country.population.total_population < global_settings.low_population and global_settings.email_notification and user.settings['low population'] and (datetime.datetime.now() - country.date_last_population_notification).seconds/60 > global_settings.frequency_email_notification:
+            from polls.services.system_service import SystemService, EmailEvent
+            country.date_last_population_notification = datetime.datetime.now()
+            SystemService().send_email([user.email],EmailEvent.LOW_POPULATION,country.population.total_population)
+
         country.save()
 
     def update_price_goods(self):
@@ -699,6 +713,13 @@ class GameService:
 
         attacking_country.budget.military_expenses = self.get_military_expenses(attacking_country)
         defending_country.budget.military_expenses = self.get_military_expenses(defending_country)
+
+        global_settings = GlobalSettings.objects().first()
+        defending_user = User.objects(country=defending_country.id).first()
+        attacking_user = User.objects(country=attacking_country.id).first()
+        if global_settings.email_notification and defending_user.settings['attacks']:
+            from polls.services.system_service import SystemService, EmailEvent
+            SystemService().send_notification([defending_user.email],EmailEvent.ATTACK,attacking_user.username)
 
         # attacking_country.save() !
         # defending_country.save() !

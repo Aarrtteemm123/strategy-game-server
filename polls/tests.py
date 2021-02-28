@@ -2,12 +2,14 @@ import datetime
 import json
 import time
 from django.test import TestCase
+from sendgrid import SendGridAPIClient, Mail
+from sendgrid import SendGridAPIClient, Mail
 
 from polls.errors import UnknownNameTaxError
 from polls.models import News, Country, User, ArmyUnit, Cache
 from polls.services.user_service import UserService
 from polls.services.game_service import GameService
-from polls.services.system_service import SystemService
+from polls.services.system_service import SystemService, EmailTemplate
 
 #print(UserService().register_new_user('pl1','pas1','er@gmail.com','Ukraine','https://i.pinimg.com/originals/c2/b2/75/c2b2757203f9b9e1b86986aad502d2d5.jpg'))
 #print(UserService().register_new_user('pl2','pas2','er2@gmail.com','Great Britain','https://images-na.ssl-images-amazon.com/images/I/71d6ai1UMEL._AC_SL1500_.jpg'))
@@ -31,6 +33,7 @@ from polls.services.view_service import CountryViewService, NewsViewService, Pla
 #SystemService().create_default_global_settings()
 #SystemService().update_top_players_cache()
 #SystemService().update_trade_cache()
+
 class ServiceTestCase(TestCase):
     def setUp(self):
         pass

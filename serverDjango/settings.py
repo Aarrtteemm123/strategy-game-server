@@ -27,16 +27,14 @@ SECRET_KEY = 'c4gf@3u-=zn^*^=yi9t2wv5duae!^c^iftd4y3aj(0cgv!#21e'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ADMIN_EMAIL = 'email'
-ADMIN_EMAIL_PASSWORD = 'password'
+ADMIN_EMAIL = 'ADMIN EMAIL'
+EMAIL_API_KEY = 'EMAIL API KEY'
 
 ALLOWED_HOSTS = []
 
 CORS_ORIGIN_ALLOW_ALL = True # If this is used then `CORS_ORIGIN_WHITELIST` will not have any effect
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_WHITELIST = [
 
-] # If this is used, then not need to use `CORS_ORIGIN_ALLOW_ALL = True`
 CORS_ORIGIN_REGEX_WHITELIST = [
 
 ]

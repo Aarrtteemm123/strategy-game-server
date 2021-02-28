@@ -13,9 +13,10 @@ from rest_framework.decorators import api_view
 from mongoengine import *
 from polls.errors import *
 from polls.services.game_service import GameService
-from polls.services.system_service import SystemService
+from polls.services.system_service import SystemService, EmailEvent
 from polls.services.user_service import UserService
 from polls.services.view_service import CountryViewService, NewsViewService, PlayerViewService
+from serverDjango.settings import ADMIN_EMAIL
 
 connect('TestDb')
 
@@ -89,7 +90,7 @@ def redirect_feedback(request, user_id):
         if SystemService.verify_token(user_id, request_data['token']):
             if (datetime.datetime.now() - user.date_last_feedback).seconds/60 >= global_settings.feedback_pause:
                 user.date_last_feedback = datetime.datetime.now()
-                SystemService().get_feedback(user.username, user.email, request_data['rating'], request_data['msg'])
+                SystemService().send_notification([ADMIN_EMAIL],EmailEvent.FEEDBACK, user.username, user.email, request_data['rating'], request_data['msg'])
                 user.save()
             else:
                 return HttpResponse({'You can send only 1 feedback in 24 hours'},

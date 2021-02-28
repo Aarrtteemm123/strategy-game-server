@@ -1,8 +1,7 @@
 import datetime
 import json
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-import smtplib
+
+from sendgrid import SendGridAPIClient, Mail
 
 from polls.errors import UnknownUserError
 from lib.tokenlib.errors import ExpiredTokenError
@@ -10,9 +9,10 @@ from tokenlib.errors import InvalidSignatureError
 
 from polls.models import Trade, History, Modifier, ArmyUnitCharacteristic, ArmyUnit, Population, \
     Army, Goods, Warehouse, IndustrialBuildings, Technology, Budget, Country, Law, User, GlobalSettings, Cache
+from polls.services.view_service import PlayerViewService, CountryViewService, NewsViewService
+from serverDjango.settings import ADMIN_EMAIL, EMAIL_API_KEY
+
 from polls.services.game_service import GameService
-from polls.services.view_service import PlayerViewService, CountryViewService
-from serverDjango.settings import ADMIN_EMAIL, ADMIN_EMAIL_PASSWORD
 
 
 class SystemService:
@@ -67,20 +67,49 @@ class SystemService:
             user.settings[setting] = setting in settings
         user.save()
 
-    def send_email(self, from_email, to_email, password, message, title):
-        msg = MIMEMultipart()  # create msg object
-        msg['Subject'] = title  # title
-        msg.attach(MIMEText(message, 'html'))  # attach text to msg as html
-        server = smtplib.SMTP('smtp.gmail.com: 587')  # create server
-        server.starttls()  # always use TLS protocol
-        server.login(from_email, password)  # login
-        server.sendmail(from_email, to_email, msg.as_string())  # send msg
-        server.quit()  # destroy connection
+    def send_notification(self, to_emails, type_notification, *args):
+        if type_notification == EmailEvent.REGISTRATION:
+            html_msg = EmailTemplate().get_html_registration(*args)
+            SystemService().send_email(to_emails, html_msg, EmailTemplate.REGISTRATION_TITLE)
+        elif type_notification == EmailEvent.DELETE:
+            html_msg = EmailTemplate().get_html_delete_account(*args)
+            SystemService().send_email(to_emails, html_msg, EmailTemplate.DELETE_TITLE)
+        elif type_notification == EmailEvent.CHANGE_DATA:
+            html_msg = EmailTemplate().get_html_edit_account(*args)
+            SystemService().send_email(to_emails, html_msg, EmailTemplate.CHANGE_TITLE)
+        elif type_notification == EmailEvent.FEEDBACK:
+            msg_html = EmailTemplate().get_html_feedback(*args)
+            SystemService().send_email(to_emails, msg_html, EmailTemplate.FEEDBACK_TITLE)
+        elif type_notification == EmailEvent.LOW_BUDGET:
+            msg_html = EmailTemplate().get_html_low_budget(*args)
+            SystemService().send_email(to_emails, msg_html, EmailTemplate.LOW_BUDGET_TITLE)
+        elif type_notification == EmailEvent.LOW_POPULATION:
+            msg_html = EmailTemplate().get_html_low_population(*args)
+            SystemService().send_email(to_emails, msg_html, EmailTemplate.LOW_POPULATION_TITLE)
+        elif type_notification == EmailEvent.ATTACK:
+            msg_html = EmailTemplate().get_html_attack(*args)
+            SystemService().send_email(to_emails, msg_html, EmailTemplate.ATTACK)
+        elif type_notification == EmailEvent.WAREHOUSE:
+            msg_html = EmailTemplate().get_html_warehouse()
+            SystemService().send_email(to_emails, msg_html, EmailTemplate.WAREHOUSE)
+        elif type_notification == EmailEvent.NEWS:
+            news_view_obj = NewsViewService().get_news()[-1]
+            msg_html = EmailTemplate().get_html_news(news_view_obj.title,news_view_obj.date,news_view_obj.rows)
+            SystemService().send_email(to_emails, msg_html, EmailTemplate.NEWS)
 
-    def get_feedback(self, username, user_email, rating, msg):
-        msg_html = EmailTemplate().get_html_feedback(username, msg, user_email, rating)
-        self.send_email(ADMIN_EMAIL, ADMIN_EMAIL, ADMIN_EMAIL_PASSWORD,
-                        msg_html, EmailTemplate.FEEDBACK_TITLE)
+
+
+    def send_email(self, to_emails, html_content, title):
+        print('sending email...')
+        message = Mail(
+            from_email=ADMIN_EMAIL,
+            to_emails=to_emails,
+            subject=title,
+            html_content=html_content
+        )
+        sg = SendGridAPIClient(api_key=EMAIL_API_KEY)
+        response = sg.send(message)
+        print(response.status_code, response.body, response.headers)
 
     def create_default_country(self,name,link_img):
         global_settings = GlobalSettings.objects().first()
@@ -808,12 +837,64 @@ class SystemService:
             }
         ).save()
 
+class EmailEvent:
+    REGISTRATION = 'REGISTRATION'
+    DELETE = 'DELETE'
+    CHANGE_DATA = 'CHANGE DATA'
+    FEEDBACK = 'FEEDBACK'
+    LOW_BUDGET = 'LOW BUDGET'
+    LOW_POPULATION = 'LOW POPULATION'
+    WAREHOUSE = 'WAREHOUSE'
+    NEWS = 'NEWS'
+    ATTACK = 'ATTACK'
 
 class EmailTemplate:
     REGISTRATION_TITLE = 'Register in strategy - Your country'
     DELETE_TITLE = 'Delete account in strategy - Your country'
     CHANGE_TITLE = 'Account data was changed in strategy - Your country'
     FEEDBACK_TITLE = 'New feedback from strategy - Your country'
+    LOW_BUDGET_TITLE = 'Low budget - Your country'
+    LOW_POPULATION_TITLE = 'Low population - Your country'
+    WAREHOUSE = 'Warehouse problem - Your country'
+    NEWS = 'Something new - Your country'
+    ATTACK = 'Someone attacked you - Your country'
+
+    def get_html_news(self,title,date,rows):
+        html = """
+            <h3>News</h3>
+            <strong>"""+title+""" ("""+date+""")</strong>
+        """
+        for row in rows:
+            html += f"- {row} <br>\n"
+        return html
+
+    def get_html_attack(self,player_name):
+        html = """
+            <h3>Important information!</h3>
+            <strong>Player """+player_name+""" attacked your country</strong>
+        """
+        return html
+
+    def get_html_warehouse(self):
+        html = """
+            <h3>Important information!</h3>
+            <strong>The warehouse(s) has a problem</strong>
+        """
+        return html
+
+    def get_html_low_budget(self,budget):
+        html = """
+            <h3>Important information!</h3>
+            <strong>The budget is low, your country have only """+str(budget)+"""$</strong>
+        """
+        return html
+
+    def get_html_low_population(self,population):
+        html = """
+            <h3>Important information!</h3>
+            <strong>The number of inhabitants is low, in country living only """+str(population)+""" people</strong>
+        """
+        return html
 
     def get_html_registration(self, username, password, country_name, user_id, flag_link):
         html = """<html><body><h1 style="font-weight: bolder">

@@ -121,19 +121,24 @@ class Country(Document):
     adopted_laws = ListField(default=[])
     population = EmbeddedDocumentField('Population')
     army = EmbeddedDocumentField('Army')
+    date_last_warehouse_notification = DateTimeField(default=timezone.now)
+    date_last_budget_notification = DateTimeField(default=timezone.now)
+    date_last_population_notification = DateTimeField(default=timezone.now)
+    date_last_population_update = DateTimeField(default=timezone.now)
+    date_last_industry_update = DateTimeField(default=timezone.now)
+    date_last_budget_update = DateTimeField(default=timezone.now)
 
 class User(Document):
     isAuth = BooleanField(default=False)
     token = StringField(default='')
     date_last_login = DateTimeField(default=timezone.now)
-    date_last_update = DateTimeField(default=timezone.now)
     username = StringField(default='', max_length=100,unique=True)
     password = StringField(default='', max_length=100)
     email = EmailField(default='user_email@gmail.com')
     date_registration = DateTimeField(default=timezone.now)
     settings = DictField(default={
-        'news':False,'updates':True,
-        'attacks':True,'warehouse overflow':False,'low budget':False
+        'news':False,'low population':True,
+        'attacks':True,'warehouse overflow or empty':False,'low budget':False
     })
     country = ReferenceField('Country',reverse_delete_rule=mongoengine.CASCADE)
     date_last_feedback = DateTimeField(default=timezone.now)
@@ -152,8 +157,14 @@ class GlobalSettings(Document):
     # time in minutes
     feedback_pause = IntField(default=1440,min_value=1) # +
     time_speed = IntField(default=60,min_value=1) # +
+    email_notification = BooleanField(default=False) # +
+    low_budget = IntField(default=1000,min_value=0) # +
+    low_population = IntField(default=1000,min_value=0) # +
+    frequency_email_notification = IntField(default=720,min_value=1)
     frequency_update_trade = IntField(default=10,min_value=0) # +
     frequency_update_top_players = IntField(default=5,min_value=0) # +
+    frequency_check_warehouses = IntField(default=10,min_value=0) # +
+    frequency_check_news = IntField(default=30,min_value=0) # +
     number_top_players = IntField(default=10,min_value=1) # +
     length_budget_graphics = IntField(default=10,min_value=1) # +
     length_population_graphics = IntField(default=10,min_value=1) # +

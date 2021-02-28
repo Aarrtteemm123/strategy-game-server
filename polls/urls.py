@@ -36,3 +36,5 @@ urlpatterns = [
 Thread(target=run_updating_trade).start()
 Thread(target=run_updating_top_players).start()
 Thread(target=run_updating_players).start()
+Thread(target=run_check_warehouses).start()
+Thread(target=run_check_news).start()
