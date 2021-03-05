@@ -5,7 +5,7 @@ from django.test import TestCase
 from sendgrid import SendGridAPIClient, Mail
 from sendgrid import SendGridAPIClient, Mail
 
-from polls.errors import UnknownNameTaxError
+from polls.exceptions import UnknownNameTaxError
 from polls.models import News, Country, User, ArmyUnit, Cache
 from polls.services.user_service import UserService
 from polls.services.game_service import GameService

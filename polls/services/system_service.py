@@ -2,8 +2,9 @@ import datetime
 import json
 
 from sendgrid import SendGridAPIClient, Mail
+from typing import Dict, List
 
-from polls.errors import UnknownUserError
+from polls.exceptions import UnknownUserError
 from lib.tokenlib.errors import ExpiredTokenError
 from tokenlib.errors import InvalidSignatureError
 
@@ -21,7 +22,7 @@ class SystemService:
         GlobalSettings.objects().delete()
         GlobalSettings().save()
 
-    def update_top_players_cache(self,number):
+    def update_top_players_cache(self,number: int):
         top_players_lst = PlayerViewService().get_top_players(number)
         json_top_players_lst = json.dumps(top_players_lst,default=lambda x:x.__dict__)
         cache = Cache.objects().first()
@@ -37,8 +38,8 @@ class SystemService:
             cache.save()
 
     @staticmethod
-    def verify_token(user_id,token):
-        user = User.objects(id=user_id).fisrt()
+    def verify_token(user_id: str,token:str):
+        user = User.objects(id=user_id).first()
         if user:
             if user.token == token:
                 if (datetime.datetime.now() - user.date_last_login).days < 1:
@@ -58,16 +59,16 @@ class SystemService:
             game_service.update_budget(country)
 
 
-    def get_user_settings(self,user_id):
+    def get_user_settings(self,user_id: str):
         user = User.objects(id=user_id).first()
         return user.settings
 
-    def set_user_settings(self,user,settings):
+    def set_user_settings(self, user: User, settings: Dict[str, bool]):
         for setting in user.settings:
             user.settings[setting] = setting in settings
         user.save()
 
-    def send_notification(self, to_emails, type_notification, *args):
+    def send_notification(self, to_emails: List[str], type_notification: str, *args):
         if type_notification == EmailEvent.REGISTRATION:
             html_msg = EmailTemplate().get_html_registration(*args)
             SystemService().send_email(to_emails, html_msg, EmailTemplate.REGISTRATION_TITLE)
@@ -99,7 +100,7 @@ class SystemService:
 
 
 
-    def send_email(self, to_emails, html_content, title):
+    def send_email(self, to_emails: List[str], html_content: str, title: str):
         print('sending email...')
         message = Mail(
             from_email=ADMIN_EMAIL,
@@ -111,7 +112,7 @@ class SystemService:
         response = sg.send(message)
         print(response.status_code, response.body, response.headers)
 
-    def create_default_country(self,name,link_img):
+    def create_default_country(self,name: str,link_img: str):
         global_settings = GlobalSettings.objects().first()
         return Country(
             link_img=link_img,
@@ -859,7 +860,7 @@ class EmailTemplate:
     NEWS = 'Something new - Your country'
     ATTACK = 'Someone attacked you - Your country'
 
-    def get_html_news(self,title,date,rows):
+    def get_html_news(self,title: str,date: str,rows: List[str]):
         html = """
             <h3>News</h3>
             <strong>"""+title+""" ("""+date+""")</strong>
@@ -868,7 +869,7 @@ class EmailTemplate:
             html += f"- {row} <br>\n"
         return html
 
-    def get_html_attack(self,player_name):
+    def get_html_attack(self,player_name: str):
         html = """
             <h3>Important information!</h3>
             <strong>Player """+player_name+""" attacked your country</strong>
@@ -882,21 +883,21 @@ class EmailTemplate:
         """
         return html
 
-    def get_html_low_budget(self,budget):
+    def get_html_low_budget(self,budget: int):
         html = """
             <h3>Important information!</h3>
             <strong>The budget is low, your country have only """+str(budget)+"""$</strong>
         """
         return html
 
-    def get_html_low_population(self,population):
+    def get_html_low_population(self,population: int):
         html = """
             <h3>Important information!</h3>
             <strong>The number of inhabitants is low, in country living only """+str(population)+""" people</strong>
         """
         return html
 
-    def get_html_registration(self, username, password, country_name, user_id, flag_link):
+    def get_html_registration(self, username: str, password: str, country_name: str, user_id: str, flag_link: str):
         html = """<html><body><h1 style="font-weight: bolder">
         Dear """ + username + """
         <p>Welcome to online strategy - 'Your country'</h1>
@@ -912,7 +913,7 @@ class EmailTemplate:
         </body></html>"""
         return html
 
-    def get_html_delete_account(self, username):
+    def get_html_delete_account(self, username: str):
         html = """<html><body><h1 style="font-weight: bolder">
         """ + username + """!
         <hr><p><h2 style="color:red">Your account was deleted</h2>
@@ -920,7 +921,7 @@ class EmailTemplate:
         </body></html>"""
         return html
 
-    def get_html_edit_account(self, username, password, country_name, flag_link):
+    def get_html_edit_account(self, username: str, password: str, country_name: str, flag_link: str):
         html = """<html><body><h1 style="font-weight: bolder">
                 """ + username + """ attention!
                 <hr><p><h2 style="color:red">Account data was changed:</h2>
@@ -934,7 +935,7 @@ class EmailTemplate:
                 </body></html>"""
         return html
 
-    def get_html_feedback(self, username, msg, player_email, rating):
+    def get_html_feedback(self, username: str, msg: str, player_email: str, rating: float):
         html = """<html><body><h1 style="font-weight: bolder">
                         Player """ + username + """ write feedback!</h1><hr>
                         <h3>Message:</h3>

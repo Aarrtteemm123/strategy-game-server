@@ -5,12 +5,12 @@ from django.utils import timezone
 
 from polls.models import Country, User, GlobalSettings
 from polls.services.system_service import EmailTemplate, SystemService, EmailEvent
-from polls.errors import UnknownUserError
+from polls.exceptions import UnknownUserError
 from serverDjango.settings import ADMIN_EMAIL, SECRET_KEY
 
 
 class UserService:
-    def login(self, username, password):
+    def login(self, username: str, password: str):
         user = User.objects(username=username,password=password).first()
         if user:
             token = tokenlib.make_token({"user_id": str(user.id), 'username':username, 'password':password, 'random_value':random.randint(0,1000000)}, secret=SECRET_KEY)
@@ -22,7 +22,8 @@ class UserService:
         else:
             raise UnknownUserError(username)
 
-    def logout(self, user_id):
+    def logout(self, user_id: str):
+        print(type(user_id))
         user = User.objects(id=user_id).first()
         if user:
             user.isAuth = False
@@ -32,7 +33,7 @@ class UserService:
         else:
             raise UnknownUserError(str(user_id))
 
-    def register_new_user(self, username, password, email, country_name, link_country_flag):
+    def register_new_user(self, username: str, password: str, email: str, country_name: str, link_country_flag: str):
         country = SystemService().create_default_country(country_name,link_country_flag)
         try:
             country.save()
@@ -50,7 +51,7 @@ class UserService:
             SystemService().send_notification([email], EmailEvent.REGISTRATION, username, password, country_name, str(user.pk),link_country_flag)
         return True
 
-    def delete_user_account(self, user_id,password):
+    def delete_user_account(self, user_id: str, password: str):
         if User.objects(id=user_id).count() == 1 and User.objects(id=user_id).first().password == password:
             try:
                 user = User.objects(id=user_id).first()
@@ -67,8 +68,8 @@ class UserService:
                 return False
         return False
 
-    def change_user_data(self,user_id,new_username=None,new_password=None,
-                         new_country_name=None,new_country_flag=None):
+    def change_user_data(self,user_id: str,new_username: str=None,new_password: str=None,
+                         new_country_name: str=None,new_country_flag: str=None):
         user = User.objects(id=user_id).first()
         if user is not None:
             country = Country.objects(id=user.country.id).first()

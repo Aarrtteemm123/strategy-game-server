@@ -17,7 +17,7 @@ from polls.view_models.trade import TradeCardView, TableRowProducerView, ChartPr
 from polls.view_models.warehouse import WarehouseCardView
 
 class CountryViewService:
-    def get_basic_statistic(self, user_id):
+    def get_basic_statistic(self, user_id: str):
         start = time.time()
         user = User.objects(id=user_id).first()
         country = Country.objects(id=user.country.id).first()
@@ -85,7 +85,7 @@ class CountryViewService:
         finish = time.time()
         return bsv
 
-    def get_budget(self, user_id):
+    def get_budget(self, user_id: str):
         start = time.time()
         user = User.objects(id=user_id).first()
         country = Country.objects(id=user.country.id).first()
@@ -119,7 +119,7 @@ class CountryViewService:
         finish = time.time()
         return budget_view
 
-    def get_technologies(self, user_id):
+    def get_technologies(self, user_id: str):
         start = time.time()
         user = User.objects(id=user_id).first()
         country = Country.objects(id=user.country.id).first()
@@ -134,7 +134,7 @@ class CountryViewService:
         finish = time.time()
         return technologies_view_list
 
-    def get_industry(self, user_id):
+    def get_industry(self, user_id: str):
         start = time.time()
         user = User.objects(id=user_id).first()
         country = Country.objects(id=user.country.id).first()
@@ -182,7 +182,7 @@ class CountryViewService:
         finish = time.time()
         return industry_dict
 
-    def get_warehouses(self, user_id):
+    def get_warehouses(self, user_id: str):
         start = time.time()
         user = User.objects(id=user_id).first()
         country = Country.objects(id=user.country.id).first()
@@ -200,7 +200,7 @@ class CountryViewService:
         finish = time.time()
         return warehouses_list
 
-    def get_politics_laws(self, user_id):
+    def get_politics_laws(self, user_id: str):
         start = time.time()
         user = User.objects(id=user_id).first()
         country = Country.objects(id=user.country.id).first()
@@ -208,7 +208,7 @@ class CountryViewService:
         finish = time.time()
         return adopted_laws_name_list
 
-    def get_population(self, user_id):
+    def get_population(self, user_id: str):
         start = time.time()
         user = User.objects(id=user_id).first()
         country = Country.objects(id=user.country.id).first()
@@ -239,7 +239,7 @@ class CountryViewService:
         finish = time.time()
         return population_view
 
-    def get_cache_trade(self,user_id):
+    def get_cache_trade(self,user_id: str):
         cache = Cache.objects().first()
         if cache.trade != '':
             trade_view = json.loads(cache.trade)
@@ -253,7 +253,7 @@ class CountryViewService:
         else:
             return self.get_trade(user_id)
 
-    def get_trade(self, user_id):
+    def get_trade(self, user_id: str):
         start = time.time()
         user = User.objects(id=user_id).first()
         goods = Trade.objects
@@ -294,7 +294,7 @@ class CountryViewService:
         finish = time.time()
         return trade_cards_view_list
 
-    def get_army(self, user_id):
+    def get_army(self, user_id: str):
         start = time.time()
         user = User.objects(id=user_id).first()
         country = Country.objects(id=user.country.id).first()
@@ -361,7 +361,7 @@ class NewsViewService:
         return news_view_list
 
 class PlayerViewService:
-    def get_account(self,user_id):
+    def get_account(self,user_id: str):
         user = User.objects(id=user_id).first()
         country = Country.objects(id=user.country.id).first()
         game_service = GameService()
@@ -374,7 +374,7 @@ class PlayerViewService:
         )
         return account_view
 
-    def get_player(self, username):
+    def get_player(self, username: str):
         start = time.time()
         user = User.objects(username=username).first()
         if user is not None:
@@ -389,13 +389,13 @@ class PlayerViewService:
             finish = time.time()
             return player_view
 
-    def get_top_players(self,number):
+    def get_top_players(self,number: int):
         view_list = [self.get_player(user.username) for user in User.objects()]
         if number > len(view_list):
             number = len(view_list)
         return sorted(view_list,key=lambda x: x.economic_place)[:number]
 
-    def get_view_page(self,user_id):
+    def get_view_page(self,user_id: str):
         user = User.objects(id=user_id).first()
         country = Country.objects(id=user.country.id).first()
         economic_place = GameService().get_economic_place(country.name)

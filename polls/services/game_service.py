@@ -1,14 +1,14 @@
 import datetime
 import random,re
 from django.utils import timezone
-from polls.errors import *
-from polls.models import Country, Modifier, Trade, Law, ArmyUnit, History, GlobalSettings, User
+from polls.exceptions import *
+from polls.models import Country, Modifier, Trade, Law, ArmyUnit, History, GlobalSettings, User, IndustrialBuildings
 
 from polls.view_models.army import ResultWarView, ItemWarResult
 
 class GameService:
 
-    def update_budget(self, country):
+    def update_budget(self, country: Country):
         total_taxes_profit = self.get_pop_taxes_profit(country) + self.get_farms_taxes_profit(country) + self.get_mines_taxes_profit(country) + self.get_factories_taxes_profit(country)
         military_expenses = sum([country.army.units[unit.name] * unit.maintenance_price for unit in ArmyUnit.objects()])
         country.budget.total_profit += total_taxes_profit
@@ -41,7 +41,7 @@ class GameService:
 
         country.save()
 
-    def get_army_modifiers(self,country,type_modifiers):
+    def get_army_modifiers(self,country: Country,type_modifiers: str):
         if type_modifiers == 'attack' and country.army.attack_modifiers is not None:
             attack_modifiers = sum([mod.value for mod in country.army.attack_modifiers])
             return (attack_modifiers + 100) / 100
@@ -52,19 +52,19 @@ class GameService:
 
         return 1
 
-    def get_population_modifiers(self,country):
+    def get_population_modifiers(self,country: Country):
         if country.population.modifiers is not None:
             pop_modifiers = sum([mod.value for mod in country.population.modifiers])
             return (pop_modifiers + country.population.basic_percent_growth_rate + 100) / 100
         return (country.population.basic_percent_growth_rate + 100) / 100
 
-    def get_industry_modifiers(self,country,address_to):
+    def get_industry_modifiers(self,country: Country,address_to: str):
         if country.industry_modifiers is not None:
             industry_modifiers = sum([mod.value for mod in country.industry_modifiers if mod.address_to == address_to or mod.address_to == 'industry'])
             return (industry_modifiers + 100) / 100
         return 1
 
-    def update_industry(self, country):
+    def update_industry(self, country: Country):
         farms_modifiers = self.get_industry_modifiers(country, 'farms')
         mines_modifiers = self.get_industry_modifiers(country, 'mines')
         factories_modifiers = self.get_industry_modifiers(country, 'factories')
@@ -124,7 +124,7 @@ class GameService:
         self.update_warehouses_filling_speed(country)
         country.save()
 
-    def update_population(self, country):
+    def update_population(self, country: Country):
         pop_modifiers = self.get_population_modifiers(country)
 
         population_before_update = country.population.total_population
@@ -172,7 +172,7 @@ class GameService:
             goods.history_price.append(History(name='', value=goods.price_now, time=timezone.now()))
             goods.save()
 
-    def set_taxes(self, country, type_taxes, new_value):
+    def set_taxes(self, country: Country, type_taxes: str, new_value: int):
         if type_taxes == 'population_taxes':
             if 100 >= new_value >= 0:
                 country.budget.population_taxes = new_value
@@ -233,7 +233,7 @@ class GameService:
         self.update_warehouses_filling_speed(country)
         country.save()
 
-    def upgrade_technology(self, country, technology_name):
+    def upgrade_technology(self, country: Country, technology_name: str):
         technology = country.technologies.filter(name=technology_name).first()
         if country.budget.money >= technology.price_upgrade:
             if technology.level < technology.max_level:
@@ -280,7 +280,7 @@ class GameService:
         else: raise LowBudgetError
         country.save()
 
-    def __calculate_build_of_industrial_building(self, country, building, type_building):
+    def __calculate_build_of_industrial_building(self, country: Country, building: IndustrialBuildings, type_building: str):
         if country.budget.money >= building.price_build:
             if country.population.free_people >= building.workers:
                 country.budget.total_expenses += building.price_build
@@ -297,7 +297,7 @@ class GameService:
             else: raise FreePeopleError
         else: raise LowBudgetError
 
-    def build_industry(self, country, name_building):
+    def build_industry(self, country: Country, name_building: str):
         print(name_building)
         type_building = re.split(r' ', name_building)[-1]
         print(type_building)
@@ -321,7 +321,7 @@ class GameService:
 
         country.save()
 
-    def __calculate_remove_of_industrial_building(self, country, building, type_building):
+    def __calculate_remove_of_industrial_building(self, country: Country, building: IndustrialBuildings, type_building: str):
         if building.number > 0:
             country.population.free_people += building.workers
             building.number -= 1
@@ -333,7 +333,7 @@ class GameService:
             elif type_building == 'factory': country.population.factory_workers -= building.workers
             else: raise UnknownTypeBuildingError(type_building)
 
-    def remove_industry(self, country, name_building):
+    def remove_industry(self, country: Country, name_building: str):
         type_building = re.split(r' ', name_building)[-1]
 
         if type_building == 'farm':
@@ -357,7 +357,7 @@ class GameService:
         self.update_warehouses_filling_speed(country)
         country.save()
 
-    def update_warehouses_filling_speed(self, country):
+    def update_warehouses_filling_speed(self, country: Country):
         farms_modifiers = self.get_industry_modifiers(country, 'farms')
         mines_modifiers = self.get_industry_modifiers(country, 'mines')
         factories_modifiers = self.get_industry_modifiers(country, 'factories')
@@ -399,12 +399,12 @@ class GameService:
 
         country.save()
 
-    def get_number_soldiers_from_units(self, country):
+    def get_number_soldiers_from_units(self, country: Country):
         number, army_units, army = 0, ArmyUnit.objects(), country.army.units
         number = sum([army[unit] * army_units.filter(name=unit).first().need_peoples for unit in army])
         return number
 
-    def upgrade_warehouse(self, country, name_goods):
+    def upgrade_warehouse(self, country: Country, name_goods: str):
         warehouse = [item for item in country.warehouses if item.goods.name == name_goods][0]
         if country.budget.money >= warehouse.price_upgrade:
             if warehouse.level < warehouse.max_level:
@@ -417,7 +417,7 @@ class GameService:
             else: raise MaxLevelError(warehouse.max_level)
         else: raise LowBudgetError
 
-    def set_politics_law(self, country, name_law):
+    def set_politics_law(self, country: Country, name_law: str):
         law = Law.objects(name=name_law).first()
 
         if country.budget.money >= law.price:
@@ -454,8 +454,8 @@ class GameService:
 
         else: raise LowBudgetError
 
-    def __update_conscript_law(self, country, name_law, law, conscript_law_value,
-                               pop_mod=None, indus_mod=None, attack_mod=None, def_mod=None):
+    def __update_conscript_law(self, country: Country, name_law: str, law: Law, conscript_law_value: float,
+                               pop_mod: Modifier=None, indus_mod: Modifier=None, attack_mod: Modifier=None, def_mod: Modifier=None):
         self.__cansel_conscript_law(country)
 
         country.adopted_laws.append(name_law)
@@ -475,7 +475,7 @@ class GameService:
         if def_mod is not None:
             country.army.defence_modifiers.append(def_mod)
 
-    def set_conscript_law(self, country, name_law):
+    def set_conscript_law(self, country: Country, name_law: str):
         law = Law.objects(name=name_law).first()
 
         if country.budget.money >= law.price:
@@ -528,7 +528,7 @@ class GameService:
 
         else: raise LowBudgetError
 
-    def __cansel_conscript_law(self, country):
+    def __cansel_conscript_law(self, country: Country):
         conscript_laws = ['Conscript law: Elite', 'Conscript law: Volunteer',
                           'Conscript law: Limited Conscription', 'Conscript law: Extensive Conscription',
                           'Conscript law: Service by Requirement', 'Conscript law: All Adults Serve',
@@ -542,7 +542,7 @@ class GameService:
             if str_law in country.adopted_laws:
                 country.adopted_laws.remove(str_law)
 
-    def cancel_politics_law(self, country, name_law):
+    def cancel_politics_law(self, country: Country, name_law: str):
         law = Law.objects(name=name_law).first()
 
         if country.budget.money >= law.price:
@@ -578,7 +578,7 @@ class GameService:
             else: raise UnknownNameLawError(name_law)
         else: raise LowBudgetError
 
-    def buy_goods(self, country, name_goods, number):
+    def buy_goods(self, country: Country, name_goods: str, number: int):
         warehouse = [item for item in country.warehouses if item.goods.name == name_goods][0]
         max_number_buy = warehouse.capacity - warehouse.goods.value
         if 0 < number <= max_number_buy:
@@ -591,7 +591,7 @@ class GameService:
             else: raise LowBudgetError
         else: raise GoodsValueNotInRangeError(max_number_buy)
 
-    def sell_goods(self, country, name_goods, number):
+    def sell_goods(self, country: Country, name_goods: str, number: int):
         warehouse = [item for item in country.warehouses if item.goods.name == name_goods][0]
         if 0 < number <= warehouse.goods.value:
             price_goods = Trade.objects(name=name_goods).first().price_now * number
@@ -601,7 +601,7 @@ class GameService:
             country.save()
         else: raise GoodsValueNotInRangeError(warehouse.goods.value)
 
-    def edit_army(self, country, name_unit, new_number):
+    def edit_army(self, country: Country, name_unit: str, new_number: int):
         difference = country.army.units[name_unit] - new_number
         unit = ArmyUnit.objects(name=name_unit).first()
 
@@ -637,7 +637,7 @@ class GameService:
             else: raise MilitaryManpowerError
         else: raise UnitError
 
-    def calculate_war(self, attacking_country_name, defending_country_name):
+    def calculate_war(self, attacking_country_name: str, defending_country_name: str):
         attacking_country = Country.objects(name=attacking_country_name).first()
         defending_country = Country.objects(name=defending_country_name).first()
         army_units = ArmyUnit.objects()
@@ -725,13 +725,13 @@ class GameService:
         # defending_country.save() !
         return res_war_view
 
-    def get_military_expenses(self, country):
+    def get_military_expenses(self, country: Country):
         military_expenses, army_units, army = 0,ArmyUnit.objects(),country.army.units
         military_expenses = sum([army[unit] * army_units.filter(name=unit).first().maintenance_price for unit in army])
         return military_expenses
 
 
-    def get_farms_production_profit(self, country):
+    def get_farms_production_profit(self, country: Country):
         goods = Trade.objects()
         industry_modifiers = self.get_industry_modifiers(country,'farms')
         total_production_profit = 0
@@ -741,7 +741,7 @@ class GameService:
             total_production_profit += production_profit
         return total_production_profit
 
-    def get_mines_production_profit(self, country):
+    def get_mines_production_profit(self, country: Country):
         goods = Trade.objects()
         industry_modifiers = self.get_industry_modifiers(country,'mines')
         total_production_profit = 0
@@ -751,7 +751,7 @@ class GameService:
             total_production_profit += production_profit
         return total_production_profit
 
-    def get_factories_production_profit(self, country):
+    def get_factories_production_profit(self, country: Country):
         goods = Trade.objects()
         industry_modifiers = self.get_industry_modifiers(country,'factories')
         total_production_profit = 0
@@ -767,56 +767,56 @@ class GameService:
                 total_production_profit += production_profit
         return total_production_profit
 
-    def get_factories_profit(self, country):
+    def get_factories_profit(self, country: Country):
         production_profit = self.get_factories_production_profit(country)
         total_factories_profit = production_profit + self.get_factories_taxes_profit(country,production_profit)
         return total_factories_profit
 
-    def get_mines_profit(self, country):
+    def get_mines_profit(self, country: Country):
         production_profit = self.get_mines_production_profit(country)
         total_mines_profit = production_profit + self.get_mines_taxes_profit(country, production_profit)
         return total_mines_profit
 
-    def get_farms_profit(self, country):
+    def get_farms_profit(self, country: Country):
         production_profit = self.get_farms_production_profit(country)
         total_farms_profit = production_profit + self.get_farms_taxes_profit(country, production_profit)
         return total_farms_profit
 
-    def get_army_taxes_profit(self, country):
+    def get_army_taxes_profit(self, country: Country):
         global_settings = GlobalSettings.objects().first()
         return global_settings.army_taxes_profit_k * country.population.solders * (country.budget.military_taxes / 100)
 
-    def get_pop_taxes_profit(self, country):
+    def get_pop_taxes_profit(self, country: Country):
         global_settings = GlobalSettings.objects().first()
         return (global_settings.pop_taxes_profit_k * country.population.total_population * (country.budget.population_taxes / 100)) + self.get_army_taxes_profit(country)
 
-    def get_farms_taxes_profit(self, country, production_profit=None):
+    def get_farms_taxes_profit(self, country: Country, production_profit: int=None):
         global_settings = GlobalSettings.objects().first()
         if production_profit is None:
             production_profit = self.get_farms_production_profit(country)
         taxes_profit = production_profit + global_settings.farms_taxes_profit_k * production_profit * country.budget.farms_taxes
         return taxes_profit
 
-    def get_mines_taxes_profit(self, country, production_profit=None):
+    def get_mines_taxes_profit(self, country: Country, production_profit: int=None):
         global_settings = GlobalSettings.objects().first()
         if production_profit is None:
             production_profit = self.get_mines_production_profit(country)
         taxes_profit = production_profit + global_settings.mines_taxes_profit_k * production_profit * country.budget.mines_taxes
         return taxes_profit
 
-    def get_factories_taxes_profit(self, country, production_profit=None):
+    def get_factories_taxes_profit(self, country: Country, production_profit: int=None):
         global_settings = GlobalSettings.objects().first()
         if production_profit is None:
             production_profit = self.get_factories_production_profit(country)
         taxes_profit = production_profit + global_settings.factories_taxes_profit_k * production_profit * country.budget.factories_taxes
         return taxes_profit
 
-    def get_total_profit(self, country):
+    def get_total_profit(self, country: Country):
         total_profit = self.get_pop_taxes_profit(country) + self.get_farms_profit(country) + self.get_mines_profit(
             country) + self.get_factories_profit(country) - country.budget.military_expenses
         return total_profit
 
-    def get_economic_place(self, country_name):
+    def get_economic_place(self, country_name: str):
         countries = Country.objects()
         profit_target_country = 0
         economic_profit_dict = {}
@@ -828,14 +828,14 @@ class GameService:
         economic_rating = sorted(economic_profit_dict.items(), key=lambda x: x[1], reverse=True)
         return economic_rating.index((country_name, profit_target_country)) + 1
 
-    def get_army_place(self, country_name):
+    def get_army_place(self, country_name: str):
         countries = Country.objects
         army_expenses_dict = {country.name: country.budget.military_expenses for country in countries}
         army_rating_dict = sorted(army_expenses_dict.items(), key=lambda x: x[1], reverse=True)
         target_country = next(filter(lambda x: x[0] == country_name, army_rating_dict))
         return army_rating_dict.index(target_country) + 1
 
-    def get_goods_data(self, country):
+    def get_goods_data(self, country: Country):
         farms_modifiers = self.get_industry_modifiers(country,'farms')
         mines_modifiers = self.get_industry_modifiers(country,'mines')
         factories_modifiers = self.get_industry_modifiers(country,'factories')
@@ -901,7 +901,7 @@ class GameService:
 
         return data
 
-    def get_name_goods_from_building(self, name_building):
+    def get_name_goods_from_building(self, name_building: str):
         words = re.split(r' ', name_building)
         if 'factory' in words:
             words.remove('factory')

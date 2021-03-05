@@ -11,7 +11,7 @@ from tokenlib.errors import InvalidSignatureError
 from polls.models import User, Country, GlobalSettings
 from rest_framework.decorators import api_view
 from mongoengine import *
-from polls.errors import *
+from polls.exceptions import *
 from polls.services.game_service import GameService
 from polls.services.system_service import SystemService, EmailEvent
 from polls.services.user_service import UserService
