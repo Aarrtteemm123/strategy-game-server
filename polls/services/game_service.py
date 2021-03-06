@@ -9,35 +9,46 @@ from polls.view_models.army import ResultWarView, ItemWarResult
 class GameService:
 
     def update_budget(self, country: Country):
+        time_sleep_sec = (datetime.utcnow() - country.date_last_budget_update).seconds
+
         total_taxes_profit = self.get_pop_taxes_profit(country) + self.get_farms_taxes_profit(country) + self.get_mines_taxes_profit(country) + self.get_factories_taxes_profit(country)
         military_expenses = sum([country.army.units[unit.name] * unit.maintenance_price for unit in ArmyUnit.objects()])
-        country.budget.total_profit += total_taxes_profit
-        country.budget.total_expenses += military_expenses
-        country.budget.money += (total_taxes_profit - military_expenses)
+        total_taxes_profit *= (time_sleep_sec/3600)
+        military_expenses *= (time_sleep_sec/3600)
 
-        global_settings = GlobalSettings.objects().first()
+        if (total_taxes_profit > 1 or total_taxes_profit < -1) and (military_expenses > 1 or military_expenses == 0):
+            country.date_last_budget_update = datetime.utcnow()
 
-        if len(country.budget.profit_history) > global_settings.length_budget_graphics:
-            country.budget.profit_history.pop(0)
-        country.budget.profit_history.append(History(name='', value=country.budget.total_profit, time=timezone.now()))
+            country.budget.total_profit += total_taxes_profit
+            country.budget.total_expenses += military_expenses
+            country.budget.money += (total_taxes_profit - military_expenses)
 
-        if len(country.budget.expenses_history) > global_settings.length_budget_graphics:
-            country.budget.expenses_history.pop(0)
-        country.budget.expenses_history.append(
-            History(name='', value=country.budget.total_expenses, time=timezone.now()))
+            if (datetime.utcnow() - country.date_last_budget_chart_update).seconds > 3600:
+                country.date_last_budget_chart_update = datetime.utcnow()
 
-        if len(country.budget.budget_history) > global_settings.length_budget_graphics:
-            country.budget.budget_history.pop(0)
-        country.budget.budget_history.append(History(name='', value=country.budget.money, time=timezone.now()))
+                global_settings = GlobalSettings.objects().first()
 
-        country.budget.total_profit = 0
-        country.budget.total_expenses = 0
+                if len(country.budget.profit_history) > global_settings.length_budget_graphics:
+                    country.budget.profit_history.pop(0)
+                country.budget.profit_history.append(History(name='', value=country.budget.total_profit, time=timezone.now()))
 
-        user = User.objects(country=country.id).first()
-        if country.budget.money < global_settings.low_budget and global_settings.email_notification and user.settings['low budget'] and (datetime.utcnow() - country.date_last_budget_notification).seconds/60 > global_settings.frequency_email_notification:
-            from polls.services.system_service import SystemService, EmailEvent
-            country.date_last_budget_notification = datetime.utcnow()
-            SystemService().send_notification([user.email],EmailEvent.LOW_BUDGET,country.budget.money)
+                if len(country.budget.expenses_history) > global_settings.length_budget_graphics:
+                    country.budget.expenses_history.pop(0)
+                country.budget.expenses_history.append(
+                    History(name='', value=country.budget.total_expenses, time=timezone.now()))
+
+                if len(country.budget.budget_history) > global_settings.length_budget_graphics:
+                    country.budget.budget_history.pop(0)
+                country.budget.budget_history.append(History(name='', value=country.budget.money, time=timezone.now()))
+
+                country.budget.total_profit = 0
+                country.budget.total_expenses = 0
+
+                user = User.objects(country=country.id).first()
+                if country.budget.money < global_settings.low_budget and global_settings.email_notification and user.settings['low budget'] and (datetime.utcnow() - country.date_last_budget_notification).seconds/60 > global_settings.frequency_email_notification:
+                    from polls.services.system_service import SystemService, EmailEvent
+                    country.date_last_budget_notification = datetime.utcnow()
+                    SystemService().send_notification([user.email],EmailEvent.LOW_BUDGET,country.budget.money)
 
         country.save()
 

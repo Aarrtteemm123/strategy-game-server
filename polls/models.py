@@ -126,6 +126,7 @@ class Country(Document):
     date_last_population_notification = DateTimeField(default=timezone.now)
     date_last_population_update = DateTimeField(default=timezone.now)
     date_last_population_chart_update = DateTimeField(default=timezone.now)
+    date_last_budget_chart_update = DateTimeField(default=timezone.now)
     date_last_industry_update = DateTimeField(default=timezone.now)
     date_last_budget_update = DateTimeField(default=timezone.now)
 
