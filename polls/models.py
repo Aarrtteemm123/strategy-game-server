@@ -125,6 +125,7 @@ class Country(Document):
     date_last_budget_notification = DateTimeField(default=timezone.now)
     date_last_population_notification = DateTimeField(default=timezone.now)
     date_last_population_update = DateTimeField(default=timezone.now)
+    date_last_population_chart_update = DateTimeField(default=timezone.now)
     date_last_industry_update = DateTimeField(default=timezone.now)
     date_last_budget_update = DateTimeField(default=timezone.now)
 
@@ -156,7 +157,6 @@ class Cache(Document):
 class GlobalSettings(Document):
     # time in minutes
     feedback_pause = IntField(default=1440,min_value=1) # +
-    time_speed = IntField(default=60,min_value=1) # +
     email_notification = BooleanField(default=False) # +
     low_budget = IntField(default=1000,min_value=0) # +
     low_population = IntField(default=1000,min_value=0) # +

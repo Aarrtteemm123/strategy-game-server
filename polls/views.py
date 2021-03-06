@@ -1,4 +1,5 @@
-import datetime, json
+import json
+from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.http import HttpResponse
@@ -6,7 +7,6 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from rest_framework.parsers import JSONParser
 from rest_framework import status
-from tokenlib.errors import InvalidSignatureError
 
 from polls.models import User, Country, GlobalSettings
 from rest_framework.decorators import api_view
@@ -88,8 +88,8 @@ def redirect_feedback(request, user_id):
         request_data = JSONParser().parse(request)
         global_settings = GlobalSettings.objects().first()
         if SystemService.verify_token(user_id, request_data['token']):
-            if (datetime.datetime.now() - user.date_last_feedback).seconds/60 >= global_settings.feedback_pause:
-                user.date_last_feedback = datetime.datetime.now()
+            if (datetime.utcnow() - user.date_last_feedback).seconds/60 >= global_settings.feedback_pause:
+                user.date_last_feedback = datetime.utcnow()
                 SystemService().send_notification([ADMIN_EMAIL],EmailEvent.FEEDBACK, user.username, user.email, request_data['rating'], request_data['msg'])
                 user.save()
             else:

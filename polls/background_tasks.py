@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import time
 from polls.models import GlobalSettings, User, Country, News
 from polls.services.system_service import SystemService, EmailEvent
@@ -49,7 +49,7 @@ def run_check_warehouses():
                     if user.settings['warehouse overflow or empty']:
                         country = Country.objects(id=user.country).first()
                         for warehouse in country.warehouses:
-                            if warehouse.filling_speed != 0 and (datetime.datetime.now() - country.date_last_warehouse_notification).seconds/60 >= global_settings.frequency_email_notification and (warehouse.goods.value <= 0 or warehouse.goods.value >= warehouse.capacity):
+                            if warehouse.filling_speed != 0 and (datetime.utcnow() - country.date_last_warehouse_notification).seconds/60 >= global_settings.frequency_email_notification and (warehouse.goods.value <= 0 or warehouse.goods.value >= warehouse.capacity):
                                 SystemService().send_notification([user.email],EmailEvent.WAREHOUSE)
                                 break
                 time.sleep(global_settings.frequency_check_warehouses * 60)

@@ -1,6 +1,7 @@
-import datetime,time,re
+import time,re
 import json
 
+from datetime import datetime
 from polls.models import User, Country, Trade, News, ArmyUnit, Cache, GlobalSettings
 from polls.services.game_service import GameService
 from polls.view_models.account import AccountView
@@ -365,7 +366,7 @@ class PlayerViewService:
         user = User.objects(id=user_id).first()
         country = Country.objects(id=user.country.id).first()
         game_service = GameService()
-        days_in_game = (datetime.datetime.now() - user.date_registration).days
+        days_in_game = (datetime.utcnow() - user.date_registration).days
         date_reg = user.date_registration.strftime('%d.%m.%Y')
         account_view = AccountView(
             user_id,country.link_img,country.name,game_service.get_total_profit(country),

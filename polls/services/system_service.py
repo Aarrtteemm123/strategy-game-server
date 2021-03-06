@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import json
 
 from sendgrid import SendGridAPIClient, Mail
@@ -42,7 +42,7 @@ class SystemService:
         user = User.objects(id=user_id).first()
         if user:
             if user.token == token:
-                if (datetime.datetime.now() - user.date_last_login).days < 1:
+                if (datetime.utcnow() - user.date_last_login).days < 1:
                     return True
                 else:
                     raise ExpiredTokenError
@@ -54,7 +54,7 @@ class SystemService:
     def update_players(self):
         game_service = GameService()
         for country in Country.objects():
-            game_service.update_population(country)
+            game_service.update_population(country) # +
             game_service.update_industry(country)
             game_service.update_budget(country)
 

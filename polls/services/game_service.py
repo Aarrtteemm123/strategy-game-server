@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import random,re
 from django.utils import timezone
 from polls.exceptions import *
@@ -34,9 +34,9 @@ class GameService:
         country.budget.total_expenses = 0
 
         user = User.objects(country=country.id).first()
-        if country.budget.money < global_settings.low_budget and global_settings.email_notification and user.settings['low budget'] and (datetime.datetime.now() - country.date_last_budget_notification).seconds/60 > global_settings.frequency_email_notification:
+        if country.budget.money < global_settings.low_budget and global_settings.email_notification and user.settings['low budget'] and (datetime.utcnow() - country.date_last_budget_notification).seconds/60 > global_settings.frequency_email_notification:
             from polls.services.system_service import SystemService, EmailEvent
-            country.date_last_budget_notification = datetime.datetime.now()
+            country.date_last_budget_notification = datetime.utcnow()
             SystemService().send_notification([user.email],EmailEvent.LOW_BUDGET,country.budget.money)
 
         country.save()
@@ -128,37 +128,44 @@ class GameService:
         pop_modifiers = self.get_population_modifiers(country)
 
         population_before_update = country.population.total_population
-        country.population.total_population *= pop_modifiers
-        total_growth_people = (country.population.total_population - population_before_update)
+        time_sleep_sec = (datetime.utcnow() - country.date_last_population_update).seconds
+        population_after_update = population_before_update * (pop_modifiers**(time_sleep_sec/3600))
+        total_growth_people = (population_after_update - population_before_update)
 
-        growth_others = (country.population.min_percent_others / 100) * total_growth_people
-        country.population.others += growth_others
-        country.population.free_people += (total_growth_people - growth_others)
+        if total_growth_people >= 1:
+            country.date_last_population_update = datetime.utcnow()
+            country.population.total_population = population_after_update
 
-        solders_before_update = country.population.solders
-        country.population.solders = (country.population.free_people * (country.army.conscript_law_value / 100))
+            growth_others = (country.population.min_percent_others / 100) * total_growth_people
+            country.population.others += growth_others
+            country.population.free_people += (total_growth_people - growth_others)
 
-        country.population.free_people -= (country.population.solders - solders_before_update)
-        country.army.reserve_military_manpower += (country.population.solders - solders_before_update)
+            solders_before_update = country.population.solders
+            country.population.solders = (country.population.free_people * (country.army.conscript_law_value / 100))
 
-        country.population.total_population = country.population.farmers + \
-                                              country.population.miners + country.population.factory_workers + \
-                                              country.population.solders + country.population.free_people + \
-                                              country.population.others
+            country.population.free_people -= (country.population.solders - solders_before_update)
+            country.army.reserve_military_manpower += (country.population.solders - solders_before_update)
 
-        global_settings = GlobalSettings.objects().first()
+            country.population.total_population = country.population.farmers + \
+                                                  country.population.miners + country.population.factory_workers + \
+                                                  country.population.solders + country.population.free_people + \
+                                                  country.population.others
 
-        if len(country.population.population_history) > global_settings.length_population_graphics:
-            country.population.population_history.pop(0)
-        country.population.population_history.append(History(name='', value=pop_modifiers * 100 - 100, time=timezone.now()))
+            global_settings = GlobalSettings.objects().first()
 
-        user = User.objects(country=country.id).first()
-        if country.population.total_population < global_settings.low_population and global_settings.email_notification and user.settings['low population'] and (datetime.datetime.now() - country.date_last_population_notification).seconds/60 > global_settings.frequency_email_notification:
-            from polls.services.system_service import SystemService, EmailEvent
-            country.date_last_population_notification = datetime.datetime.now()
-            SystemService().send_email([user.email],EmailEvent.LOW_POPULATION,country.population.total_population)
+            if (datetime.utcnow() - country.date_last_population_chart_update).seconds > 30*60:
+                country.date_last_population_chart_update = datetime.utcnow()
+                if len(country.population.population_history) > global_settings.length_population_graphics:
+                    country.population.population_history.pop(0)
+                country.population.population_history.append(History(name='', value=pop_modifiers * 100 - 100, time=timezone.now()))
 
-        country.save()
+            user = User.objects(country=country.id).first()
+            if country.population.total_population < global_settings.low_population and global_settings.email_notification and user.settings['low population'] and (datetime.utcnow() - country.date_last_population_notification).seconds/60 > global_settings.frequency_email_notification:
+                from polls.services.system_service import SystemService, EmailEvent
+                country.date_last_population_notification = datetime.utcnow()
+                SystemService().send_email([user.email],EmailEvent.LOW_POPULATION,country.population.total_population)
+
+            country.save()
 
     def update_price_goods(self):
         global_settings = GlobalSettings.objects().first()
