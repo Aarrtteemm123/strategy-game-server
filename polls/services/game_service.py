@@ -82,55 +82,68 @@ class GameService:
 
         for farm in country.farms:
             if farm.number != 0:
+                time_sleep_sec = (datetime.utcnow() - farm.date_last_industry_update).seconds
                 name_warehouse = self.get_name_goods_from_building(farm.name)
                 warehouse = [item for item in country.warehouses if item.goods.name == name_warehouse][0]
-                total_production = farm.number * farm.production_speed * farms_modifiers
-                warehouse.goods.value += total_production
-                farm.active_number = farm.number
+                total_production = (farm.number * farm.production_speed * farms_modifiers) * time_sleep_sec / 3600
+                if total_production >= 1:
+                    farm.date_last_industry_update = datetime.utcnow()
+                    warehouse.goods.value += total_production
+                    farm.active_number = farm.number
 
-                if warehouse.goods.value > warehouse.capacity:
-                    warehouse.goods.value = warehouse.capacity
+                    if warehouse.goods.value > warehouse.capacity:
+                        warehouse.goods.value = warehouse.capacity
 
         for mine in country.mines:
             if mine.number != 0:
+                time_sleep_sec = (datetime.utcnow() - mine.date_last_industry_update).seconds
                 name_warehouse = self.get_name_goods_from_building(mine.name)
                 warehouse = [item for item in country.warehouses if item.goods.name == name_warehouse][0]
-                total_production = mine.number * mine.production_speed * mines_modifiers
-                warehouse.goods.value += total_production
-                mine.active_number = mine.number
+                total_production = (mine.number * mine.production_speed * mines_modifiers) * time_sleep_sec / 3600
 
-                if warehouse.goods.value > warehouse.capacity:
-                    warehouse.goods.value = warehouse.capacity
+                if total_production >= 1:
+                    mine.date_last_industry_update = datetime.utcnow()
+                    warehouse.goods.value += total_production
+                    mine.active_number = mine.number
+
+                    if warehouse.goods.value > warehouse.capacity:
+                        warehouse.goods.value = warehouse.capacity
 
         for factory in country.factories + country.military_factories:
             if factory.number != 0:
-                resources_dict = {}
+                time_sleep_sec = (datetime.utcnow() - factory.date_last_industry_update).seconds
 
-                for need_goods in factory.needGoods:
-                    warehouse = [item for item in country.warehouses if item.goods.name == need_goods.name][0]
-                    need_resources = need_goods.value * factory.number
+                if (datetime.utcnow() - factory.date_last_spent_resources).seconds > 3600:
+                    factory.date_last_spent_resources = datetime.utcnow()
+                    resources_dict = {}
 
-                    if need_resources <= warehouse.goods.value:
-                        resources_dict[need_goods.name] = need_resources
-                    else:
-                        resources_dict[need_goods.name] = warehouse.goods.value - need_resources  # value < 0
+                    for need_goods in factory.needGoods:
+                        warehouse = [item for item in country.warehouses if item.goods.name == need_goods.name][0]
+                        need_resources = need_goods.value * factory.number
 
-                max_deficit_name_resource = min(resources_dict)
-                deficit_goods = next(filter(lambda x: x.name == max_deficit_name_resource, factory.needGoods), None)
-                active_factories = factory.number + (int(resources_dict[max_deficit_name_resource] / deficit_goods.value) - 1)  # actually ...+(-value)
-                factory.active_number = active_factories
+                        if need_resources <= warehouse.goods.value:
+                            resources_dict[need_goods.name] = need_resources
+                        else:
+                            resources_dict[need_goods.name] = warehouse.goods.value - need_resources  # value < 0
 
-                for need_goods in factory.needGoods:
-                    warehouse = [item for item in country.warehouses if item.goods.name == need_goods.name][0]
-                    warehouse.goods.value -= active_factories * need_goods.value
+                    max_deficit_name_resource = min(resources_dict)
+                    deficit_goods = next(filter(lambda x: x.name == max_deficit_name_resource, factory.needGoods), None)
+                    active_factories = factory.number + (int(resources_dict[max_deficit_name_resource] / deficit_goods.value) - 1)  # actually ...+(-value)
+                    factory.active_number = active_factories
+
+                    for need_goods in factory.needGoods:
+                        warehouse = [item for item in country.warehouses if item.goods.name == need_goods.name][0]
+                        warehouse.goods.value -= active_factories * need_goods.value
 
                 product_name = self.get_name_goods_from_building(factory.name)
                 warehouse = [item for item in country.warehouses if item.goods.name == product_name][0]
-                total_production = factories_modifiers * active_factories * factory.production_speed
+                total_production = (factories_modifiers * factory.active_number * factory.production_speed) * time_sleep_sec / 3600
 
-                warehouse.goods.value += total_production
-                if warehouse.goods.value > warehouse.capacity:
-                    warehouse.goods.value = warehouse.capacity
+                if total_production >= 1:
+                    factory.date_last_industry_update = datetime.utcnow()
+                    warehouse.goods.value += total_production
+                    if warehouse.goods.value > warehouse.capacity:
+                        warehouse.goods.value = warehouse.capacity
 
         self.update_warehouses_filling_speed(country)
         country.save()
@@ -305,6 +318,7 @@ class GameService:
                 country.budget.money -= building.price_build
                 country.population.free_people -= building.workers
                 building.number += 1
+                building.date_last_industry_update = datetime.utcnow()
                 country.army.reserve_military_manpower = country.population.free_people * (country.army.conscript_law_value / 100)
                 country.population.free_people *= (1 - country.army.conscript_law_value / 100)
                 country.population.solders = country.army.reserve_military_manpower + self.get_number_soldiers_from_units(country)

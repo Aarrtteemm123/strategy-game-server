@@ -56,6 +56,8 @@ class IndustrialBuildings(EmbeddedDocument):
     number = IntField(default=0,min_value=0)
     needGoods = EmbeddedDocumentListField('Goods',default=[])
     active_number = IntField(default=0,min_value=0)
+    date_last_industry_update = DateTimeField(default=timezone.now)
+    date_last_spent_resources = DateTimeField(default=timezone.now)
 
 class Warehouse(EmbeddedDocument):
     goods = EmbeddedDocumentField('Goods')
@@ -127,7 +129,6 @@ class Country(Document):
     date_last_population_update = DateTimeField(default=timezone.now)
     date_last_population_chart_update = DateTimeField(default=timezone.now)
     date_last_budget_chart_update = DateTimeField(default=timezone.now)
-    date_last_industry_update = DateTimeField(default=timezone.now)
     date_last_budget_update = DateTimeField(default=timezone.now)
 
 class User(Document):
