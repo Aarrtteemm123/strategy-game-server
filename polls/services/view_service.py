@@ -34,7 +34,9 @@ class CountryViewService:
         profit_data = [history.value for history in country.budget.profit_history]
         expenses_data = [history.value for history in country.budget.expenses_history]
         x_budget_data = [str(history.time) for history in country.budget.profit_history]
-        max_chart_budget_y_axis_value = max(max(profit_data), max(expenses_data))
+        max_chart_budget_y_axis_value = 0
+        if profit_data and expenses_data:
+            max_chart_budget_y_axis_value = max(max(profit_data), max(expenses_data))
         chart_budget = ChartBudgetData(profit_data, expenses_data, x_budget_data, max_chart_budget_y_axis_value)
 
         pop_data = [history.value for history in country.population.population_history]
@@ -174,7 +176,7 @@ class CountryViewService:
                 factory.name,factory.link_img,factory.production_speed,
                 factory.active_number * factory.production_speed * factories_modifiers,
                 factory.price_build,factory.workers,factory.number,factory.active_number,factory.number * factory.workers,
-                [TableRowGoodsView(item.link_img,item.name,item.value) for item in factory.needGoods]
+                [TableRowGoodsView(item.link_img,item.name,item.value) for item in factory.need_goods]
             )
             factories_list.append(industrial_card_view)
 
@@ -194,7 +196,7 @@ class CountryViewService:
                 warehouse.goods.name,warehouse.goods.link_img,
                 warehouse.goods.value,warehouse.capacity,
                 warehouse.filling_speed,warehouse.level,warehouse.max_level,
-                warehouse.price_upgrade,warehouse.added_capacity,warehouse.increasePrice
+                warehouse.price_upgrade,warehouse.added_capacity,warehouse.increase_price
             )
             warehouses_list.append(warehouse_card_view)
 
@@ -316,13 +318,13 @@ class CountryViewService:
                 weapons = warehouse.goods.value
                 storage_capacity = warehouse.capacity
 
-            elif name_unit == 'PTO':
-                warehouse = next(filter(lambda x:x.goods.name=='PTO',country.warehouses),None)
+            elif name_unit == 'Anti-tank gun':
+                warehouse = next(filter(lambda x:x.goods.name=='Anti-tank gun',country.warehouses),None)
                 weapons = warehouse.goods.value
                 storage_capacity = warehouse.capacity
 
-            elif name_unit == 'PVO':
-                warehouse = next(filter(lambda x:x.goods.name=='PVO',country.warehouses),None)
+            elif name_unit == 'Air defense':
+                warehouse = next(filter(lambda x:x.goods.name=='Air defense',country.warehouses),None)
                 weapons = warehouse.goods.value
                 storage_capacity = warehouse.capacity
 

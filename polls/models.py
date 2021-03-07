@@ -27,6 +27,9 @@ class Budget(EmbeddedDocument):
     profit_history = EmbeddedDocumentListField('History',default=[])
     expenses_history = EmbeddedDocumentListField('History',default=[])
     budget_history = EmbeddedDocumentListField('History',default=[])
+    date_last_budget_notification = DateTimeField(default=timezone.now)
+    date_last_budget_chart_update = DateTimeField(default=timezone.now)
+    date_last_budget_update = DateTimeField(default=timezone.now)
 
 class Modifier(EmbeddedDocument):
     value = FloatField(default=0.0)
@@ -39,7 +42,7 @@ class Technology(EmbeddedDocument):
     level = IntField(default=0,min_value=0,max_value=100)
     max_level = IntField(default=0)
     total_result = FloatField(default=0)
-    increasePrice = FloatField(default=0,min_value=0)
+    increase_price = FloatField(default=0, min_value=0)
     modifiers = EmbeddedDocumentListField('Modifier',default=[])
 
 class Goods(EmbeddedDocument):
@@ -47,14 +50,14 @@ class Goods(EmbeddedDocument):
     value = IntField(default=0,min_value=0)
     link_img = StringField(default='',max_length=100)
 
-class IndustrialBuildings(EmbeddedDocument):
+class IndustrialBuilding(EmbeddedDocument):
     name = StringField(default='',max_length=100)
     link_img = StringField(default='',max_length=100)
     production_speed = FloatField(default=0,min_value=0)
     price_build = IntField(default=0,min_value=0)
     workers = IntField(default=0,min_value=0)
     number = IntField(default=0,min_value=0)
-    needGoods = EmbeddedDocumentListField('Goods',default=[])
+    need_goods = EmbeddedDocumentListField('Goods', default=[])
     active_number = IntField(default=0,min_value=0)
     date_last_industry_update = DateTimeField(default=timezone.now)
     date_last_spent_resources = DateTimeField(default=timezone.now)
@@ -67,7 +70,7 @@ class Warehouse(EmbeddedDocument):
     max_level = IntField(default=0,min_value=0)
     price_upgrade = IntField(default=0,min_value=0)
     added_capacity = IntField(default=0,min_value=0)
-    increasePrice = FloatField(default=0,min_value=0)
+    increase_price = FloatField(default=0, min_value=0)
 
 class Law(Document):
     name = StringField(default='',max_length=100)
@@ -87,6 +90,9 @@ class Population(EmbeddedDocument):
     basic_percent_growth_rate = IntField(default=0,min_value=0)
     modifiers = EmbeddedDocumentListField('Modifier', default=[])
     population_history = EmbeddedDocumentListField('History',default=[])
+    date_last_population_notification = DateTimeField(default=timezone.now)
+    date_last_population_update = DateTimeField(default=timezone.now)
+    date_last_population_chart_update = DateTimeField(default=timezone.now)
 
 class ArmyUnitCharacteristic(EmbeddedDocument):
     unit_name = StringField(default='',max_length=100)
@@ -114,22 +120,16 @@ class Country(Document):
     name = StringField(default='',max_length=100,unique=True)
     budget = EmbeddedDocumentField('Budget')
     technologies = EmbeddedDocumentListField('Technology',default=[])
-    farms = EmbeddedDocumentListField('IndustrialBuildings',default=[])
-    mines = EmbeddedDocumentListField('IndustrialBuildings',default=[])
-    factories = EmbeddedDocumentListField('IndustrialBuildings',default=[])
-    military_factories = EmbeddedDocumentListField('IndustrialBuildings',default=[])
+    farms = EmbeddedDocumentListField('IndustrialBuilding',default=[])
+    mines = EmbeddedDocumentListField('IndustrialBuilding',default=[])
+    factories = EmbeddedDocumentListField('IndustrialBuilding',default=[])
+    military_factories = EmbeddedDocumentListField('IndustrialBuilding',default=[])
     industry_modifiers = EmbeddedDocumentListField('Modifier',default=[])
     warehouses = EmbeddedDocumentListField('Warehouse',default=[])
     adopted_laws = ListField(default=[])
     population = EmbeddedDocumentField('Population')
     army = EmbeddedDocumentField('Army')
     date_last_warehouse_notification = DateTimeField(default=timezone.now)
-    date_last_budget_notification = DateTimeField(default=timezone.now)
-    date_last_population_notification = DateTimeField(default=timezone.now)
-    date_last_population_update = DateTimeField(default=timezone.now)
-    date_last_population_chart_update = DateTimeField(default=timezone.now)
-    date_last_budget_chart_update = DateTimeField(default=timezone.now)
-    date_last_budget_update = DateTimeField(default=timezone.now)
 
 class User(Document):
     isAuth = BooleanField(default=False)
@@ -167,7 +167,7 @@ class GlobalSettings(Document):
     frequency_update_top_players = IntField(default=5,min_value=0) # +
     frequency_check_warehouses = IntField(default=10,min_value=0) # +
     frequency_check_news = IntField(default=30,min_value=0) # +
-    number_top_players = IntField(default=10,min_value=1) # +
+    number_top_players = IntField(default=5,min_value=1) # +
     length_budget_graphics = IntField(default=10,min_value=1) # +
     length_population_graphics = IntField(default=10,min_value=1) # +
     length_goods_price_graphics = IntField(default=6,min_value=1) # +

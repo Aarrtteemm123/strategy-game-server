@@ -18,7 +18,7 @@ from polls.services.system_service import SystemService, EmailTemplate
 #print(UserService().register_new_user('pl4','pas4','er4@gmail.com','Moldova','https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Flag_of_Moldova.svg/1280px-Flag_of_Moldova.svg.png'))
 from polls.services.view_service import CountryViewService, NewsViewService, PlayerViewService
 
-country = Country.objects(name='Ukraine').first()
+#country = Country.objects(name='Ukraine').first()
 #user = User.objects(username='pl1').first()
 #print(user.token,user.date_last_login)
 #UserService().logout(user.id)

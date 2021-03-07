@@ -2,14 +2,14 @@ from datetime import datetime
 import random,re
 from django.utils import timezone
 from polls.exceptions import *
-from polls.models import Country, Modifier, Trade, Law, ArmyUnit, History, GlobalSettings, User, IndustrialBuildings
+from polls.models import Country, Modifier, Trade, Law, ArmyUnit, History, GlobalSettings, User, IndustrialBuilding
 
 from polls.view_models.army import ResultWarView, ItemWarResult
 
 class GameService:
 
     def update_budget(self, country: Country):
-        time_sleep_sec = (datetime.utcnow() - country.date_last_budget_update).seconds
+        time_sleep_sec = (datetime.utcnow() - country.budget.date_last_budget_update).seconds
 
         total_taxes_profit = self.get_pop_taxes_profit(country) + self.get_farms_taxes_profit(country) + self.get_mines_taxes_profit(country) + self.get_factories_taxes_profit(country)
         military_expenses = sum([country.army.units[unit.name] * unit.maintenance_price for unit in ArmyUnit.objects()])
@@ -17,14 +17,14 @@ class GameService:
         military_expenses *= (time_sleep_sec/3600)
 
         if (total_taxes_profit > 1 or total_taxes_profit < -1) and (military_expenses > 1 or military_expenses == 0):
-            country.date_last_budget_update = datetime.utcnow()
+            country.budget.date_last_budget_update = datetime.utcnow()
 
             country.budget.total_profit += total_taxes_profit
             country.budget.total_expenses += military_expenses
             country.budget.money += (total_taxes_profit - military_expenses)
 
-            if (datetime.utcnow() - country.date_last_budget_chart_update).seconds > 3600:
-                country.date_last_budget_chart_update = datetime.utcnow()
+            if (datetime.utcnow() - country.budget.date_last_budget_chart_update).seconds > 3600:
+                country.budget.date_last_budget_chart_update = datetime.utcnow()
 
                 global_settings = GlobalSettings.objects().first()
 
@@ -45,9 +45,9 @@ class GameService:
                 country.budget.total_expenses = 0
 
                 user = User.objects(country=country.id).first()
-                if country.budget.money < global_settings.low_budget and global_settings.email_notification and user.settings['low budget'] and (datetime.utcnow() - country.date_last_budget_notification).seconds/60 > global_settings.frequency_email_notification:
+                if country.budget.money < global_settings.low_budget and global_settings.email_notification and user.settings['low budget'] and (datetime.utcnow() - country.budget.date_last_budget_notification).seconds/60 > global_settings.frequency_email_notification:
                     from polls.services.system_service import SystemService, EmailEvent
-                    country.date_last_budget_notification = datetime.utcnow()
+                    country.budget.date_last_budget_notification = datetime.utcnow()
                     SystemService().send_notification([user.email],EmailEvent.LOW_BUDGET,country.budget.money)
 
         country.save()
@@ -117,7 +117,7 @@ class GameService:
                     factory.date_last_spent_resources = datetime.utcnow()
                     resources_dict = {}
 
-                    for need_goods in factory.needGoods:
+                    for need_goods in factory.need_goods:
                         warehouse = [item for item in country.warehouses if item.goods.name == need_goods.name][0]
                         need_resources = need_goods.value * factory.number
 
@@ -127,11 +127,11 @@ class GameService:
                             resources_dict[need_goods.name] = warehouse.goods.value - need_resources  # value < 0
 
                     max_deficit_name_resource = min(resources_dict)
-                    deficit_goods = next(filter(lambda x: x.name == max_deficit_name_resource, factory.needGoods), None)
+                    deficit_goods = next(filter(lambda x: x.name == max_deficit_name_resource, factory.need_goods), None)
                     active_factories = factory.number + (int(resources_dict[max_deficit_name_resource] / deficit_goods.value) - 1)  # actually ...+(-value)
                     factory.active_number = active_factories
 
-                    for need_goods in factory.needGoods:
+                    for need_goods in factory.need_goods:
                         warehouse = [item for item in country.warehouses if item.goods.name == need_goods.name][0]
                         warehouse.goods.value -= active_factories * need_goods.value
 
@@ -152,12 +152,12 @@ class GameService:
         pop_modifiers = self.get_population_modifiers(country)
 
         population_before_update = country.population.total_population
-        time_sleep_sec = (datetime.utcnow() - country.date_last_population_update).seconds
+        time_sleep_sec = (datetime.utcnow() - country.population.date_last_population_update).seconds
         population_after_update = population_before_update * (pop_modifiers**(time_sleep_sec/3600))
         total_growth_people = (population_after_update - population_before_update)
 
         if total_growth_people >= 1:
-            country.date_last_population_update = datetime.utcnow()
+            country.population.date_last_population_update = datetime.utcnow()
             country.population.total_population = population_after_update
 
             growth_others = (country.population.min_percent_others / 100) * total_growth_people
@@ -177,16 +177,16 @@ class GameService:
 
             global_settings = GlobalSettings.objects().first()
 
-            if (datetime.utcnow() - country.date_last_population_chart_update).seconds > 30*60:
-                country.date_last_population_chart_update = datetime.utcnow()
+            if (datetime.utcnow() - country.population.date_last_population_chart_update).seconds > 30*60:
+                country.population.date_last_population_chart_update = datetime.utcnow()
                 if len(country.population.population_history) > global_settings.length_population_graphics:
                     country.population.population_history.pop(0)
                 country.population.population_history.append(History(name='', value=pop_modifiers * 100 - 100, time=timezone.now()))
 
             user = User.objects(country=country.id).first()
-            if country.population.total_population < global_settings.low_population and global_settings.email_notification and user.settings['low population'] and (datetime.utcnow() - country.date_last_population_notification).seconds/60 > global_settings.frequency_email_notification:
+            if country.population.total_population < global_settings.low_population and global_settings.email_notification and user.settings['low population'] and (datetime.utcnow() - country.population.date_last_population_notification).seconds/60 > global_settings.frequency_email_notification:
                 from polls.services.system_service import SystemService, EmailEvent
-                country.date_last_population_notification = datetime.utcnow()
+                country.population.date_last_population_notification = datetime.utcnow()
                 SystemService().send_email([user.email],EmailEvent.LOW_POPULATION,country.population.total_population)
 
             country.save()
@@ -270,7 +270,7 @@ class GameService:
             if technology.level < technology.max_level:
                 country.budget.total_expenses += technology.price_upgrade
                 country.budget.money -= technology.price_upgrade
-                technology.price_upgrade *= technology.increasePrice
+                technology.price_upgrade *= technology.increase_price
                 technology.level += 1
 
                 if technology.name == 'Medicine technology':
@@ -311,7 +311,7 @@ class GameService:
         else: raise LowBudgetError
         country.save()
 
-    def __calculate_build_of_industrial_building(self, country: Country, building: IndustrialBuildings, type_building: str):
+    def __calculate_build_of_industrial_building(self, country: Country, building: IndustrialBuilding, type_building: str):
         if country.budget.money >= building.price_build:
             if country.population.free_people >= building.workers:
                 country.budget.total_expenses += building.price_build
@@ -353,7 +353,7 @@ class GameService:
 
         country.save()
 
-    def __calculate_remove_of_industrial_building(self, country: Country, building: IndustrialBuildings, type_building: str):
+    def __calculate_remove_of_industrial_building(self, country: Country, building: IndustrialBuilding, type_building: str):
         if building.number > 0:
             country.population.free_people += building.workers
             building.number -= 1
@@ -417,7 +417,7 @@ class GameService:
             need_resources[product_name] = 0
 
         for factory in all_factories:
-            for goods in factory.needGoods:
+            for goods in factory.need_goods:
                 need_resources[goods.name] += goods.value * factory.number
 
         for factory in all_factories:
@@ -425,7 +425,7 @@ class GameService:
                 product_name = self.get_name_goods_from_building(factory.name)
                 warehouse = [item for item in country.warehouses if item.goods.name == product_name][0]
                 warehouse.filling_speed = factories_modifiers * factory.production_speed * factory.number
-                for goods in factory.needGoods:
+                for goods in factory.need_goods:
                     warehouse = [item for item in country.warehouses if item.goods.name == goods.name][0]
                     warehouse.filling_speed -= need_resources[goods.name]
 
@@ -442,7 +442,7 @@ class GameService:
             if warehouse.level < warehouse.max_level:
                 country.budget.total_expenses += warehouse.price_upgrade
                 country.budget.money -= warehouse.price_upgrade
-                warehouse.price_upgrade *= warehouse.increasePrice
+                warehouse.price_upgrade *= warehouse.increase_price
                 warehouse.level += 1
                 warehouse.capacity += warehouse.added_capacity
                 country.save()
@@ -641,10 +641,10 @@ class GameService:
             warehouse = [item for item in country.warehouses if item.goods.name == 'Infantry equipment'][0]
         elif name_unit == 'Artillery':
             warehouse = [item for item in country.warehouses if item.goods.name == 'Artillery'][0]
-        elif name_unit == 'PTO':
-            warehouse = [item for item in country.warehouses if item.goods.name == 'PTO'][0]
-        elif name_unit == 'PVO':
-            warehouse = [item for item in country.warehouses if item.goods.name == 'PVO'][0]
+        elif name_unit == 'Anti-tank gun':
+            warehouse = [item for item in country.warehouses if item.goods.name == 'Anti-tank gun'][0]
+        elif name_unit == 'Air defense':
+            warehouse = [item for item in country.warehouses if item.goods.name == 'Air defense'][0]
         elif name_unit == 'Tank': # names not equals!
             warehouse = [item for item in country.warehouses if item.goods.name == 'Tanks'][0]
         elif name_unit == 'Aviation':
@@ -791,8 +791,8 @@ class GameService:
             if factory.number > 0:
                 name_goods = self.get_name_goods_from_building(factory.name)
                 expenses = 0
-                if factory.needGoods:
-                    for item in factory.needGoods:
+                if factory.need_goods:
+                    for item in factory.need_goods:
                         expenses += item.value * goods.filter(name=item.name).first().price_now
                 production_profit = factory.production_speed * factory.active_number * industry_modifiers * goods.filter(
                     name=name_goods).first().price_now - expenses
