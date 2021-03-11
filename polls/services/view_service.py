@@ -23,23 +23,23 @@ class CountryViewService:
         user = User.objects(id=user_id).first()
         country = Country.objects(id=user.country.id).first()
 
-        total_profit = round(GameService().get_total_profit(country))
+        total_profit = int(GameService().get_total_profit(country))
         economic_place = GameService().get_economic_place(country.name)
         army_place = GameService().get_army_place(country.name)
 
-        money_history = [history.value for history in country.budget.budget_history]
+        money_history = [int(history.value) for history in country.budget.budget_history]
         x_money_data = [str(history.time) for history in country.budget.budget_history]
         chart_money = ChartPopulationData(money_history,x_money_data)
 
-        profit_data = [history.value for history in country.budget.profit_history]
-        expenses_data = [history.value for history in country.budget.expenses_history]
+        profit_data = [int(history.value) for history in country.budget.profit_history]
+        expenses_data = [int(history.value) for history in country.budget.expenses_history]
         x_budget_data = [str(history.time) for history in country.budget.profit_history]
         max_chart_budget_y_axis_value = 0
         if profit_data and expenses_data:
             max_chart_budget_y_axis_value = max(max(profit_data), max(expenses_data))
         chart_budget = ChartBudgetData(profit_data, expenses_data, x_budget_data, max_chart_budget_y_axis_value)
 
-        pop_data = [history.value for history in country.population.population_history]
+        pop_data = [round(history.value,1) for history in country.population.population_history]
         x_pop_data = [str(history.time) for history in country.population.population_history]
         chart_pop = ChartPopulationData(pop_data, x_pop_data)
 
@@ -93,27 +93,27 @@ class CountryViewService:
         user = User.objects(id=user_id).first()
         country = Country.objects(id=user.country.id).first()
 
-        pop_taxes_profit = GameService().get_pop_taxes_profit(country)
-        army_taxes_profit = GameService().get_army_taxes_profit(country)
-        farms_taxes_profit = GameService().get_farms_taxes_profit(country)
-        mines_taxes_profit = GameService().get_mines_taxes_profit(country)
-        factories_taxes_profit = GameService().get_factories_taxes_profit(country)
+        pop_taxes_profit = int(GameService().get_pop_taxes_profit(country))
+        army_taxes_profit = int(GameService().get_army_taxes_profit(country))
+        farms_taxes_profit = int(GameService().get_farms_taxes_profit(country))
+        mines_taxes_profit = int(GameService().get_mines_taxes_profit(country))
+        factories_taxes_profit = int(GameService().get_factories_taxes_profit(country))
 
         taxes_profit = pop_taxes_profit + farms_taxes_profit + mines_taxes_profit + factories_taxes_profit
-        farms_profit = GameService().get_farms_production_profit(country)
-        mines_profit = GameService().get_mines_production_profit(country)
-        factories_profit = GameService().get_factories_production_profit(country)
+        farms_profit = int(GameService().get_farms_production_profit(country))
+        mines_profit = int(GameService().get_mines_production_profit(country))
+        factories_profit = int(GameService().get_factories_production_profit(country))
         total_profit = taxes_profit + farms_profit + mines_profit + factories_profit
 
-        pop_tax_card = TaxesCard('population taxes',country.budget.population_taxes,pop_taxes_profit,[ModifierView(mod.value,mod.address_from) for mod in country.population.modifiers])
-        army_views_modifiers = [ModifierView(mod.value,mod.address_from) for mod in country.army.attack_modifiers]
-        army_views_modifiers.extend([ModifierView(mod.value,mod.address_from) for mod in country.army.defence_modifiers])
+        pop_tax_card = TaxesCard('population taxes',country.budget.population_taxes,pop_taxes_profit,[ModifierView(round(mod.value,2),mod.address_from) for mod in country.population.modifiers])
+        army_views_modifiers = [ModifierView(round(mod.value,2),'to attack, '+mod.address_from) for mod in country.army.attack_modifiers]
+        army_views_modifiers.extend([ModifierView(round(mod.value,2),'to defence, '+mod.address_from) for mod in country.army.defence_modifiers])
         army_tax_card = TaxesCard('army taxes',country.budget.military_taxes,army_taxes_profit,army_views_modifiers)
-        farms_tax_card = TaxesCard('farms taxes',country.budget.farms_taxes,farms_taxes_profit,[ModifierView(mod.value,mod.address_from) for mod in country.industry_modifiers if mod.address_to == 'farms' or mod.address_to == 'industry'])
-        mines_tax_card = TaxesCard('mines taxes',country.budget.mines_taxes,mines_taxes_profit,[ModifierView(mod.value,mod.address_from) for mod in country.industry_modifiers if mod.address_to == 'mines' or mod.address_to == 'industry'])
-        factories_tax_card = TaxesCard('factories taxes', country.budget.factories_taxes, factories_taxes_profit,[ModifierView(mod.value, mod.address_from) for mod in country.industry_modifiers if mod.address_to == 'factories' or mod.address_to == 'industry'])
+        farms_tax_card = TaxesCard('farms taxes',country.budget.farms_taxes,farms_taxes_profit,[ModifierView(round(mod.value,2),mod.address_from) for mod in country.industry_modifiers if mod.address_to == 'farms' or mod.address_to == 'industry'])
+        mines_tax_card = TaxesCard('mines taxes',country.budget.mines_taxes,mines_taxes_profit,[ModifierView(round(mod.value,2),mod.address_from) for mod in country.industry_modifiers if mod.address_to == 'mines' or mod.address_to == 'industry'])
+        factories_tax_card = TaxesCard('factories taxes', country.budget.factories_taxes, factories_taxes_profit,[ModifierView(round(mod.value,2), mod.address_from) for mod in country.industry_modifiers if mod.address_to == 'factories' or mod.address_to == 'industry'])
 
-        budget_view = BudgetView(country.budget.money, taxes_profit,farms_profit,
+        budget_view = BudgetView(int(country.budget.money), taxes_profit,farms_profit,
             mines_profit,factories_profit,
             country.budget.military_expenses,total_profit,pop_tax_card,army_tax_card,
             farms_tax_card,mines_tax_card,factories_tax_card
@@ -153,8 +153,8 @@ class CountryViewService:
 
         for farm in country.farms:
             industrial_card_view = IndustrialCardView(
-                farm.name,farm.link_img,farm.production_speed,
-                farm.active_number * farm.production_speed * farms_modifiers,
+                farm.name,farm.link_img,round(farm.production_speed,2),
+                round(farm.active_number * farm.production_speed * farms_modifiers,2),
                 farm.price_build,farm.workers,farm.number,farm.active_number,farm.number * farm.workers,[]
             )
             farms_list.append(industrial_card_view)
@@ -163,8 +163,8 @@ class CountryViewService:
 
         for mine in country.mines:
             industrial_card_view = IndustrialCardView(
-                mine.name,mine.link_img,mine.production_speed,
-                mine.active_number * mine.production_speed * mines_modifiers,
+                mine.name,mine.link_img,round(mine.production_speed,2),
+                round(mine.active_number * mine.production_speed * mines_modifiers,2),
                 mine.price_build,mine.workers,mine.number,mine.active_number,mine.number * mine.workers,[]
             )
             mines_list.append(industrial_card_view)
@@ -173,8 +173,8 @@ class CountryViewService:
 
         for factory in country.factories + country.military_factories:
             industrial_card_view = IndustrialCardView(
-                factory.name,factory.link_img,factory.production_speed,
-                factory.active_number * factory.production_speed * factories_modifiers,
+                factory.name,factory.link_img,round(factory.production_speed,2),
+                round(factory.active_number * factory.production_speed * factories_modifiers),
                 factory.price_build,factory.workers,factory.number,factory.active_number,factory.number * factory.workers,
                 [TableRowGoodsView(item.link_img,item.name,item.value) for item in factory.need_goods]
             )
@@ -194,8 +194,8 @@ class CountryViewService:
         for warehouse in country.warehouses:
             warehouse_card_view = WarehouseCardView(
                 warehouse.goods.name,warehouse.goods.link_img,
-                warehouse.goods.value,warehouse.capacity,
-                warehouse.filling_speed,warehouse.level,warehouse.max_level,
+                round(warehouse.goods.value,2),warehouse.capacity,
+                round(warehouse.filling_speed,2),warehouse.level,warehouse.max_level,
                 warehouse.price_upgrade,warehouse.added_capacity,warehouse.increase_price
             )
             warehouses_list.append(warehouse_card_view)
@@ -219,11 +219,11 @@ class CountryViewService:
         population_modifiers = 0  # -> 1(100%)
 
         for mod in country.population.modifiers:
-            modifiers_view_list.append(ModifierView(mod.value,mod.address_from))
+            modifiers_view_list.append(ModifierView(round(mod.value,2),mod.address_from))
             population_modifiers += mod.value
         modifiers_view_list.append(ModifierView(country.population.basic_percent_growth_rate,'basic percent'))
 
-        percent_total_progress = (population_modifiers+country.population.basic_percent_growth_rate)
+        percent_total_progress = round((population_modifiers+country.population.basic_percent_growth_rate),2)
 
         pie_chart_labels = ['Farmers','Miners','Workers','Solders','Free','Others']
         pie_chart_data = [
@@ -250,7 +250,7 @@ class CountryViewService:
             target_country = Country.objects(id=user.country.id).first()
             for trade_card in trade_view:
                 warehouse = next(filter(lambda x:x.goods.name==trade_card['name'],target_country.warehouses),None)
-                trade_card['warehouse_has'] = warehouse.goods.value
+                trade_card['warehouse_has'] = round(warehouse.goods.value,2)
                 trade_card['warehouse_capacity'] = warehouse.capacity
             return trade_view
         else:
@@ -282,16 +282,19 @@ class CountryViewService:
 
             data_top_producer.sort(key=lambda x: x.number, reverse=True)
             warehouse = next(filter(lambda x:x.goods.name==item.name,target_country.warehouses),None)
-            price_list = [history.value for history in item.history_price]
+            price_list = [round(history.value,2) for history in item.history_price]
+
+            if not price_list:
+                price_list = [round(item.price_now,2)]
 
             chart_price_goods = ChartPriceGoods(
-                price_list,[str(history.time) for history in item.history_price],
+                price_list,[history.time.strftime("%H:%M:%S") for history in item.history_price],
                 item.name,max(price_list) * 1.2, min(price_list) * 0.9
             )
 
             trade_card_view = TradeCardView(
                 item.name,warehouse.goods.link_img,
-                item.price_now,warehouse.goods.value,warehouse.capacity,data_top_producer,chart_price_goods
+                round(item.price_now),round(warehouse.goods.value,2),warehouse.capacity,data_top_producer,chart_price_goods
             )
             trade_cards_view_list.append(trade_card_view)
         finish = time.time()
@@ -350,7 +353,7 @@ class CountryViewService:
             army_card_view = ArmyCardView(
                 name_unit,unit.link_img,army[name_unit],unit.need_peoples,
                 unit.maintenance_price,unit.maintenance_price*army[name_unit],
-                country.army.reserve_military_manpower,weapons,storage_capacity,modifiers,unit_characteristic_view_list
+                country.army.reserve_military_manpower,round(weapons,2),storage_capacity,modifiers,unit_characteristic_view_list
             )
             army_view_list.append(army_card_view)
         finish = time.time()

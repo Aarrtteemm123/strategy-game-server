@@ -18,7 +18,7 @@ from polls.services.system_service import SystemService, EmailTemplate
 #print(UserService().register_new_user('pl4','pas4','er4@gmail.com','Moldova','https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Flag_of_Moldova.svg/1280px-Flag_of_Moldova.svg.png'))
 from polls.services.view_service import CountryViewService, NewsViewService, PlayerViewService
 
-#country = Country.objects(name='Ukraine').first()
+country = Country.objects(name='Ukraine').first()
 #user = User.objects(username='pl1').first()
 #print(user.token,user.date_last_login)
 #UserService().logout(user.id)
@@ -33,8 +33,10 @@ from polls.services.view_service import CountryViewService, NewsViewService, Pla
 #print(make_password('pas0'))
 #print(UserService().delete_user_account('5fe0d7a9c17049903ac3b6f3','pas12'))
 #SystemService().create_default_global_settings()
-#SystemService().update_top_players_cache()
+#SystemService().update_top_players_cache(10)
 #SystemService().update_trade_cache()
+#GameService().update_price_goods()
+GameService().update_industry(country)
 #print(country.date_last_population_update)
 class ServiceTestCase(TestCase):
     def setUp(self):

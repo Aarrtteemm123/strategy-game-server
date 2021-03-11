@@ -1,5 +1,5 @@
 class WarehouseCardView:
-    def __init__(self,name = '',link_img = '',value = 0,capacity = 0,filling_speed = 0,
+    def __init__(self,name = '',link_img = '',value = 0.0,capacity = 0,filling_speed = 0.0,
                  level = 0, max_level = 0, price_upgrade = 0,added_capacity = 0,
                  increase_price=0):
         self.name = name

@@ -308,13 +308,13 @@ class SystemService:
                                         Goods(name='Steel', value=5, link_img='industry_goods/steel.jpg'),
                                         Goods(name='Rubber', value=5, link_img='industry_goods/rubber.jpg'),
                                     ]),
-                IndustrialBuilding(name='PTO factory', link_img='army/pto.jpg', production_speed=global_settings.factories_production_k * 10,
+                IndustrialBuilding(name='Anti-tank gun factory', link_img='army/pto.jpg', production_speed=global_settings.factories_production_k * 10,
                                    price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*5000), number=0,
                                    need_goods=[
                                         Goods(name='Steel', value=5, link_img='industry_goods/steel.jpg'),
                                         Goods(name='Rubber', value=5, link_img='industry_goods/rubber.jpg'),
                                     ]),
-                IndustrialBuilding(name='PVO factory', link_img='army/pvo.jpg', production_speed=global_settings.factories_production_k * 10,
+                IndustrialBuilding(name='Air defense factory', link_img='army/pvo.jpg', production_speed=global_settings.factories_production_k * 10,
                                    price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*5000), number=0,
                                    need_goods=[
                                         Goods(name='Steel', value=5, link_img='industry_goods/steel.jpg'),

@@ -21,9 +21,9 @@ class Budget(EmbeddedDocument):
     mines_taxes = IntField(default=0,min_value=0,max_value=100)
     factories_taxes = IntField(default=0,min_value=0,max_value=100)
     military_taxes = IntField(default=0,min_value=0,max_value=100)
-    military_expenses = IntField(default=0,min_value=0)
-    total_profit = IntField(default=0)
-    total_expenses = IntField(default=0)
+    military_expenses = FloatField(default=0,min_value=0)
+    total_profit = FloatField(default=0)
+    total_expenses = FloatField(default=0)
     profit_history = EmbeddedDocumentListField('History',default=[])
     expenses_history = EmbeddedDocumentListField('History',default=[])
     budget_history = EmbeddedDocumentListField('History',default=[])
@@ -47,7 +47,7 @@ class Technology(EmbeddedDocument):
 
 class Goods(EmbeddedDocument):
     name = StringField(default='',max_length=100)
-    value = IntField(default=0,min_value=0)
+    value = FloatField(default=0,min_value=0)
     link_img = StringField(default='',max_length=100)
 
 class IndustrialBuilding(EmbeddedDocument):
@@ -60,7 +60,6 @@ class IndustrialBuilding(EmbeddedDocument):
     need_goods = EmbeddedDocumentListField('Goods', default=[])
     active_number = IntField(default=0,min_value=0)
     date_last_industry_update = DateTimeField(default=timezone.now)
-    date_last_spent_resources = DateTimeField(default=timezone.now)
 
 class Warehouse(EmbeddedDocument):
     goods = EmbeddedDocumentField('Goods')

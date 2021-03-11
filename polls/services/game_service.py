@@ -83,10 +83,11 @@ class GameService:
         for farm in country.farms:
             if farm.number != 0:
                 time_sleep_sec = (datetime.utcnow() - farm.date_last_industry_update).seconds
-                name_warehouse = self.get_name_goods_from_building(farm.name)
-                warehouse = [item for item in country.warehouses if item.goods.name == name_warehouse][0]
-                total_production = (farm.number * farm.production_speed * farms_modifiers) * time_sleep_sec / 3600
-                if total_production >= 1:
+                if time_sleep_sec > 1:
+                    name_warehouse = self.get_name_goods_from_building(farm.name)
+                    warehouse = [item for item in country.warehouses if item.goods.name == name_warehouse][0]
+                    total_production = (farm.number * farm.production_speed * farms_modifiers) * time_sleep_sec / 3600
+
                     farm.date_last_industry_update = datetime.utcnow()
                     warehouse.goods.value += total_production
                     farm.active_number = farm.number
@@ -97,11 +98,11 @@ class GameService:
         for mine in country.mines:
             if mine.number != 0:
                 time_sleep_sec = (datetime.utcnow() - mine.date_last_industry_update).seconds
-                name_warehouse = self.get_name_goods_from_building(mine.name)
-                warehouse = [item for item in country.warehouses if item.goods.name == name_warehouse][0]
-                total_production = (mine.number * mine.production_speed * mines_modifiers) * time_sleep_sec / 3600
+                if time_sleep_sec > 1:
+                    name_warehouse = self.get_name_goods_from_building(mine.name)
+                    warehouse = [item for item in country.warehouses if item.goods.name == name_warehouse][0]
+                    total_production = (mine.number * mine.production_speed * mines_modifiers) * time_sleep_sec / 3600
 
-                if total_production >= 1:
                     mine.date_last_industry_update = datetime.utcnow()
                     warehouse.goods.value += total_production
                     mine.active_number = mine.number
@@ -112,34 +113,32 @@ class GameService:
         for factory in country.factories + country.military_factories:
             if factory.number != 0:
                 time_sleep_sec = (datetime.utcnow() - factory.date_last_industry_update).seconds
-
-                if (datetime.utcnow() - factory.date_last_spent_resources).seconds > 3600:
-                    factory.date_last_spent_resources = datetime.utcnow()
+                if time_sleep_sec > 1:
                     resources_dict = {}
-
                     for need_goods in factory.need_goods:
                         warehouse = [item for item in country.warehouses if item.goods.name == need_goods.name][0]
-                        need_resources = need_goods.value * factory.number
-
+                        need_resources = need_goods.value * factory.number * time_sleep_sec / 3600
                         if need_resources <= warehouse.goods.value:
                             resources_dict[need_goods.name] = need_resources
                         else:
                             resources_dict[need_goods.name] = warehouse.goods.value - need_resources  # value < 0
 
-                    max_deficit_name_resource = min(resources_dict)
+                    max_deficit_name_resource = min(resources_dict,key=resources_dict.get)
                     deficit_goods = next(filter(lambda x: x.name == max_deficit_name_resource, factory.need_goods), None)
-                    active_factories = factory.number + (int(resources_dict[max_deficit_name_resource] / deficit_goods.value) - 1)  # actually ...+(-value)
+                    active_factories = factory.number + (int(resources_dict[max_deficit_name_resource] / (deficit_goods.value * time_sleep_sec / 3600)) - 1)  # actually ...+(-value)
                     factory.active_number = active_factories
+
+                    if factory.active_number > factory.number:
+                        factory.active_number = factory.number
 
                     for need_goods in factory.need_goods:
                         warehouse = [item for item in country.warehouses if item.goods.name == need_goods.name][0]
-                        warehouse.goods.value -= active_factories * need_goods.value
+                        warehouse.goods.value -= factory.active_number * need_goods.value * time_sleep_sec / 3600
 
-                product_name = self.get_name_goods_from_building(factory.name)
-                warehouse = [item for item in country.warehouses if item.goods.name == product_name][0]
-                total_production = (factories_modifiers * factory.active_number * factory.production_speed) * time_sleep_sec / 3600
+                    product_name = self.get_name_goods_from_building(factory.name)
+                    warehouse = [item for item in country.warehouses if item.goods.name == product_name][0]
+                    total_production = (factories_modifiers * factory.active_number * factory.production_speed) * time_sleep_sec / 3600
 
-                if total_production >= 1:
                     factory.date_last_industry_update = datetime.utcnow()
                     warehouse.goods.value += total_production
                     if warehouse.goods.value > warehouse.capacity:
@@ -208,7 +207,9 @@ class GameService:
             if 100 >= new_value >= 0:
                 country.budget.population_taxes = new_value
                 existing_modifiers = country.population.modifiers.filter(address_from='population taxes')
-                if existing_modifiers.count() == 0:
+                if new_value == 50 and existing_modifiers.count() != 0:
+                    existing_modifiers.delete()
+                elif existing_modifiers.count() == 0:
                     country.population.modifiers.append(Modifier(value=-0.2 * new_value + 10, address_from='population taxes'))
                 else:
                     existing_modifiers.update(value=-0.2 * new_value + 10)
@@ -218,7 +219,9 @@ class GameService:
             if 100 >= new_value >= 0:
                 country.budget.farms_taxes = new_value
                 existing_modifiers = country.industry_modifiers.filter(address_from='farms taxes')
-                if existing_modifiers.count() == 0:
+                if new_value == 50 and existing_modifiers.count() != 0:
+                    existing_modifiers.delete()
+                elif existing_modifiers.count() == 0:
                     country.industry_modifiers.append(Modifier(value=-0.6 * new_value + 30, address_from='farms taxes', address_to='farms'))
                 else:
                     existing_modifiers.update(value=-0.6 * new_value + 30)
@@ -228,7 +231,9 @@ class GameService:
             if 100 >= new_value >= 0:
                 country.budget.mines_taxes = new_value
                 existing_modifiers = country.industry_modifiers.filter(address_from='mines taxes')
-                if existing_modifiers.count() == 0:
+                if new_value == 50 and existing_modifiers.count() != 0:
+                    existing_modifiers.delete()
+                elif existing_modifiers.count() == 0:
                     country.industry_modifiers.append(
                         Modifier(value=-0.6 * new_value + 30, address_from='mines taxes', address_to='mines'))
                 else:
@@ -239,7 +244,9 @@ class GameService:
             if 100 >= new_value >= 0:
                 country.budget.factories_taxes = new_value
                 existing_modifiers = country.industry_modifiers.filter(address_from='factories taxes')
-                if existing_modifiers.count() == 0:
+                if new_value == 50 and existing_modifiers.count() != 0:
+                    existing_modifiers.delete()
+                elif existing_modifiers.count() == 0:
                     country.industry_modifiers.append(
                         Modifier(value=-0.6 * new_value + 30, address_from='factories taxes', address_to='factories'))
                 else:
@@ -251,7 +258,11 @@ class GameService:
                 country.budget.military_taxes = new_value
                 existing_attack_modifiers = country.army.attack_modifiers.filter(address_from='army taxes')
                 existing_defence_modifiers = country.army.defence_modifiers.filter(address_from='army taxes')
-                if existing_attack_modifiers.count() == 0:
+                if new_value == 50 and existing_attack_modifiers.count() != 0:
+                    existing_attack_modifiers.delete()
+                    if existing_defence_modifiers.count() != 0:
+                        existing_defence_modifiers.delete()
+                elif existing_attack_modifiers.count() == 0:
                     country.army.attack_modifiers.append(Modifier(value=-new_value + 50, address_from='army taxes'))
                     country.army.defence_modifiers.append(Modifier(value=-new_value + 50, address_from='army taxes'))
                 else:
@@ -357,6 +368,8 @@ class GameService:
         if building.number > 0:
             country.population.free_people += building.workers
             building.number -= 1
+            if building.active_number > 0:
+                building.active_number -=1
             country.army.reserve_military_manpower = country.population.free_people * (country.army.conscript_law_value / 100)
             country.population.free_people *= (1 - country.army.conscript_law_value / 100)
             country.population.solders = country.army.reserve_military_manpower + self.get_number_soldiers_from_units(country)
@@ -389,12 +402,16 @@ class GameService:
         self.update_warehouses_filling_speed(country)
         country.save()
 
+    # need to update
     def update_warehouses_filling_speed(self, country: Country):
         farms_modifiers = self.get_industry_modifiers(country, 'farms')
         mines_modifiers = self.get_industry_modifiers(country, 'mines')
         factories_modifiers = self.get_industry_modifiers(country, 'factories')
 
         need_resources = {}
+
+        for warehouse in country.warehouses:
+            warehouse.filling_speed = 0
 
         for farm in country.farms:
             product_name = self.get_name_goods_from_building(farm.name)
@@ -418,13 +435,13 @@ class GameService:
 
         for factory in all_factories:
             for goods in factory.need_goods:
-                need_resources[goods.name] += goods.value * factory.number
+                need_resources[goods.name] += goods.value * factory.active_number
 
         for factory in all_factories:
-            if factory.number != 0:
+            if factory.number != 0 and factory.active_number != 0:
                 product_name = self.get_name_goods_from_building(factory.name)
                 warehouse = [item for item in country.warehouses if item.goods.name == product_name][0]
-                warehouse.filling_speed = factories_modifiers * factory.production_speed * factory.number
+                warehouse.filling_speed = factories_modifiers * factory.production_speed * factory.active_number
                 for goods in factory.need_goods:
                     warehouse = [item for item in country.warehouses if item.goods.name == goods.name][0]
                     warehouse.filling_speed -= need_resources[goods.name]
@@ -907,25 +924,25 @@ class GameService:
                 if is_first_iteration:
                     data[self.get_name_goods_from_building(farm.name)] = []
                 data[self.get_name_goods_from_building(farm.name)].append(
-                    (country.name, farm.number * farm.production_speed * farms_modifiers))
+                    (country.name, round(farm.number * farm.production_speed * farms_modifiers,2)))
 
             for mine in country.mines:
                 if is_first_iteration:
                     data[self.get_name_goods_from_building(mine.name)] = []
                 data[self.get_name_goods_from_building(mine.name)].append(
-                    (country.name, mine.number * mine.production_speed * mines_modifiers))
+                    (country.name, round(mine.number * mine.production_speed * mines_modifiers,2)))
 
             for factory in country.factories:
                 if is_first_iteration:
                     data[self.get_name_goods_from_building(factory.name)] = []
                 data[self.get_name_goods_from_building(factory.name)].append(
-                    (country.name, factory.active_number * factory.production_speed * factories_modifiers))
+                    (country.name, round(factory.active_number * factory.production_speed * factories_modifiers,2)))
 
             for military_factory in country.military_factories:
                 if is_first_iteration:
                     data[self.get_name_goods_from_building(military_factory.name)] = []
                 data[self.get_name_goods_from_building(military_factory.name)].append((country.name,
-                                                                                       military_factory.active_number * military_factory.production_speed * factories_modifiers))
+                                                                                       round(military_factory.active_number * military_factory.production_speed * factories_modifiers,2)))
             is_first_iteration = False
 
         for key in data:
