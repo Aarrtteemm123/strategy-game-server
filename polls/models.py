@@ -185,7 +185,7 @@ class GlobalSettings(Document):
     mines_production_k = FloatField(default=1.0,min_value=0.1) # +
     factories_production_k = FloatField(default=1.0,min_value=0.1) # +
     army_taxes_profit_k = FloatField(default=2.0,min_value=0.1) # +
-    pop_taxes_profit_k = FloatField(default=0.2,min_value=0.1) # +
-    farms_taxes_profit_k = FloatField(default=0.5,min_value=0.1) # +
-    mines_taxes_profit_k = FloatField(default=0.5,min_value=0.1) # +
-    factories_taxes_profit_k = FloatField(default=0.5,min_value=0.1) # +
+    pop_taxes_profit_k = FloatField(default=0.05,min_value=0.1) # +
+    farms_taxes_profit_k = FloatField(default=0.1,min_value=0.1) # +
+    mines_taxes_profit_k = FloatField(default=0.1,min_value=0.1) # +
+    factories_taxes_profit_k = FloatField(default=0.1,min_value=0.1) # +

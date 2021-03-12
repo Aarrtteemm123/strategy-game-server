@@ -41,6 +41,7 @@ def logout(request, user_id):
         request_data = JSONParser().parse(request)
         if SystemService.verify_token(user_id, request_data['token']):
             UserService().logout(user_id)
+        return HttpResponse({}, status=status.HTTP_200_OK)
     except Exception as error:
         return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -74,7 +75,7 @@ def change_user_data(request, user_id):
     try:
         request_data = JSONParser().parse(request)
         if SystemService.verify_token(user_id, request_data['token']):
-            UserService().change_user_data(user_id, request_data['username'], request_data['password'],
+            UserService().change_user_data(user_id, request_data['password'],
                                            request_data['country_name'], request_data['link_on_flag'])
     except Exception as error:
         return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

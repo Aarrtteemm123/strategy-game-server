@@ -68,12 +68,11 @@ class UserService:
                 return False
         return False
 
-    def change_user_data(self,user_id: str,new_username: str=None,new_password: str=None,
+    def change_user_data(self,user_id: str,new_password: str=None,
                          new_country_name: str=None,new_country_flag: str=None):
         user = User.objects(id=user_id).first()
         if user is not None:
             country = Country.objects(id=user.country.id).first()
-            user.username = new_username if new_username is not None and User.objects(username=new_username).count() == 0 else user.username
             user.password = new_password if new_password is not None else user.password
             country.name = new_country_name if new_country_name is not None and Country.objects(name=new_country_name).count() == 0 else country.name
             country.link_img = new_country_flag if new_country_flag is not None else country.link_img

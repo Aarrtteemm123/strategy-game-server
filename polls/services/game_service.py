@@ -72,7 +72,7 @@ class GameService:
     def get_industry_modifiers(self,country: Country,address_to: str):
         if country.industry_modifiers is not None:
             industry_modifiers = sum([mod.value for mod in country.industry_modifiers if mod.address_to == address_to or mod.address_to == 'industry'])
-            return (industry_modifiers + 100) / 100
+            return (industry_modifiers + 100) / 100 if industry_modifiers >= -100 else 0
         return 1
 
     def update_industry(self, country: Country):
@@ -210,9 +210,9 @@ class GameService:
                 if new_value == 50 and existing_modifiers.count() != 0:
                     existing_modifiers.delete()
                 elif existing_modifiers.count() == 0:
-                    country.population.modifiers.append(Modifier(value=-0.2 * new_value + 10, address_from='population taxes'))
+                    country.population.modifiers.append(Modifier(value=0.04 * new_value - 2, address_from='population taxes'))
                 else:
-                    existing_modifiers.update(value=-0.2 * new_value + 10)
+                    existing_modifiers.update(value=0.04 * new_value - 2)
             else: raise TaxValueNotInRangeError
 
         elif type_taxes == 'farms_taxes':
@@ -402,7 +402,6 @@ class GameService:
         self.update_warehouses_filling_speed(country)
         country.save()
 
-    # need to update
     def update_warehouses_filling_speed(self, country: Country):
         farms_modifiers = self.get_industry_modifiers(country, 'farms')
         mines_modifiers = self.get_industry_modifiers(country, 'mines')
@@ -704,7 +703,7 @@ class GameService:
 
                         sum_attack_modifiers = self.get_army_modifiers(attacking_country,'attack')
                         attack_power = attacking_country.army.units[unit.name] * item[1].attack_value * sum_attack_modifiers
-                        sum_defence_modifiers = self.get_army_modifiers(attacking_country,'defence')
+                        sum_defence_modifiers = self.get_army_modifiers(defending_country,'defence')
                         defence_power = defending_country.army.units[item[1].unit_name] * item[1].defence_value * sum_defence_modifiers
                         difference_power = defence_power - attack_power
 
@@ -770,8 +769,8 @@ class GameService:
             from polls.services.system_service import SystemService, EmailEvent
             SystemService().send_notification([defending_user.email],EmailEvent.ATTACK,attacking_user.username)
 
-        # attacking_country.save() !
-        # defending_country.save() !
+        attacking_country.save()
+        defending_country.save()
         return res_war_view
 
     def get_military_expenses(self, country: Country):

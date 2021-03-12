@@ -35,8 +35,7 @@ country = Country.objects(name='Ukraine').first()
 #SystemService().create_default_global_settings()
 #SystemService().update_top_players_cache(10)
 #SystemService().update_trade_cache()
-#GameService().update_price_goods()
-GameService().update_industry(country)
+#GameService().calculate_war('Ukraine','Moldova')
 #print(country.date_last_population_update)
 class ServiceTestCase(TestCase):
     def setUp(self):
