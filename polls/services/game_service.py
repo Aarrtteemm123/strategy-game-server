@@ -212,7 +212,7 @@ class GameService:
                 elif existing_modifiers.count() == 0:
                     country.population.modifiers.append(Modifier(value=0.04 * new_value - 2, address_from='population taxes'))
                 else:
-                    existing_modifiers.update(value=0.04 * new_value - 2)
+                    existing_modifiers.update(value=-0.04 * new_value + 2)
             else: raise TaxValueNotInRangeError
 
         elif type_taxes == 'farms_taxes':
@@ -724,6 +724,7 @@ class GameService:
         if next(filter(lambda x: x[1] != 0, defending_country.army.units.items()), None) is None:
             defending_country.army.losses += 1
             attacking_country.army.victories += 1
+            res_war_view.prey.append(ItemWarResult('Money',defending_country.budget.money))
             attacking_country.budget.money += defending_country.budget.money
             defending_country.budget.money = 0
             warehouses_victory_country = attacking_country.warehouses

@@ -124,127 +124,127 @@ class SystemService:
                           budget_history = [History(value=int(global_settings.start_budget_k*50000))],
                           ),
             technologies=[
-                Technology(name='Medicine technology', price_upgrade=int(global_settings.technology_price_k*5000), level=0, max_level=100, total_result=0.0,
+                Technology(name='Medicine technology', price_upgrade=int(global_settings.technology_price_k*10000), level=0, max_level=100, total_result=0.0,
                            increase_price=1.3,
                            modifiers=[
                                Modifier(value=0.1, address_from='Medicine technology',
-                                        address_to='basic_percent_growth_rate')
+                                        address_to='basic percent growth rate population')
                            ]),
                 Technology(name='Computers technology', price_upgrade=int(global_settings.technology_price_k*10000), level=0, max_level=100, total_result=0.0,
                            increase_price=1.3,
                            modifiers=[
-                               Modifier(value=1, address_from='Computers technology', address_to='production_speed')
+                               Modifier(value=1, address_from='Computers technology', address_to='production speed')
                            ]),
                 Technology(name='Upgrade weapons', price_upgrade=int(global_settings.technology_price_k*10000), level=0, max_level=100, total_result=0.0,
                            increase_price=1.3,
                            modifiers=[
-                               Modifier(value=2, address_from='Upgrade weapons', address_to='attack_value')
+                               Modifier(value=2, address_from='Upgrade weapons', address_to='attack value')
                            ]),
                 Technology(name='Upgrade defence system', price_upgrade=int(global_settings.technology_price_k*10000), level=0, max_level=100, total_result=0.0,
                            increase_price=1.3,
                            modifiers=[
-                               Modifier(value=2, address_from='Upgrade defence system', address_to='defence_value')
+                               Modifier(value=2, address_from='Upgrade defence system', address_to='defence value')
                            ]),
             ],
             farms=[
-                IndustrialBuilding(name='Seed farm', link_img='farms_goods/seed.jpg', production_speed=global_settings.farms_production_k * 10,
+                IndustrialBuilding(name='Seed farm', link_img='farms_goods/seed.jpg', production_speed=global_settings.farms_production_k * 5,
                                    price_build=int(global_settings.farms_price_k*10000), workers=int(global_settings.farm_workers_k*1000), number=0, need_goods=[]),
-                IndustrialBuilding(name='Meat farm', link_img='farms_goods/meat.jpg', production_speed=global_settings.farms_production_k * 10,
+                IndustrialBuilding(name='Meat farm', link_img='farms_goods/meat.jpg', production_speed=global_settings.farms_production_k * 5,
                                    price_build=int(global_settings.farms_price_k*10000), workers=int(global_settings.farm_workers_k*1000), number=0, need_goods=[]),
-                IndustrialBuilding(name='Milk farm', link_img='farms_goods/milk.jpg', production_speed=global_settings.farms_production_k * 10,
+                IndustrialBuilding(name='Milk farm', link_img='farms_goods/milk.jpg', production_speed=global_settings.farms_production_k * 5,
                                    price_build=int(global_settings.farms_price_k*10000), workers=int(global_settings.farm_workers_k*1000), number=0, need_goods=[]),
-                IndustrialBuilding(name='Fish farm', link_img='farms_goods/fish.jpg', production_speed=global_settings.farms_production_k * 10,
+                IndustrialBuilding(name='Fish farm', link_img='farms_goods/fish.jpg', production_speed=global_settings.farms_production_k * 5,
                                    price_build=int(global_settings.farms_price_k*10000), workers=int(global_settings.farm_workers_k*1000), number=0, need_goods=[]),
-                IndustrialBuilding(name='Fruits farm', link_img='farms_goods/fruits.jpg', production_speed=global_settings.farms_production_k * 10,
+                IndustrialBuilding(name='Fruits farm', link_img='farms_goods/fruits.jpg', production_speed=global_settings.farms_production_k * 5,
                                    price_build=int(global_settings.farms_price_k*10000), workers=int(global_settings.farm_workers_k*1000), number=0, need_goods=[]),
-                IndustrialBuilding(name='Vegetables farm', link_img='farms_goods/vegetables.jpg', production_speed=global_settings.farms_production_k * 10,
+                IndustrialBuilding(name='Vegetables farm', link_img='farms_goods/vegetables.jpg', production_speed=global_settings.farms_production_k * 5,
                                    price_build=int(global_settings.farms_price_k*10000), workers=int(global_settings.farm_workers_k*1000), number=0, need_goods=[]),
             ],
             mines=[
-                IndustrialBuilding(name='Iron mine', link_img='mine_goods/iron.jpg', production_speed=global_settings.mines_production_k * 10,
+                IndustrialBuilding(name='Iron mine', link_img='mine_goods/iron.jpg', production_speed=global_settings.mines_production_k * 5,
                                    price_build=int(global_settings.mines_price_k*10000), workers=int(global_settings.mine_workers_k*5000), number=0, need_goods=[]),
-                IndustrialBuilding(name='Aluminum mine', link_img='mine_goods/aluminum.jpg', production_speed=global_settings.mines_production_k * 10,
+                IndustrialBuilding(name='Aluminum mine', link_img='mine_goods/aluminum.jpg', production_speed=global_settings.mines_production_k * 5,
                                    price_build=int(global_settings.mines_price_k*10000), workers=int(global_settings.mine_workers_k*5000), number=0, need_goods=[]),
-                IndustrialBuilding(name='Coal mine', link_img='mine_goods/coal.jpg', production_speed=global_settings.mines_production_k * 10,
+                IndustrialBuilding(name='Coal mine', link_img='mine_goods/coal.jpg', production_speed=global_settings.mines_production_k * 5,
                                    price_build=int(global_settings.mines_price_k*10000), workers=int(global_settings.mine_workers_k*5000), number=0, need_goods=[]),
-                IndustrialBuilding(name='Oil well', link_img='mine_goods/oil.jpg', production_speed=global_settings.mines_production_k * 10,
+                IndustrialBuilding(name='Oil well', link_img='mine_goods/oil.jpg', production_speed=global_settings.mines_production_k * 5,
                                    price_build=int(global_settings.mines_price_k*12000), workers=int(global_settings.mine_workers_k*5000), number=0, need_goods=[]),
-                IndustrialBuilding(name='Silicon mine', link_img='mine_goods/silicon.jpg', production_speed=global_settings.mines_production_k * 10,
+                IndustrialBuilding(name='Silicon mine', link_img='mine_goods/silicon.jpg', production_speed=global_settings.mines_production_k * 5,
                                    price_build=int(global_settings.mines_price_k*11000), workers=int(global_settings.mine_workers_k*5000), number=0, need_goods=[]),
-                IndustrialBuilding(name='Salt mine', link_img='mine_goods/salt.jpg', production_speed=global_settings.mines_production_k * 10,
+                IndustrialBuilding(name='Salt mine', link_img='mine_goods/salt.jpg', production_speed=global_settings.mines_production_k * 5,
                                    price_build=int(global_settings.mines_price_k*8000), workers=int(global_settings.mine_workers_k*5000), number=0, need_goods=[]),
-                IndustrialBuilding(name='Minerals mine', link_img='mine_goods/minerals.jpg', production_speed=global_settings.mines_production_k * 10,
+                IndustrialBuilding(name='Minerals mine', link_img='mine_goods/minerals.jpg', production_speed=global_settings.mines_production_k * 5,
                                    price_build=int(global_settings.mines_price_k*15000), workers=int(global_settings.mine_workers_k*5000), number=0, need_goods=[]),
-                IndustrialBuilding(name='Gold mine', link_img='mine_goods/gold.jpg', production_speed=global_settings.mines_production_k * 10,
-                                   price_build=int(global_settings.mines_price_k*20000), workers=int(global_settings.mine_workers_k*5000), number=0, need_goods=[]),
-                IndustrialBuilding(name='Diamond mine', link_img='mine_goods/diamond.jpg', production_speed=global_settings.mines_production_k * 1,
+                IndustrialBuilding(name='Gold mine', link_img='mine_goods/gold.jpg', production_speed=global_settings.mines_production_k * 5,
+                                   price_build=int(global_settings.mines_price_k*30000), workers=int(global_settings.mine_workers_k*5000), number=0, need_goods=[]),
+                IndustrialBuilding(name='Diamond mine', link_img='mine_goods/diamond.jpg', production_speed=global_settings.mines_production_k * 5,
                                    price_build=int(global_settings.mines_price_k*50000), workers=int(global_settings.mine_workers_k*5000), number=0, need_goods=[]),
             ],
             factories=[
-                IndustrialBuilding(name='Bakery factory', link_img='industry_goods/bakery.jpg', production_speed=global_settings.factories_production_k * 10,
+                IndustrialBuilding(name='Bakery factory', link_img='industry_goods/bakery.jpg', production_speed=global_settings.factories_production_k * 20,
                                    price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
                                    need_goods=[
                                         Goods(name='Seed', value=5, link_img='farms_goods/seed.jpg')
                                     ]),
                 IndustrialBuilding(name='Canned food factory', link_img='industry_goods/canned_food.jpg',
-                                   production_speed=global_settings.factories_production_k*10,
+                                   production_speed=global_settings.factories_production_k*20,
                                    price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
                                    need_goods=[
                                         Goods(name='Seed', value=5, link_img='farms_goods/seed.jpg'),
                                         Goods(name='Meat', value=5, link_img='farms_goods/meat.jpg'),
                                         Goods(name='Aluminum', value=5, link_img='mine_goods/aluminum.jpg'),
                                     ]),
-                IndustrialBuilding(name='Cheese factory', link_img='industry_goods/cheese.jpg', production_speed=global_settings.factories_production_k * 10,
-                                   price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
+                IndustrialBuilding(name='Cheese factory', link_img='industry_goods/cheese.jpg', production_speed=global_settings.factories_production_k * 20,
+                                   price_build=int(global_settings.factories_price_k*12000), workers=int(global_settings.factory_workers_k*10000), number=0,
                                    need_goods=[
                                         Goods(name='Milk', value=5, link_img='farms_goods/milk.jpg'),
                                     ]),
                 IndustrialBuilding(name='Salt fish factory', link_img='industry_goods/salt_fish.jpg',
-                                   production_speed=global_settings.factories_production_k*10,
+                                   production_speed=global_settings.factories_production_k*15,
                                    price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
                                    need_goods=[
                                         Goods(name='Fish', value=5, link_img='farms_goods/fish.jpg'),
                                         Goods(name='Salt', value=5, link_img='mine_goods/salt.jpg'),
                                     ]),
                 IndustrialBuilding(name='Juice factory', link_img='industry_goods/juice.jpg', production_speed=global_settings.factories_production_k * 10,
-                                   price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
+                                   price_build=int(global_settings.factories_price_k*15000), workers=int(global_settings.factory_workers_k*10000), number=0,
                                    need_goods=[
                                         Goods(name='Fruits', value=5, link_img='farms_goods/fruits.jpg'),
                                         Goods(name='Glass', value=5, link_img='industry_goods/glass.jpg'),
                                     ]),
-                IndustrialBuilding(name='Fuel factory', link_img='industry_goods/fuel.jpg', production_speed=global_settings.factories_production_k * 10,
-                                   price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
+                IndustrialBuilding(name='Fuel factory', link_img='industry_goods/fuel.jpg', production_speed=global_settings.factories_production_k * 25,
+                                   price_build=int(global_settings.factories_price_k*20000), workers=int(global_settings.factory_workers_k*10000), number=0,
                                    need_goods=[
                                         Goods(name='Oil', value=5, link_img='mine_goods/oil.jpg'),
                                     ]),
                 IndustrialBuilding(name='Electronics factory', link_img='industry_goods/electronics.jpg',
-                                   production_speed=global_settings.factories_production_k*10,
-                                   price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
+                                   production_speed=global_settings.factories_production_k*20,
+                                   price_build=int(global_settings.factories_price_k*15000), workers=int(global_settings.factory_workers_k*10000), number=0,
                                    need_goods=[
                                         Goods(name='Silicon', value=5, link_img='mine_goods/silicon.jpg'),
                                         Goods(name='Gold', value=5, link_img='mine_goods/gold.jpg'),
                                     ]),
                 IndustrialBuilding(name='Chemicals factory', link_img='industry_goods/chemicals.jpg',
-                                   production_speed=global_settings.factories_production_k*10,
-                                   price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
+                                   production_speed=global_settings.factories_production_k*25,
+                                   price_build=int(global_settings.factories_price_k*18000), workers=int(global_settings.factory_workers_k*10000), number=0,
                                    need_goods=[
                                         Goods(name='Silicon', value=5, link_img='mine_goods/minerals.jpg'),
                                     ]),
                 IndustrialBuilding(name='Computers factory', link_img='industry_goods/computers.jpg',
                                    production_speed=global_settings.factories_production_k*10,
-                                   price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
+                                   price_build=int(global_settings.factories_price_k*25000), workers=int(global_settings.factory_workers_k*10000), number=0,
                                    need_goods=[
                                         Goods(name='Electronics', value=5, link_img='industry_goods/electronics.jpg'),
                                         Goods(name='Plastic', value=5, link_img='industry_goods/plastic.jpg'),
                                     ]),
-                IndustrialBuilding(name='Steel factory', link_img='industry_goods/steel.jpg', production_speed=global_settings.factories_production_k * 10,
+                IndustrialBuilding(name='Steel factory', link_img='industry_goods/steel.jpg', production_speed=global_settings.factories_production_k * 20,
                                    price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
                                    need_goods=[
                                         Goods(name='Iron', value=5, link_img='mine_goods/iron.jpg'),
                                         Goods(name='Coal', value=5, link_img='mine_goods/coal.jpg'),
                                     ]),
-                IndustrialBuilding(name='Rubber factory', link_img='industry_goods/rubber.jpg', production_speed=global_settings.factories_production_k * 10,
-                                   price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
+                IndustrialBuilding(name='Rubber factory', link_img='industry_goods/rubber.jpg', production_speed=global_settings.factories_production_k * 15,
+                                   price_build=int(global_settings.factories_price_k*13000), workers=int(global_settings.factory_workers_k*10000), number=0,
                                    need_goods=[
                                         Goods(name='Oil', value=5, link_img='mine_goods/oil.jpg'),
                                     ]),
@@ -253,15 +253,15 @@ class SystemService:
                                    need_goods=[
                                         Goods(name='Oil', value=5, link_img='mine_goods/oil.jpg'),
                                     ]),
-                IndustrialBuilding(name='Glass factory', link_img='industry_goods/glass.jpg', production_speed=global_settings.factories_production_k * 10,
-                                   price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
+                IndustrialBuilding(name='Glass factory', link_img='industry_goods/glass.jpg', production_speed=global_settings.factories_production_k * 20,
+                                   price_build=int(global_settings.factories_price_k*15000), workers=int(global_settings.factory_workers_k*10000), number=0,
                                    need_goods=[
                                         Goods(name='Silicon', value=5, link_img='mine_goods/minerals.jpg'),
                                         Goods(name='Coal', value=5, link_img='mine_goods/coal.jpg'),
                                     ]),
                 IndustrialBuilding(name='Fertilizer factory', link_img='industry_goods/fertilizer.jpg',
                                    production_speed=global_settings.factories_production_k*10,
-                                   price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
+                                   price_build=int(global_settings.factories_price_k*11000), workers=int(global_settings.factory_workers_k*10000), number=0,
                                    need_goods=[
                                         Goods(name='Salt', value=5, link_img='mine_goods/salt.jpg'),
                                         Goods(name='Minerals', value=5, link_img='mine_goods/minerals.jpg'),
@@ -276,60 +276,60 @@ class SystemService:
                                    production_speed=global_settings.factories_production_k*10,
                                    price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
                                    need_goods=[
-                                        Goods(name='Silicon', value=5, link_img='mine_goods/silicon.jpg'),
-                                        Goods(name='Glass', value=5, link_img='industry_goods/glass.jpg'),
+                                        Goods(name='Silicon', value=3, link_img='mine_goods/silicon.jpg'),
+                                        Goods(name='Glass', value=3, link_img='industry_goods/glass.jpg'),
                                     ]),
-                IndustrialBuilding(name='Battery factory', link_img='industry_goods/battery.jpg', production_speed=global_settings.factories_production_k * 10,
+                IndustrialBuilding(name='Battery factory', link_img='industry_goods/battery.jpg', production_speed=global_settings.factories_production_k * 12,
                                    price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
                                    need_goods=[
-                                        Goods(name='Chemicals', value=5, link_img='industry_goods/chemicals.jpg'),
-                                        Goods(name='Aluminum', value=5, link_img='mine_goods/aluminum.jpg'),
+                                        Goods(name='Chemicals', value=4, link_img='industry_goods/chemicals.jpg'),
+                                        Goods(name='Aluminum', value=4, link_img='mine_goods/aluminum.jpg'),
                                     ]),
-                IndustrialBuilding(name='Jewelry factory', link_img='industry_goods/jewelry.jpg', production_speed=global_settings.factories_production_k * 10,
-                                   price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
+                IndustrialBuilding(name='Jewelry factory', link_img='industry_goods/jewelry.jpg', production_speed=global_settings.factories_production_k * 5,
+                                   price_build=int(global_settings.factories_price_k*60000), workers=int(global_settings.factory_workers_k*10000), number=0,
                                    need_goods=[
-                                        Goods(name='Gold', value=5, link_img='mine_goods/gold.jpg'),
-                                        Goods(name='Diamond', value=5, link_img='mine_goods/diamond.jpg'),
+                                        Goods(name='Gold', value=2, link_img='mine_goods/gold.jpg'),
+                                        Goods(name='Diamond', value=2, link_img='mine_goods/diamond.jpg'),
                                     ]),
             ],
             military_factories=[
                 IndustrialBuilding(name='Infantry equipment factory', link_img='army/infantry_equipment.jpg',
-                                   production_speed=global_settings.factories_production_k*10,
-                                   price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
+                                   production_speed=global_settings.factories_production_k*5,
+                                   price_build=int(global_settings.factories_price_k*30000), workers=int(global_settings.factory_workers_k*10000), number=0,
                                    need_goods=[
                                         Goods(name='Steel', value=5, link_img='industry_goods/steel.jpg'),
                                         Goods(name='Aluminum', value=5, link_img='mine_goods/aluminum.jpg'),
                                         Goods(name='Canned food', value=5, link_img='industry_goods/canned_food.jpg'),
                                         Goods(name='Medicine', value=5, link_img='industry_goods/medicine.png'),
                                     ]),
-                IndustrialBuilding(name='Artillery factory', link_img='army/artillery.jpg', production_speed=global_settings.factories_production_k * 10,
-                                   price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
+                IndustrialBuilding(name='Artillery factory', link_img='army/artillery.jpg', production_speed=global_settings.factories_production_k * 3,
+                                   price_build=int(global_settings.factories_price_k*40000), workers=int(global_settings.factory_workers_k*10000), number=0,
                                    need_goods=[
                                         Goods(name='Steel', value=5, link_img='industry_goods/steel.jpg'),
+                                        Goods(name='Rubber', value=4, link_img='industry_goods/rubber.jpg'),
+                                    ]),
+                IndustrialBuilding(name='Anti-tank gun factory', link_img='army/pto.jpg', production_speed=global_settings.factories_production_k * 2,
+                                   price_build=int(global_settings.factories_price_k*45000), workers=int(global_settings.factory_workers_k*10000), number=0,
+                                   need_goods=[
+                                        Goods(name='Steel', value=4, link_img='industry_goods/steel.jpg'),
+                                        Goods(name='Rubber', value=2, link_img='industry_goods/rubber.jpg'),
+                                    ]),
+                IndustrialBuilding(name='Air defense factory', link_img='army/pvo.jpg', production_speed=global_settings.factories_production_k * 2,
+                                   price_build=int(global_settings.factories_price_k*50000), workers=int(global_settings.factory_workers_k*10000), number=0,
+                                   need_goods=[
+                                        Goods(name='Steel', value=6, link_img='industry_goods/steel.jpg'),
+                                        Goods(name='Rubber', value=4, link_img='industry_goods/rubber.jpg'),
+                                    ]),
+                IndustrialBuilding(name='Tanks factory', link_img='army/tank.jpg', production_speed=global_settings.factories_production_k * 0.5,
+                                   price_build=int(global_settings.factories_price_k*70000), workers=int(global_settings.factory_workers_k*10000), number=0,
+                                   need_goods=[
+                                        Goods(name='Steel', value=10, link_img='industry_goods/steel.jpg'),
                                         Goods(name='Rubber', value=5, link_img='industry_goods/rubber.jpg'),
                                     ]),
-                IndustrialBuilding(name='Anti-tank gun factory', link_img='army/pto.jpg', production_speed=global_settings.factories_production_k * 10,
-                                   price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
+                IndustrialBuilding(name='Aviation factory', link_img='army/aviation.jpg', production_speed=global_settings.factories_production_k * 0.25,
+                                   price_build=int(global_settings.factories_price_k*80000), workers=int(global_settings.factory_workers_k*10000), number=0,
                                    need_goods=[
-                                        Goods(name='Steel', value=5, link_img='industry_goods/steel.jpg'),
-                                        Goods(name='Rubber', value=5, link_img='industry_goods/rubber.jpg'),
-                                    ]),
-                IndustrialBuilding(name='Air defense factory', link_img='army/pvo.jpg', production_speed=global_settings.factories_production_k * 10,
-                                   price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
-                                   need_goods=[
-                                        Goods(name='Steel', value=5, link_img='industry_goods/steel.jpg'),
-                                        Goods(name='Rubber', value=5, link_img='industry_goods/rubber.jpg'),
-                                    ]),
-                IndustrialBuilding(name='Tanks factory', link_img='army/tank.jpg', production_speed=global_settings.factories_production_k * 10,
-                                   price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
-                                   need_goods=[
-                                        Goods(name='Steel', value=5, link_img='industry_goods/steel.jpg'),
-                                        Goods(name='Rubber', value=5, link_img='industry_goods/rubber.jpg'),
-                                    ]),
-                IndustrialBuilding(name='Aviation factory', link_img='army/aviation.jpg', production_speed=global_settings.factories_production_k * 10,
-                                   price_build=int(global_settings.factories_price_k*10000), workers=int(global_settings.factory_workers_k*10000), number=0,
-                                   need_goods=[
-                                        Goods(name='Aluminum', value=5, link_img='mine_goods/aluminum.jpg'),
+                                        Goods(name='Aluminum', value=15, link_img='mine_goods/aluminum.jpg'),
                                         Goods(name='Rubber', value=5, link_img='industry_goods/rubber.jpg'),
                                     ]),
             ],
@@ -640,7 +640,7 @@ class SystemService:
         ]
               ).save()
 
-        Trade(name='Cheese',default_price=30, price_now=30, history_price=[
+        Trade(name='Cheese',default_price=35, price_now=35, history_price=[
         ]
               ).save()
 
@@ -648,11 +648,11 @@ class SystemService:
         ]
               ).save()
 
-        Trade(name='Juice',default_price=40, price_now=40, history_price=[
+        Trade(name='Juice',default_price=45, price_now=45, history_price=[
         ]
               ).save()
 
-        Trade(name='Fuel',default_price=60, price_now=60, history_price=[
+        Trade(name='Fuel',default_price=80, price_now=80, history_price=[
         ]
               ).save()
 
@@ -660,15 +660,15 @@ class SystemService:
         ]
               ).save()
 
-        Trade(name='Chemicals',default_price=60, price_now=60, history_price=[
+        Trade(name='Chemicals',default_price=70, price_now=70, history_price=[
         ]
               ).save()
 
-        Trade(name='Computers',default_price=100, price_now=100, history_price=[
+        Trade(name='Computers',default_price=90, price_now=90, history_price=[
         ]
               ).save()
 
-        Trade(name='Steel',default_price=110, price_now=110, history_price=[
+        Trade(name='Steel',default_price=120, price_now=120, history_price=[
         ]
               ).save()
 
@@ -676,7 +676,7 @@ class SystemService:
         ]
               ).save()
 
-        Trade(name='Plastic',default_price=60, price_now=60, history_price=[
+        Trade(name='Plastic',default_price=65, price_now=65, history_price=[
         ]
               ).save()
 
@@ -700,7 +700,7 @@ class SystemService:
         ]
               ).save()
 
-        Trade(name='Jewelry',default_price=1000, price_now=1000, history_price=[
+        Trade(name='Jewelry',default_price=1200, price_now=1200, history_price=[
         ]
               ).save()
 
@@ -744,12 +744,12 @@ class SystemService:
                 'Tank': ArmyUnitCharacteristic(unit_name='Tank', attack_value=5,
                                                defence_value=5),
                 'Aviation': ArmyUnitCharacteristic(unit_name='Aviation', attack_value=1,
-                                                   defence_value=15),
+                                                   defence_value=13),
             }
         ).save()
 
         ArmyUnit(
-            name='Artillery', link_img='army/artillery.jpg', need_peoples=4, maintenance_price=20,
+            name='Artillery', link_img='army/artillery.jpg', need_peoples=8, maintenance_price=20,
             unit_characteristic={
                 'Infantry': ArmyUnitCharacteristic(unit_name='Infantry',
                                                    attack_value=60, defence_value=10),
@@ -761,13 +761,13 @@ class SystemService:
                                               defence_value=15),
                 'Tank': ArmyUnitCharacteristic(unit_name='Tank', attack_value=10,
                                                defence_value=15),
-                'Aviation': ArmyUnitCharacteristic(unit_name='Aviation', attack_value=5,
-                                                   defence_value=10),
+                'Aviation': ArmyUnitCharacteristic(unit_name='Aviation', attack_value=20,
+                                                   defence_value=5),
             }
         ).save()
 
         ArmyUnit(
-            name='Anti-tank gun', link_img='army/pto.jpg', need_peoples=4, maintenance_price=30,
+            name='Anti-tank gun', link_img='army/pto.jpg', need_peoples=10, maintenance_price=30,
             unit_characteristic={
                 'Infantry': ArmyUnitCharacteristic(unit_name='Infantry',
                                                    attack_value=30, defence_value=10),
@@ -779,13 +779,13 @@ class SystemService:
                                               defence_value=15),
                 'Tank': ArmyUnitCharacteristic(unit_name='Tank', attack_value=70,
                                                defence_value=20),
-                'Aviation': ArmyUnitCharacteristic(unit_name='Aviation', attack_value=1,
+                'Aviation': ArmyUnitCharacteristic(unit_name='Aviation', attack_value=5,
                                                    defence_value=10),
             }
         ).save()
 
         ArmyUnit(
-            name='Air defense', link_img='army/pvo.jpg', need_peoples=6, maintenance_price=60,
+            name='Air defense', link_img='army/pvo.jpg', need_peoples=10, maintenance_price=60,
             unit_characteristic={
                 'Infantry': ArmyUnitCharacteristic(unit_name='Infantry',
                                                    attack_value=25, defence_value=10),
@@ -803,11 +803,11 @@ class SystemService:
         ).save()
 
         ArmyUnit(
-            name='Tank', link_img='army/tank.jpg', need_peoples=4, maintenance_price=100,
+            name='Tank', link_img='army/tank.jpg', need_peoples=20, maintenance_price=100,
             unit_characteristic={
                 'Infantry': ArmyUnitCharacteristic(unit_name='Infantry',
-                                                   attack_value=100, defence_value=200),
-                'Artillery': ArmyUnitCharacteristic(unit_name='Artillery', attack_value=30,
+                                                   attack_value=150, defence_value=200),
+                'Artillery': ArmyUnitCharacteristic(unit_name='Artillery', attack_value=35,
                                                     defence_value=30),
                 'Anti-tank gun': ArmyUnitCharacteristic(unit_name='Anti-tank gun',
                                               attack_value=20, defence_value=5),
@@ -821,11 +821,11 @@ class SystemService:
         ).save()
 
         ArmyUnit(
-            name='Aviation', link_img='army/aviation.jpg', need_peoples=3, maintenance_price=250,
+            name='Aviation', link_img='army/aviation.jpg', need_peoples=30, maintenance_price=250,
             unit_characteristic={
                 'Infantry': ArmyUnitCharacteristic(unit_name='Infantry',
-                                                   attack_value=40, defence_value=500),
-                'Artillery': ArmyUnitCharacteristic(unit_name='Artillery', attack_value=25,
+                                                   attack_value=90, defence_value=500),
+                'Artillery': ArmyUnitCharacteristic(unit_name='Artillery', attack_value=35,
                                                     defence_value=50),
                 'Anti-tank gun': ArmyUnitCharacteristic(unit_name='Anti-tank gun',
                                               attack_value=25, defence_value=150),

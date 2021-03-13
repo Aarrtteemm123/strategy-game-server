@@ -159,10 +159,10 @@ class GlobalSettings(Document):
     # time in minutes
     feedback_pause = IntField(default=1440,min_value=1) # +
     email_notification = BooleanField(default=False) # +
-    low_budget = IntField(default=1000,min_value=0) # +
+    low_budget = IntField(default=100,min_value=0) # +
     low_population = IntField(default=1000,min_value=0) # +
     frequency_email_notification = IntField(default=720,min_value=1)
-    frequency_update_trade = IntField(default=10,min_value=0) # +
+    frequency_update_trade = IntField(default=5,min_value=0) # +
     frequency_update_top_players = IntField(default=5,min_value=0) # +
     frequency_check_warehouses = IntField(default=10,min_value=0) # +
     frequency_check_news = IntField(default=30,min_value=0) # +
@@ -175,17 +175,17 @@ class GlobalSettings(Document):
     farm_workers_k = FloatField(default=1.0,min_value=0.0) # +
     mine_workers_k = FloatField(default=1.0,min_value=0.0) # +
     factory_workers_k = FloatField(default=1.0,min_value=0.0) # +
-    farms_price_k = FloatField(default=1.0,min_value=0.1) # +
-    mines_price_k = FloatField(default=1.0,min_value=0.1) # +
-    factories_price_k = FloatField(default=1.0,min_value=0.1) # +
-    warehouses_price_k = FloatField(default=1.0,min_value=0.1) # +
-    technology_price_k = FloatField(default=1.0,min_value=0.1) # +
-    laws_price_k = FloatField(default=1.0,min_value=0.1) # +
-    farms_production_k = FloatField(default=1.0,min_value=0.1) # +
-    mines_production_k = FloatField(default=1.0,min_value=0.1) # +
-    factories_production_k = FloatField(default=1.0,min_value=0.1) # +
-    army_taxes_profit_k = FloatField(default=2.0,min_value=0.1) # +
-    pop_taxes_profit_k = FloatField(default=0.05,min_value=0.1) # +
-    farms_taxes_profit_k = FloatField(default=0.1,min_value=0.1) # +
-    mines_taxes_profit_k = FloatField(default=0.1,min_value=0.1) # +
-    factories_taxes_profit_k = FloatField(default=0.1,min_value=0.1) # +
+    farms_price_k = FloatField(default=1.0,min_value=0.0) # +
+    mines_price_k = FloatField(default=1.0,min_value=0.0) # +
+    factories_price_k = FloatField(default=1.0,min_value=0.0) # +
+    warehouses_price_k = FloatField(default=1.0,min_value=0.0) # +
+    technology_price_k = FloatField(default=1.0,min_value=0.0) # +
+    laws_price_k = FloatField(default=1.0,min_value=0.0) # +
+    farms_production_k = FloatField(default=1.0,min_value=0.0) # +
+    mines_production_k = FloatField(default=1.0,min_value=0.0) # +
+    factories_production_k = FloatField(default=1.0,min_value=0.0) # +
+    army_taxes_profit_k = FloatField(default=2.0,min_value=0.0) # +
+    pop_taxes_profit_k = FloatField(default=0.05,min_value=0.0) # +
+    farms_taxes_profit_k = FloatField(default=0.1,min_value=0.0) # +
+    mines_taxes_profit_k = FloatField(default=0.02,min_value=0.0) # +
+    factories_taxes_profit_k = FloatField(default=0.01,min_value=0.0) # +

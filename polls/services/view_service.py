@@ -268,8 +268,8 @@ class CountryViewService:
 
         for item in goods:
             data_top_producer = []
-            if len(production_data[item.name]) > 4:
-                data_top_producer_buffer = production_data[item.name][:5]
+            if len(production_data[item.name]) > 2:
+                data_top_producer_buffer = production_data[item.name][:3]
             else:
                 data_top_producer_buffer = production_data[item.name]
 
