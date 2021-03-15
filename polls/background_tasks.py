@@ -49,7 +49,7 @@ def run_check_warehouses():
                     if user.settings['warehouse overflow or empty']:
                         country = Country.objects(id=user.country).first()
                         for warehouse in country.warehouses:
-                            if warehouse.filling_speed != 0 and (datetime.utcnow() - country.date_last_warehouse_notification).seconds/60 >= global_settings.frequency_email_notification and (warehouse.goods.value <= 0 or warehouse.goods.value >= warehouse.capacity):
+                            if warehouse.filling_speed != 0 and (datetime.utcnow() - country.date_last_warehouse_notification).total_seconds()/60 >= global_settings.frequency_email_notification and (warehouse.goods.value <= 0 or warehouse.goods.value >= warehouse.capacity):
                                 SystemService().send_notification([user.email],EmailEvent.WAREHOUSE)
                                 break
                 time.sleep(global_settings.frequency_check_warehouses * 60)
@@ -80,3 +80,16 @@ def run_check_news():
                 time.sleep(global_settings.frequency_check_news * 60)
             except Exception as e:
                 print(e)
+
+def clear_country_attack_history():
+    print('clear_country_attack_history')
+    global_settings = GlobalSettings.objects().first()
+    while True:
+        for country in Country.objects():
+            active_history_lst = []
+            for history in country.army.history_attacks:
+                if (datetime.utcnow() - history.time).total_seconds()/60 < global_settings.pause_between_war:
+                    active_history_lst.append(history)
+            country.army.history_attacks = active_history_lst
+            country.save()
+        time.sleep(3600 * 24)

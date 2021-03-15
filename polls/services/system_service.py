@@ -102,15 +102,18 @@ class SystemService:
 
     def send_email(self, to_emails: List[str], html_content: str, title: str):
         print('sending email...')
-        message = Mail(
-            from_email=ADMIN_EMAIL,
-            to_emails=to_emails,
-            subject=title,
-            html_content=html_content
-        )
-        sg = SendGridAPIClient(api_key=EMAIL_API_KEY)
-        response = sg.send(message)
-        print(response.status_code, response.body, response.headers)
+        try:
+            message = Mail(
+                from_email=ADMIN_EMAIL,
+                to_emails=to_emails,
+                subject=title,
+                html_content=html_content
+            )
+            sg = SendGridAPIClient(api_key=EMAIL_API_KEY)
+            response = sg.send(message)
+            print(response.status_code, response.body, response.headers)
+        except Exception as e:
+            print(e)
 
     def create_default_country(self,name: str,link_img: str):
         global_settings = GlobalSettings.objects().first()

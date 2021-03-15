@@ -688,6 +688,17 @@ class GameService:
     def calculate_war(self, attacking_country_name: str, defending_country_name: str):
         attacking_country = Country.objects(name=attacking_country_name).first()
         defending_country = Country.objects(name=defending_country_name).first()
+
+        global_settings = GlobalSettings.objects().first()
+        history_attack = next(filter(lambda x: x.name == str(defending_country.id), attacking_country.army.history_attacks),None)
+        if history_attack is not None and (datetime.utcnow() - history_attack.time).total_seconds()/60 < global_settings.pause_between_war:
+            raise TooManyAttackError(defending_country_name)
+        elif history_attack is not None and (datetime.utcnow() - history_attack.time).total_seconds()/60 > global_settings.pause_between_war:
+            history_attack.time = timezone.now()
+        elif history_attack is None:
+            attacking_country.army.history_attacks.append(History(name=str(defending_country.id)))
+
+
         army_units = ArmyUnit.objects()
         res_war_view = ResultWarView()
         unit_solders_attacking_country_before_war = self.get_number_soldiers_from_units(attacking_country)

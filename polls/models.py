@@ -112,6 +112,7 @@ class Army(EmbeddedDocument):
     losses = IntField(default=0,min_value=0)
     attack_modifiers = EmbeddedDocumentListField('Modifier', default=[])
     defence_modifiers = EmbeddedDocumentListField('Modifier', default=[])
+    history_attacks = EmbeddedDocumentListField('History', default=[])
     units = DictField(default={})
 
 class Country(Document):
@@ -158,6 +159,7 @@ class Cache(Document):
 class GlobalSettings(Document):
     # time in minutes
     feedback_pause = IntField(default=1440,min_value=1) # +
+    pause_between_war = IntField(default=60,min_value=1)
     email_notification = BooleanField(default=False) # +
     low_budget = IntField(default=100,min_value=0) # +
     low_population = IntField(default=1000,min_value=0) # +

@@ -53,3 +53,7 @@ class GoodsValueNotInRangeError(Exception):
 class UnknownUserError(Exception):
     def __init__(self,username,msg='User with name (user id) {} not found'):
         super().__init__(msg.format(username))
+
+class TooManyAttackError(Exception):
+    def __init__(self,country_name,msg='You attacked country {} recently, limit - 1 attack per hour'):
+        super().__init__(msg.format(country_name))
