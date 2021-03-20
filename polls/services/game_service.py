@@ -23,7 +23,7 @@ class GameService:
             country.budget.total_expenses += military_expenses
             country.budget.money += (total_taxes_profit - military_expenses)
 
-            if (datetime.utcnow() - country.budget.date_last_budget_chart_update).seconds > 3600:
+            if (datetime.utcnow() - country.budget.date_last_budget_chart_update).total_seconds() > 3600:
                 country.budget.date_last_budget_chart_update = datetime.utcnow()
 
                 global_settings = GlobalSettings.objects().first()
@@ -176,7 +176,7 @@ class GameService:
 
             global_settings = GlobalSettings.objects().first()
 
-            if (datetime.utcnow() - country.population.date_last_population_chart_update).seconds > 30*60:
+            if (datetime.utcnow() - country.population.date_last_population_chart_update).total_seconds() > 30*60:
                 country.population.date_last_population_chart_update = datetime.utcnow()
                 if len(country.population.population_history) > global_settings.length_population_graphics:
                     country.population.population_history.pop(0)

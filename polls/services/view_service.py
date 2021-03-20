@@ -2,7 +2,7 @@ import time,re
 import json
 
 from datetime import datetime
-from polls.models import User, Country, Trade, News, ArmyUnit, Cache, GlobalSettings
+from polls.models import User, Country, Trade, News, ArmyUnit, Cache, GlobalSettings, FQA, Law
 from polls.services.game_service import GameService
 from polls.view_models.account import AccountView
 from polls.view_models.army import ArmyCardView, UnitCharacteristicView
@@ -12,6 +12,7 @@ from polls.view_models.industry import IndustrialCardView, TableRowGoodsView
 from polls.view_models.modifier import ModifierView
 from polls.view_models.news import NewsView
 from polls.view_models.player import PlayerView, TopPlayersPage
+from polls.view_models.politics import LawView, PoliticsView
 from polls.view_models.population import PopulationView
 from polls.view_models.technology import TechnologyView
 from polls.view_models.trade import TradeCardView, TableRowProducerView, ChartPriceGoods
@@ -203,13 +204,29 @@ class CountryViewService:
         finish = time.time()
         return warehouses_list
 
-    def get_politics_laws(self, user_id: str):
-        start = time.time()
+    def get_cache_politics_laws(self, user_id: str):
         user = User.objects(id=user_id).first()
         country = Country.objects(id=user.country.id).first()
-        adopted_laws_name_list = country.adopted_laws
-        finish = time.time()
-        return adopted_laws_name_list
+        cache = Cache.objects().first()
+        if cache.politics != '':
+            politics_view = json.loads(cache.politics)
+            politics_view['selected_laws'] = country.adopted_laws
+            return politics_view
+        else:
+            return self.get_politics_laws(user_id)
+
+    def get_politics_laws(self, user_id: str):
+        user = User.objects(id=user_id).first()
+        country = Country.objects(id=user.country.id).first()
+        conscription_laws = []
+        pop_laws = []
+        for law in Law.objects():
+            if 'Conscript law:' in law.name:
+                conscription_percent = re.split(' ',law.description)[-1]
+                conscription_laws.append(LawView(law.name,law.description,[ModifierView(mod.value,mod.address_to) for mod in law.modifiers],conscription_percent))
+            else:
+                pop_laws.append(LawView(law.name,f' ({law.description})',[ModifierView(mod.value,mod.address_to) for mod in law.modifiers]))
+        return PoliticsView(country.adopted_laws,conscription_laws,pop_laws)
 
     def get_population(self, user_id: str):
         start = time.time()
@@ -358,6 +375,10 @@ class CountryViewService:
             army_view_list.append(army_card_view)
         finish = time.time()
         return army_view_list
+
+class FQAViewService:
+    def get_FQA(self):
+        return [dict(question=fqa_obj.question,answer=fqa_obj.answer) for fqa_obj in FQA.objects()]
 
 class NewsViewService:
     def get_news(self):

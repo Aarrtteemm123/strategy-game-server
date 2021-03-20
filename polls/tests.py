@@ -6,7 +6,7 @@ from django.utils import timezone
 from sendgrid import SendGridAPIClient, Mail
 
 from polls.exceptions import UnknownNameTaxError
-from polls.models import News, Country, User, ArmyUnit, Cache
+from polls.models import News, Country, User, ArmyUnit, Cache, FQA
 from polls.services.user_service import UserService
 from polls.services.game_service import GameService
 from polls.services.system_service import SystemService, EmailTemplate
@@ -14,7 +14,8 @@ from polls.services.system_service import SystemService, EmailTemplate
 #print(UserService().register_new_user('pl2','pas2','er2@gmail.com','Great Britain','https://images-na.ssl-images-amazon.com/images/I/71d6ai1UMEL._AC_SL1500_.jpg'))
 #print(UserService().register_new_user('pl3','pas3','er3@gmail.com','Germany','https://image.winudf.com/v2/image1/Y29tLmZsYWd3YWxscGFwZXIuZ2VybWFueV9zY3JlZW5fNF8xNTQ3NDgyNTMyXzA1OA/screen-5.jpg?fakeurl=1&type=.jpg'))
 #print(UserService().register_new_user('pl4','pas4','er4@gmail.com','Moldova','https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Flag_of_Moldova.svg/1280px-Flag_of_Moldova.svg.png'))
-from polls.services.view_service import CountryViewService, NewsViewService, PlayerViewService
+from polls.services.view_service import CountryViewService, NewsViewService, PlayerViewService, FQAViewService
+
 #SystemService().create_default_global_settings()
 country = Country.objects(name='Ukraine').first()
 user = User.objects(username='pl1').first()
@@ -33,7 +34,7 @@ user = User.objects(username='pl1').first()
 #SystemService().create_default_global_settings()
 #SystemService().update_top_players_cache(10)
 #SystemService().update_trade_cache()
-GameService().calculate_war('Ukraine','Moldova')
+#GameService().calculate_war('Ukraine','Moldova')
 #print(country.date_last_population_update)
 class ServiceTestCase(TestCase):
     def setUp(self):

@@ -37,6 +37,14 @@ class SystemService:
             cache.trade = json.dumps(trade_view,default=lambda x:x.__dict__)
             cache.save()
 
+    def update_politics_cache(self):
+        user = User.objects().first()
+        if user:
+            politics_view = CountryViewService().get_politics_laws(user.id)
+            cache = Cache.objects().first()
+            cache.politics = json.dumps(politics_view,default=lambda x:x.__dict__)
+            cache.save()
+
     @staticmethod
     def verify_token(user_id: str,token:str):
         user = User.objects(id=user_id).first()

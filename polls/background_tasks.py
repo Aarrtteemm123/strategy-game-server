@@ -1,11 +1,25 @@
 from datetime import datetime
 import time
 from polls.models import GlobalSettings, User, Country, News
+from polls.services.game_service import GameService
 from polls.services.system_service import SystemService, EmailEvent
 
+def run_updating_price_goods():
+    print('run_updating_price_goods')
+    while True:
+        GameService().update_price_goods()
+        time.sleep(3600)
 
-def run_updating_trade():
-    print('run_updating_trade')
+def run_updating_politics_cache():
+    print('run_updating_politics_cache')
+    global_settings = GlobalSettings()
+    while True:
+        SystemService().update_politics_cache()
+        time.sleep(global_settings.frequency_update_politics_cache * 60)
+
+
+def run_updating_cache_trade():
+    print('run_updating_cache_trade')
     system_service = SystemService()
     global_settings = GlobalSettings()
     while True:

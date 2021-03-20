@@ -15,7 +15,7 @@ from polls.exceptions import *
 from polls.services.game_service import GameService
 from polls.services.system_service import SystemService, EmailEvent
 from polls.services.user_service import UserService
-from polls.services.view_service import CountryViewService, NewsViewService, PlayerViewService
+from polls.services.view_service import CountryViewService, NewsViewService, PlayerViewService, FQAViewService
 from serverDjango.settings import ADMIN_EMAIL
 
 connect('TestDb')
@@ -133,7 +133,7 @@ def get_view(request, user_id, name_view):
             elif name_view == 'Warehouses':
                 view_obj = CountryViewService().get_warehouses(user_id)
             elif name_view == 'Politics':
-                view_obj = CountryViewService().get_politics_laws(user_id)
+                view_obj = CountryViewService().get_cache_politics_laws(user_id)
             elif name_view == 'Population':
                 view_obj = CountryViewService().get_population(user_id)
             elif name_view == 'Trade':
@@ -148,6 +148,8 @@ def get_view(request, user_id, name_view):
                 view_obj = PlayerViewService().get_account(user_id)
             elif name_view == 'TopPlayers':
                 view_obj = PlayerViewService().get_view_page(user_id)
+            elif name_view == 'FQA':
+                view_obj = FQAViewService().get_FQA()
             return HttpResponse(json.dumps(view_obj, default=lambda x: x.__dict__), status=status.HTTP_200_OK)
     except Exception as error:
         return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

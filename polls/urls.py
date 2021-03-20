@@ -33,9 +33,12 @@ urlpatterns = [
     url(r'^game/calculate_war/(?P<user_id>[0-9|a-z]+)/(?P<defending_player_name>[0-9|a-z]+)$', views.calculate_war),
 ]
 
-Thread(target=run_updating_trade).start()
+# run background tasks here
+Thread(target=run_updating_cache_trade).start()
 Thread(target=run_updating_top_players).start()
 Thread(target=run_updating_players).start()
 Thread(target=run_check_warehouses).start()
 Thread(target=run_check_news).start()
 Thread(target=clear_country_attack_history).start()
+Thread(target=run_updating_price_goods).start()
+Thread(target=run_updating_politics_cache).start()

@@ -4,6 +4,10 @@ from mongoengine import *
 
 connect('TestDb')
 
+class FQA(Document):
+    question = StringField(default='',max_length=2000)
+    answer = StringField(default='',max_length=2000)
+
 class News(Document):
     title = StringField(default='',max_length=200)
     date = DateTimeField(default=timezone.now)
@@ -155,6 +159,7 @@ class Trade(Document):
 class Cache(Document):
     top_players = StringField(default='')
     trade = StringField(default='')
+    politics = StringField(default='')
 
 class GlobalSettings(Document):
     # time in minutes
@@ -166,6 +171,7 @@ class GlobalSettings(Document):
     frequency_email_notification = IntField(default=720,min_value=1)
     frequency_update_trade = IntField(default=5,min_value=0) # +
     frequency_update_top_players = IntField(default=5,min_value=0) # +
+    frequency_update_politics_cache = IntField(default=60,min_value=0) # +
     frequency_check_warehouses = IntField(default=10,min_value=0) # +
     frequency_check_news = IntField(default=30,min_value=0) # +
     number_top_players = IntField(default=5,min_value=1) # +
