@@ -341,9 +341,7 @@ class GameService:
         else: raise LowBudgetError
 
     def build_industry(self, country: Country, name_building: str):
-        print(name_building)
         type_building = re.split(r' ', name_building)[-1]
-        print(type_building)
         if type_building == 'farm':
             farm = country.farms.filter(name=name_building).first()
             self.__calculate_build_of_industrial_building(country, farm, type_building)
@@ -473,23 +471,23 @@ class GameService:
             if not name_law in country.adopted_laws:
 
                 if name_law == 'Free medicine':
-                    country.population.modifiers.append(Modifier(value=5, address_from=name_law))
-                    country.industry_modifiers.append(Modifier(value=-10, address_from=name_law, address_to='industry'))
+                    country.population.modifiers.append(Modifier(value=0.2, address_from=name_law))
+                    country.industry_modifiers.append(Modifier(value=-15, address_from=name_law, address_to='industry'))
 
                 elif name_law == 'Isolation':
-                    country.population.modifiers.append(Modifier(value=-5, address_from=name_law))
-                    country.industry_modifiers.append(Modifier(value=-5, address_from=name_law, address_to='industry'))
-                    country.army.defence_modifiers.append(Modifier(value=15, address_from=name_law))
+                    country.population.modifiers.append(Modifier(value=-0.6, address_from=name_law))
+                    country.industry_modifiers.append(Modifier(value=-10, address_from=name_law, address_to='industry'))
+                    country.army.defence_modifiers.append(Modifier(value=25, address_from=name_law))
 
                 elif name_law == 'Free housing':
-                    country.population.modifiers.append(Modifier(value=5, address_from=name_law))
-                    country.industry_modifiers.append(Modifier(value=-10, address_from=name_law, address_to='industry'))
+                    country.population.modifiers.append(Modifier(value=0.25, address_from=name_law))
+                    country.industry_modifiers.append(Modifier(value=-15, address_from=name_law, address_to='industry'))
                     country.army.attack_modifiers.append(Modifier(value=-10, address_from=name_law))
                     country.army.defence_modifiers.append(Modifier(value=10, address_from=name_law))
 
                 elif name_law == 'Free education':
-                    country.population.modifiers.append(Modifier(value=-2, address_from=name_law))
-                    country.industry_modifiers.append(Modifier(value=15, address_from=name_law, address_to='industry'))
+                    country.population.modifiers.append(Modifier(value=-0.1, address_from=name_law))
+                    country.industry_modifiers.append(Modifier(value=20, address_from=name_law, address_to='industry'))
                     country.army.attack_modifiers.append(Modifier(value=-10, address_from=name_law))
 
                 else: raise UnknownNameLawError(name_law)
@@ -530,7 +528,7 @@ class GameService:
 
             if name_law == 'Conscript law: Elite':
                 self.__update_conscript_law(country, name_law, law, 0.5,
-                                            pop_mod=Modifier(value=-10, address_from=name_law),
+                                            pop_mod=Modifier(value=-0.1, address_from=name_law),
                                             indus_mod=Modifier(value=10, address_from=name_law, address_to='industry'),
                                             attack_mod=Modifier(value=10, address_from=name_law),
                                             def_mod=Modifier(value=10, address_from=name_law))
@@ -550,21 +548,21 @@ class GameService:
 
             elif name_law == 'Conscript law: Service by Requirement':
                 self.__update_conscript_law(country, name_law, law, 10,
-                                            pop_mod=Modifier(value=-5, address_from=name_law),
-                                            indus_mod=Modifier(value=5, address_from=name_law, address_to='industry'),
+                                            pop_mod=Modifier(value=-0.5, address_from=name_law),
+                                            indus_mod=Modifier(value=-10, address_from=name_law, address_to='industry'),
                                             attack_mod=Modifier(value=-5, address_from=name_law),
                                             def_mod=Modifier(value=-5, address_from=name_law))
 
             elif name_law == 'Conscript law: All Adults Serve':
                 self.__update_conscript_law(country, name_law, law, 20,
-                                            pop_mod=Modifier(value=-10, address_from=name_law),
-                                            indus_mod=Modifier(value=-15, address_from=name_law, address_to='industry'),
+                                            pop_mod=Modifier(value=-2, address_from=name_law),
+                                            indus_mod=Modifier(value=-20, address_from=name_law, address_to='industry'),
                                             attack_mod=Modifier(value=-5, address_from=name_law),
                                             def_mod=Modifier(value=-5, address_from=name_law))
 
             elif name_law == 'Conscript law: All with weapons':
                 self.__update_conscript_law(country, name_law, law, 30,
-                                            pop_mod=Modifier(value=-15, address_from=name_law),
+                                            pop_mod=Modifier(value=-4, address_from=name_law),
                                             indus_mod=Modifier(value=-35, address_from=name_law, address_to='industry'),
                                             attack_mod=Modifier(value=-15, address_from=name_law),
                                             def_mod=Modifier(value=-10, address_from=name_law))
@@ -577,10 +575,7 @@ class GameService:
         else: raise LowBudgetError
 
     def __cansel_conscript_law(self, country: Country):
-        conscript_laws = ['Conscript law: Elite', 'Conscript law: Volunteer',
-                          'Conscript law: Limited Conscription', 'Conscript law: Extensive Conscription',
-                          'Conscript law: Service by Requirement', 'Conscript law: All Adults Serve',
-                          'Conscript law: All with weapons']
+        conscript_laws = [law.name for law in Law.objects() if 'Conscript law:' in law.name]
 
         for str_law in conscript_laws:
             country.population.modifiers.filter(address_from=str_law).delete()
@@ -602,24 +597,24 @@ class GameService:
                 country.adopted_laws.remove(name_law)
 
                 if name_law == 'Free medicine':
-                    country.population.modifiers.remove(Modifier(value=5, address_from=name_law))
-                    country.industry_modifiers.remove(Modifier(value=-10, address_from=name_law, address_to='industry'))
+                    country.population.modifiers.filter(address_from=name_law).delete()
+                    country.industry_modifiers.filter(address_from=name_law).delete()
 
                 elif name_law == 'Isolation':
-                    country.population.modifiers.remove(Modifier(value=-5, address_from=name_law))
-                    country.industry_modifiers.remove(Modifier(value=-5, address_from=name_law, address_to='industry'))
-                    country.army.defence_modifiers.remove(Modifier(value=15, address_from=name_law))
+                    country.population.modifiers.filter(address_from=name_law).delete()
+                    country.industry_modifiers.filter(address_from=name_law).delete()
+                    country.army.defence_modifiers.filter(address_from=name_law).delete()
 
                 elif name_law == 'Free housing':
-                    country.population.modifiers.remove(Modifier(value=5, address_from=name_law))
-                    country.industry_modifiers.remove(Modifier(value=-10, address_from=name_law, address_to='industry'))
-                    country.army.attack_modifiers.remove(Modifier(value=-10, address_from=name_law))
-                    country.army.defence_modifiers.remove(Modifier(value=10, address_from=name_law))
+                    country.population.modifiers.filter(address_from=name_law).delete()
+                    country.industry_modifiers.filter(address_from=name_law).delete()
+                    country.army.attack_modifiers.filter(address_from=name_law).delete()
+                    country.army.defence_modifiers.filter(address_from=name_law).delete()
 
                 elif name_law == 'Free education':
-                    country.population.modifiers.remove(Modifier(value=-2, address_from=name_law))
-                    country.industry_modifiers.remove(Modifier(value=15, address_from=name_law, address_to='industry'))
-                    country.army.attack_modifiers.remove(Modifier(value=-10, address_from=name_law))
+                    country.population.modifiers.filter(address_from=name_law).delete()
+                    country.industry_modifiers.filter(address_from=name_law).delete()
+                    country.army.attack_modifiers.filter(address_from=name_law).delete()
 
                 self.update_warehouses_filling_speed(country)
                 country.save()

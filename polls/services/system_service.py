@@ -481,46 +481,46 @@ class SystemService:
         Law(
             name='Isolation', description='Close border for all', price=global_settings.laws_price_k*20000,
             modifiers=[
-                Modifier(value=-1, address_from='Isolation', address_to='basic_percent_growth_rate'),
-                Modifier(value=-5, address_from='Isolation', address_to='production_speed'),
-                Modifier(value=15, address_from='Isolation', address_to='defence_value'),
+                Modifier(value=-0.6, address_from='Isolation', address_to='growth rate population'),
+                Modifier(value=-10, address_from='Isolation', address_to='production speed'),
+                Modifier(value=25, address_from='Isolation', address_to='defence value'),
             ]
         ).save()
 
         Law(
             name='Free medicine', description='Medicine is free for everyone', price=global_settings.laws_price_k*20000,
             modifiers=[
-                Modifier(value=0.5, address_from='Free medicine', address_to='basic_percent_growth_rate'),
-                Modifier(value=-25, address_from='Free medicine', address_to='production_speed'),
+                Modifier(value=0.2, address_from='Free medicine', address_to='growth rate population'),
+                Modifier(value=-15, address_from='Free medicine', address_to='production speed'),
             ]
         ).save()
 
         Law(
             name='Free housing', description='Gift flat for every family', price=global_settings.laws_price_k*20000,
             modifiers=[
-                Modifier(value=1, address_from='Free housing', address_to='basic_percent_growth_rate'),
-                Modifier(value=-25, address_from='Free housing', address_to='production_speed'),
-                Modifier(value=-25, address_from='Free housing', address_to='attack_value'),
-                Modifier(value=10, address_from='Free housing', address_to='defence_value'),
+                Modifier(value=0.25, address_from='Free housing', address_to='growth rate population'),
+                Modifier(value=-15, address_from='Free housing', address_to='production speed'),
+                Modifier(value=-10, address_from='Free housing', address_to='attack value'),
+                Modifier(value=10, address_from='Free housing', address_to='defence value'),
             ]
         ).save()
 
         Law(
             name='Free education', description='Education is free for everyone', price=global_settings.laws_price_k*20000,
             modifiers=[
-                Modifier(value=-0.2, address_from='Free education', address_to='basic_percent_growth_rate'),
-                Modifier(value=20, address_from='Free education', address_to='production_speed'),
-                Modifier(value=-10, address_from='Free education', address_to='attack_value'),
+                Modifier(value=-0.1, address_from='Free education', address_to='growth rate population'),
+                Modifier(value=20, address_from='Free education', address_to='production speed'),
+                Modifier(value=-10, address_from='Free education', address_to='attack value'),
             ]
         ).save()
 
         Law(
             name='Conscript law: Elite', description='Percent of the total population 0.5%', price=global_settings.laws_price_k*20000,
             modifiers=[
-                Modifier(value=-0.1, address_from='Conscript law: Elite', address_to='basic_percent_growth_rate'),
-                Modifier(value=10, address_from='Conscript law: Elite', address_to='production_speed'),
-                Modifier(value=10, address_from='Conscript law: Elite', address_to='attack_value'),
-                Modifier(value=10, address_from='Conscript law: Elite', address_to='defence_value'),
+                Modifier(value=-0.1, address_from='Conscript law: Elite', address_to='growth rate population'),
+                Modifier(value=10, address_from='Conscript law: Elite', address_to='production speed'),
+                Modifier(value=10, address_from='Conscript law: Elite', address_to='attack value'),
+                Modifier(value=10, address_from='Conscript law: Elite', address_to='defence value'),
             ]
         ).save()
 
@@ -534,16 +534,16 @@ class SystemService:
         Law(
             name='Conscript law: Limited Conscription', description='Percent of the total population 2.5%', price=global_settings.laws_price_k*20000,
             modifiers=[
-                Modifier(value=-0.2, address_from='Conscript law: Limited Conscription', address_to='production_speed'),
-                Modifier(value=5, address_from='Conscript law: Limited Conscription', address_to='attack_value'),
-                Modifier(value=5, address_from='Conscript law: Limited Conscription', address_to='defence_value'),
+                Modifier(value=-5, address_from='Conscript law: Limited Conscription', address_to='production speed'),
+                Modifier(value=5, address_from='Conscript law: Limited Conscription', address_to='attack value'),
+                Modifier(value=5, address_from='Conscript law: Limited Conscription', address_to='defence value'),
             ]
         ).save()
 
         Law(
             name='Conscript law: Extensive Conscription', description='Percent of the total population 5%', price=global_settings.laws_price_k*20000,
             modifiers=[
-                Modifier(value=-5, address_from='Conscript law: Extensive Conscription', address_to='production_speed'),
+                Modifier(value=-5, address_from='Conscript law: Extensive Conscription', address_to='production speed'),
             ]
         ).save()
 
@@ -553,20 +553,20 @@ class SystemService:
             modifiers=[
                 Modifier(value=-0.5, address_from='Conscript law: Service by Requirement',
                          address_to='basic_percent_growth_rate'),
-                Modifier(value=-5, address_from='Conscript law: Service by Requirement', address_to='production_speed'),
-                Modifier(value=-5, address_from='Conscript law: Service by Requirement', address_to='attack_value'),
-                Modifier(value=-5, address_from='Conscript law: Service by Requirement', address_to='defence_value'),
+                Modifier(value=-10, address_from='Conscript law: Service by Requirement', address_to='production speed'),
+                Modifier(value=-5, address_from='Conscript law: Service by Requirement', address_to='attack value'),
+                Modifier(value=-5, address_from='Conscript law: Service by Requirement', address_to='defence value'),
             ]
         ).save()
 
         Law(
             name='Conscript law: All Adults Serve', description='Percent of the total population 20%', price=global_settings.laws_price_k*20000,
             modifiers=[
-                Modifier(value=-1.5, address_from='Conscript law: All Adults Serve',
-                         address_to='basic_percent_growth_rate'),
-                Modifier(value=-15, address_from='Conscript law: All Adults Serve', address_to='production_speed'),
-                Modifier(value=-5, address_from='Conscript law: All Adults Serve', address_to='attack_value'),
-                Modifier(value=-5, address_from='Conscript law: All Adults Serve', address_to='defence_value'),
+                Modifier(value=-2, address_from='Conscript law: All Adults Serve',
+                         address_to='growth rate population'),
+                Modifier(value=-20, address_from='Conscript law: All Adults Serve', address_to='production speed'),
+                Modifier(value=-5, address_from='Conscript law: All Adults Serve', address_to='attack value'),
+                Modifier(value=-5, address_from='Conscript law: All Adults Serve', address_to='defence value'),
             ]
         ).save()
 
@@ -574,10 +574,10 @@ class SystemService:
             name='Conscript law: All with weapons', description='Percent of the total population 30%', price=global_settings.laws_price_k*20000,
             modifiers=[
                 Modifier(value=-4, address_from='Conscript law: All with weapons',
-                         address_to='basic_percent_growth_rate'),
-                Modifier(value=-35, address_from='Conscript law: All with weapons', address_to='production_speed'),
-                Modifier(value=-15, address_from='Conscript law: All with weapons', address_to='attack_value'),
-                Modifier(value=-10, address_from='Conscript law: All with weapons', address_to='defence_value'),
+                         address_to='growth rate population'),
+                Modifier(value=-35, address_from='Conscript law: All with weapons', address_to='production speed'),
+                Modifier(value=-15, address_from='Conscript law: All with weapons', address_to='attack value'),
+                Modifier(value=-10, address_from='Conscript law: All with weapons', address_to='defence value'),
             ]
         ).save()
 
