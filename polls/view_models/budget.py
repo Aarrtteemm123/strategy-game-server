@@ -1,4 +1,3 @@
-import json
 from polls.view_models.modifier import ModifierView
 
 class TaxesCard:
@@ -29,5 +28,3 @@ class BudgetView:
         self.farms_taxes = farms_taxes
         self.mines_taxes = mines_taxes
         self.factories_taxes = factories_taxes
-
-#print(json.dumps(bv.__dict__, default=lambda x: x.__dict__))

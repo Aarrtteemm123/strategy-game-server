@@ -22,6 +22,3 @@ class PopulationView:
         self.modifiers = modifiers
         self.pie_chart_data = pie_chart_data
         self.pie_chart_labels = pie_chart_labels
-
-#tv = PopulationView()
-#print(json.dumps(tv.__dict__, default=lambda x: x.__dict__))

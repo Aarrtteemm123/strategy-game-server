@@ -1,5 +1,3 @@
-import json
-
 from polls.view_models.modifier import ModifierView
 
 
@@ -14,6 +12,3 @@ class TechnologyView:
         self.max_level = max_level
         self.percent_total_result = percent_total_result
         self.modifiers = modifiers
-
-
-#print(json.dumps(tv.__dict__, default=lambda x: x.__dict__))

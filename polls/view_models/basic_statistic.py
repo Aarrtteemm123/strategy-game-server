@@ -1,6 +1,3 @@
-import json
-
-
 class ChartBudgetData:
     def __init__(self, profit_data=None, expenses_data=None, x_axis_label=None, y_axis_max = 0):
         if x_axis_label is None:
@@ -93,5 +90,3 @@ class BasicStatisticView:
         self.mine_goods_table = mine_goods_table
         self.industrial_goods_table = industrial_goods_table
         self.military_goods_table = military_goods_table
-
-#print(json.dumps(bs.__dict__,default=lambda x: x.__dict__))

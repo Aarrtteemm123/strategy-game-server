@@ -23,7 +23,6 @@ class UserService:
             raise UnknownUserError(username)
 
     def logout(self, user_id: str):
-        print(type(user_id))
         user = User.objects(id=user_id).first()
         if user:
             user.isAuth = False
