@@ -908,7 +908,7 @@ class EmailTemplate:
         """
         return html
 
-    def get_html_registration(self, username: str, password: str, country_name: str, user_id: str, flag_link: str):
+    def get_html_registration(self, username: str, country_name: str, user_id: str, flag_link: str):
         html = """<html><body><h1 style="font-weight: bolder">
         Dear """ + username + """
         <p>Welcome to online strategy - 'Your country'</h1>
@@ -916,7 +916,6 @@ class EmailTemplate:
         <h3>Player data:</h3>
         <p>ID: """ + user_id + """
         <p>Login: """ + username + """
-        <p>Password: """ + password + """
         <p>Country: """ + country_name + """
         <p>Flag: """ + flag_link + """
         <p><a href="http://htmlbook.ru/html/a/href">Click on this link and start play now!</a>
@@ -932,21 +931,19 @@ class EmailTemplate:
         </body></html>"""
         return html
 
-    def get_html_edit_account(self, username: str, password: str, country_name: str, flag_link: str):
+    def get_html_edit_account(self, username: str, country_name: str, flag_link: str):
         html = """<html><body><h1 style="font-weight: bolder">
                 """ + username + """ attention!
                 <hr><p><h2 style="color:red">Account data was changed:</h2>
                 <h3>New player data:</h3>
                 <p>Username: """ + username + """
-                <p>Password: """ + password + """
                 <p>Country: """ + country_name + """
                 <p>Flag: """ + flag_link + """
-                <p><a href="http://htmlbook.ru/html/a/href">Click on this link and start play now!</a>
                 <p><strong style="color:orange">If you have any question or problems, write on this email testtset1009@gmail.com</strong>
                 </body></html>"""
         return html
 
-    def get_html_feedback(self, username: str, msg: str, player_email: str, rating: float):
+    def get_html_feedback(self, username: str, msg: str, rating: float, player_email: str):
         html = """<html><body><h1 style="font-weight: bolder">
                         Player """ + username + """ write feedback!</h1><hr>
                         <h3>Message:</h3>

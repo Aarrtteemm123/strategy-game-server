@@ -89,13 +89,12 @@ def redirect_feedback(request, user_id):
         request_data = JSONParser().parse(request)
         global_settings = GlobalSettings.objects().first()
         if SystemService.verify_token(user_id, request_data['token']):
-            delta_time = datetime.utcnow() - user.date_last_feedback
             if (datetime.utcnow() - user.date_last_feedback).total_seconds()/60 >= global_settings.feedback_pause:
                 user.date_last_feedback = datetime.utcnow()
-                SystemService().send_notification([ADMIN_EMAIL],EmailEvent.FEEDBACK, user.username, user.email, request_data['rating'], request_data['msg'])
+                SystemService().send_notification([ADMIN_EMAIL],EmailEvent.FEEDBACK, user.username, request_data['msg'], request_data['rating'], user.email)
                 user.save()
             else:
-                return HttpResponse({'You can send only 1 feedback in 24 hours'},
+                return HttpResponse('You can send only 1 feedback in 24 hours',
                                     status=status.HTTP_208_ALREADY_REPORTED)
     except Exception as error:
         return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

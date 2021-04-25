@@ -47,7 +47,7 @@ class UserService:
             country.delete()
             return False
         if GlobalSettings.objects().first().email_notification:
-            SystemService().send_notification([email], EmailEvent.REGISTRATION, username, password, country_name, str(user.pk),link_country_flag)
+            SystemService().send_notification([email], EmailEvent.REGISTRATION, username, country_name, str(user.pk), link_country_flag)
         return True
 
     def delete_user_account(self, user_id: str, password: str):
@@ -79,6 +79,6 @@ class UserService:
             user.country = country.to_dbref()
             user.save()
             if GlobalSettings.objects().first().email_notification:
-                SystemService().send_notification([user.email], EmailEvent.CHANGE_DATA, user.username, user.password, country.name,country.link_img)
+                SystemService().send_notification([user.email], EmailEvent.CHANGE_DATA, user.username, country.name, country.link_img)
             return True
         return False
