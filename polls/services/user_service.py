@@ -1,4 +1,5 @@
 import random
+from hashlib import sha256
 
 import tokenlib as tokenlib
 from django.utils import timezone
@@ -11,7 +12,7 @@ from serverDjango.settings import ADMIN_EMAIL, SECRET_KEY
 
 class UserService:
     def login(self, username: str, password: str):
-        user = User.objects(username=username,password=password).first()
+        user = User.objects(username=username,password=sha256(password.encode()).hexdigest()).first()
         if user:
             token = tokenlib.make_token({"user_id": str(user.id), 'username':username, 'password':password, 'random_value':random.randint(0,1000000)}, secret=SECRET_KEY)
             user.isAuth = True
@@ -39,7 +40,7 @@ class UserService:
         except Exception as error:
             print(error)
             return False
-        user = User(username=username, password=password, email=email, country=country.pk)
+        user = User(username=username, password=sha256(password.encode()).hexdigest(), email=email, country=country.pk)
         try:
             user.save()
         except Exception as error:
@@ -51,7 +52,7 @@ class UserService:
         return True
 
     def delete_user_account(self, user_id: str, password: str):
-        if User.objects(id=user_id).count() == 1 and User.objects(id=user_id).first().password == password:
+        if User.objects(id=user_id).count() == 1 and User.objects(id=user_id).first().password == sha256(password.encode()).hexdigest():
             try:
                 user = User.objects(id=user_id).first()
                 user_email = user.email
@@ -67,12 +68,10 @@ class UserService:
                 return False
         return False
 
-    def change_user_data(self,user_id: str,new_password: str=None,
-                         new_country_name: str=None,new_country_flag: str=None):
+    def change_user_data(self,user_id: str,new_country_name: str=None,new_country_flag: str=None):
         user = User.objects(id=user_id).first()
         if user is not None:
             country = Country.objects(id=user.country.id).first()
-            user.password = new_password if new_password is not None else user.password
             country.name = new_country_name if new_country_name is not None and Country.objects(name=new_country_name).count() == 0 else country.name
             country.link_img = new_country_flag if new_country_flag is not None else country.link_img
             country.save()

@@ -397,7 +397,7 @@ class PlayerViewService:
         account_view = AccountView(
             user_id,country.link_img,country.name,game_service.get_total_profit(country),
             game_service.get_economic_place(country.name),game_service.get_army_place(country.name),
-            user.username,user.password,user.email,date_reg,days_in_game
+            user.username,user.email,date_reg,days_in_game
         )
         return account_view
 

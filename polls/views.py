@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from hashlib import sha256
 
 from django.contrib.auth.models import User
 from django.http import HttpResponse
@@ -29,7 +30,7 @@ def index(request):
 def login(request, username, password):
     try:
         token = UserService().login(username, password)
-        user_id = User.objects(username=username, password=password).first().id
+        user_id = User.objects(username=username, password=sha256(password.encode()).hexdigest()).first().id
     except Exception as error:
         return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     return HttpResponse(json.dumps({'token': token, 'user_id': str(user_id)}), status=status.HTTP_202_ACCEPTED)
@@ -59,12 +60,14 @@ def register(request):
                                                                                              status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['DELETE'])
+@api_view(['PUT'])
 def delete_account(request, user_id, password):
     try:
         request_data = JSONParser().parse(request)
         if SystemService.verify_token(user_id, request_data['token']):
-            UserService().delete_user_account(user_id, password)
+            deleted = UserService().delete_user_account(user_id, password)
+            if not deleted:
+                return HttpResponse({'Incorrect password'}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as error:
         return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     return HttpResponse({}, status=status.HTTP_200_OK)
@@ -75,8 +78,7 @@ def change_user_data(request, user_id):
     try:
         request_data = JSONParser().parse(request)
         if SystemService.verify_token(user_id, request_data['token']):
-            UserService().change_user_data(user_id, request_data['password'],
-                                           request_data['country_name'], request_data['link_on_flag'])
+            UserService().change_user_data(user_id, request_data['country_name'], request_data['link_on_flag'])
     except Exception as error:
         return HttpResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     return HttpResponse({}, status=status.HTTP_200_OK)
